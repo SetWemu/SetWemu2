@@ -1,5 +1,5 @@
 const ENV = {
-  // When testing on your computer (development)
+  // When testing on computer (development)
   dev: {
     API_URL: 'http://localhost:5000/api',  // Oneth's local backend
     FIREBASE_API_KEY: 'temp-key',           // Oneth will give real key
@@ -26,7 +26,6 @@ const getEnv = () => {
 
 export const API_CONFIG = getEnv();
 
-// Export individual values so you can use them easily
 export const API_URL = API_CONFIG.API_URL;
 export const FIREBASE_API_KEY = API_CONFIG.FIREBASE_API_KEY;
 export const FIREBASE_PROJECT_ID = API_CONFIG.FIREBASE_PROJECT_ID;
