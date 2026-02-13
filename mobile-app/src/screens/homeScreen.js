@@ -5,10 +5,9 @@ import {
   StyleSheet,
   FlatList,
   Image,
-  ScrollView,
   TouchableOpacity,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const stories = [
   { id: "1", name: "j_kovrikov", avatar: "https://i.pravatar.cc/100?img=1" },
@@ -23,7 +22,7 @@ const posts = [
     user: "Bing Chin",
     time: "2hrs ago",
     caption:
-      "Found the most amazing artisan cheeses at the food market today! Can't wait to go back 🧀",
+      "Found the most amazing artisan cheeses at the food market today!",
     image:
       "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
     event: "Artisan Food Market",
@@ -62,42 +61,50 @@ const HomeScreen = () => {
       </View>
 
       <View style={styles.actions}>
-        <Text style={styles.actionText}>❤️ {item.likes}</Text>
-        <Text style={styles.actionText}>💬 {item.comments}</Text>
-        <Text style={styles.actionText}>✈️ {item.shares}</Text>
+        <TouchableOpacity>
+          <Text style={styles.actionText}>❤️ {item.likes}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Text style={styles.actionText}>💬 {item.comments}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Text style={styles.actionText}>✈️ {item.shares}</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Home Feed</Text>
+      {/* Header */}
+      <View style={styles.headerBar}>
+        <Text style={styles.headerTitle}>Home Feed</Text>
+
+        <View style={styles.headerIcons}>
+          <TouchableOpacity>
+            <Text style={styles.icon}>➕</Text>
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Text style={styles.icon}>💬</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
 
       <FlatList
         ListHeaderComponent={
-          <View>
-            <FlatList
-              data={stories}
-              renderItem={renderStory}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.stories}
-            />
-          </View>
+          <FlatList
+            data={stories}
+            renderItem={renderStory}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.stories}
+          />
         }
         data={posts}
         renderItem={renderPost}
         keyExtractor={(item) => item.id}
       />
-
-      <View style={styles.bottomNav}>
-        <Text style={styles.navIcon}>🏠</Text>
-        <Text style={styles.navIcon}>🧭</Text>
-        <Text style={styles.navIcon}>➕</Text>
-        <Text style={styles.navIcon}>📍</Text>
-        <Text style={styles.navIcon}>👤</Text>
-      </View>
     </SafeAreaView>
   );
 };
@@ -109,85 +116,107 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#071B2E",
   },
-  header: {
+
+  headerBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+
+  headerTitle: {
     color: "white",
     fontSize: 20,
-    textAlign: "center",
-    marginVertical: 10,
     fontWeight: "600",
   },
+
+  headerIcons: {
+    flexDirection: "row",
+  },
+
+  icon: {
+    fontSize: 20,
+    color: "white",
+    marginLeft: 15,
+  },
+
   stories: {
     paddingVertical: 10,
     paddingHorizontal: 10,
   },
+
   storyItem: {
     alignItems: "center",
     marginRight: 15,
   },
+
   storyAvatar: {
     width: 60,
     height: 60,
     borderRadius: 30,
   },
+
   storyName: {
     color: "white",
     fontSize: 12,
     marginTop: 5,
   },
+
   card: {
     backgroundColor: "#0E2A47",
     margin: 10,
     borderRadius: 15,
     padding: 12,
   },
+
   cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
+
   user: {
     color: "white",
     fontWeight: "600",
   },
+
   time: {
     color: "#aaa",
     fontSize: 12,
   },
+
   caption: {
     color: "white",
     marginVertical: 10,
   },
+
   postImage: {
     width: "100%",
     height: 200,
     borderRadius: 10,
   },
+
   eventInfo: {
     marginTop: 8,
   },
+
   eventTitle: {
     color: "white",
     fontWeight: "600",
   },
+
   eventMeta: {
     color: "#ccc",
     fontSize: 12,
   },
+
   actions: {
     flexDirection: "row",
     justifyContent: "space-around",
     marginTop: 10,
   },
+
   actionText: {
     color: "white",
-  },
-  bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 10,
-    backgroundColor: "#051423",
-  },
-  navIcon: {
-    color: "white",
-    fontSize: 18,
   },
 });
