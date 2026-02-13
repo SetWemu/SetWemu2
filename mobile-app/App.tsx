@@ -11,7 +11,7 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import SignupScreen from './src/screens/auth/SignupScreen';
+import HomeScreen from './src/screens/HomeScreen';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -19,7 +19,8 @@ function App() {
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-    <SignupScreen navigation={undefined} />
+      {/* <SignupScreen navigation={undefined} /> */}
+      <HomeScreen />
     </SafeAreaProvider>
   );
 }
