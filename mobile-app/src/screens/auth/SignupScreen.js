@@ -24,23 +24,36 @@ const SignupScreen = ({ navigation }) => {
   const passwordsMatch = password === confirmPassword;
 
   const handleSignup = () => {
+    if (!name) {
+      alert('Please enter your name');
+      return;
+    }
+    if (!emailValid) {
+      alert('Please enter a valid email');
+      return;
+    }
+    if (!passwordStrong) {
+      alert('Password must be at least 8 characters');
+      return;
+    }
+    if (!passwordsMatch) {
+      alert('Passwords do not match');
+      return;
+    }
+
     setLoading(true);
 
     // simulate API call
     setTimeout(() => {
       setLoading(false);
-      if (navigation && typeof navigation.replace === 'function') {
-        navigation.replace('Home');
-      } else {
-        alert('Signup successful');
-      }
+      alert('Signup successful');
     }, 2000);
   };
 
   return (
     <View style={styles.container}>
       <Image
-        source={require('../../assets/Logo Base (6).png')}
+        source={require('../../assests/Logo Base (6).png')}
         style={styles.logo}
       />
       <Text style={styles.title}>Signup</Text>
