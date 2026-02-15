@@ -1,93 +1,105 @@
-// SetWemu Brand Colors
-
 export const COLORS = {
-  // PRIMARY BRAND COLORS
-  primary: '#ADF3FF', // Primary Blue (light cyan)
-  primaryDark: '#4CC1D4', // Darker blue (teal) - for hover/pressed states
-  primaryLight: '#E1FAFF', // Very light blue - for backgrounds
-  primaryMedium: '#8DE4F2', // Medium blue - for accents
+  primary:       '#ADF3FF',
+  primaryDark:   '#4CC1D4',
+  primaryLight:  '#5DD5E8',
+  primaryMedium: '#2A8FA0',
+  secondary:     '#4CC1D4',
+  accent:        '#ADF3FF',
 
-  secondary: '#4CC1D4', // Teal/Turquoise - secondary actions
+  teal: {
+    lightest: '#D6F9FF',
+    light:    '#ADF3FF',
+    mid:      '#5DD5E8',
+    brand:    '#4CC1D4',
+    deep:     '#2A8FA0',
+    glow:     'rgba(173,243,255,0.10)',
+    glowMid:  'rgba(77,193,212,0.20)',
+    border:   'rgba(173,243,255,0.25)',
+  },
 
-  accent: '#8DE4F2', // Sky Blue - highlights and accents
+  white: '#FFFFFF',
+  black: '#000000',
 
-  // NEUTRAL COLORS
-  white: '#FFFFFF', // Pure white
-  black: '#000000', // Pure black
+  success: '#30D158',
+  error:   '#FF453A',
+  warning: '#FFD60A',
+  info:    '#ADF3FF',
 
-  // STATUS COLORS
-  success: '#4CC1D4',
-  error: '#FF6B6B',
-  warning: '#FFB84D',
-  info: '#ADF3FF',
-
-  // TEXT COLORS
   text: {
-    primary: '#000000', // Black - main text
-    secondary: '#4A4A4A', // Dark gray - less important text
-    light: '#9E9E9E', // Light gray - captions, labels
-    white: '#FFFFFF', // White - text on dark backgrounds
-    disabled: '#BDBDBD', // Disabled/inactive text
-    link: '#4CC1D4', // Teal - for clickable links
+    primary:   '#F2F2F7',
+    secondary: '#ABABAB',
+    tertiary:  '#6B6B6B',
+    light:     '#9E9E9E',
+    white:     '#FFFFFF',
+    disabled:  '#4A4A4A',
+    link:      '#ADF3FF',
+    inverse:   '#141416',
   },
 
-  // BACKGROUND COLORS
   background: {
-    primary: '#FFFFFF', // White - main screen background
-    secondary: '#E1FAFF', // Very light blue - alternative background
-    tertiary: '#F5F5F5', // Light gray - cards/sections
-    dark: '#000000', // Black - dark backgrounds
-    card: '#FFFFFF', // White - card backgrounds
-    overlay: 'rgba(0, 0, 0, 0.5)', // Semi-transparent black
-    blue: '#ADF3FF', // Primary blue background
-    lightBlue: '#E1FAFF', // Very light blue background
+    primary:   '#141416',
+    secondary: '#1C1C1E',
+    tertiary:  '#242428',
+    card:      '#1C1C1E',
+    input:     '#2C2C2E',
+    dark:      '#141416',
+    overlay:   'rgba(0,0,0,0.70)',
+    white:     '#1C1C1E',
+    light:     '#242428',
+    blue:      'rgba(173,243,255,0.10)',
+    lightBlue: 'rgba(173,243,255,0.06)',
   },
 
-  // BORDER COLORS
   border: {
-    light: '#E1FAFF', // Very light blue
-    medium: '#8DE4F2', // Sky blue
-    dark: '#4CC1D4', // Teal
-    black: '#000000', // Black borders
+    subtle:  'rgba(255,255,255,0.06)',
+    light:   'rgba(255,255,255,0.10)',
+    medium:  'rgba(255,255,255,0.16)',
+    dark:    'rgba(255,255,255,0.22)',
+    teal:    'rgba(173,243,255,0.25)',
+    black:   'rgba(255,255,255,0.10)',
   },
 
-  // BUTTON COLORS (Specific combinations)
   button: {
-    primary: {
-      background: '#4CC1D4', // Teal background
-      text: '#FFFFFF', // White text
-      border: '#4CC1D4', // Teal border
-      pressed: '#3BA8B8', // Darker when pressed
-    },
-    secondary: {
-      background: 'transparent', // No background
-      text: '#4CC1D4', // Teal text
-      border: '#4CC1D4', // Teal border
-      pressed: '#E1FAFF', // Light blue when pressed
-    },
-    accent: {
-      background: '#ADF3FF', // Light blue background
-      text: '#000000', // Black text
-      border: '#ADF3FF', // Light blue border
-      pressed: '#8DE4F2', // Medium blue when pressed
-    },
+    primary:   { background: '#4CC1D4', text: '#141416', border: '#4CC1D4', pressed: '#2A8FA0' },
+    secondary: { background: 'transparent', text: '#ADF3FF', border: '#4CC1D4', pressed: 'rgba(173,243,255,0.10)' },
+    accent:    { background: 'rgba(173,243,255,0.12)', text: '#ADF3FF', border: 'rgba(173,243,255,0.25)', pressed: 'rgba(173,243,255,0.20)' },
+    danger:    { background: 'rgba(255,69,58,0.12)', text: '#FF453A', border: '#FF453A', pressed: 'rgba(255,69,58,0.25)' },
   },
 
-  // GRADIENT COMBINATIONS
   gradient: {
-    blue: ['#E1FAFF', '#ADF3FF', '#8DE4F2'], // Light to medium blue
-    teal: ['#8DE4F2', '#4CC1D4'], // Sky blue to teal
-    primary: ['#ADF3FF', '#4CC1D4'], // Primary gradient
+    blue:    ['#1C1C1E', '#ADF3FF'],
+    teal:    ['#2A8FA0', '#4CC1D4'],
+    primary: ['#4CC1D4', '#ADF3FF'],
+    dark:    ['#141416', '#1C1C1E'],
   },
 
-  // SOCIAL MEDIA COLORS (keep these)
   facebook: '#1877F2',
-  google: '#EA4335',
-  twitter: '#1DA1F2',
+  google:   '#EA4335',
+  twitter:  '#1DA1F2',
 
-  // SPECIAL
   transparent: 'transparent',
-  shadow: 'rgba(0, 0, 0, 0.1)', // For shadows
+  shadow:      'rgba(0,0,0,0.40)',
 };
+
+export const SPACING = {
+  xs:   4,  sm:  8,  md:   12,
+  lg:  16,  xl: 20,  xxl:  24,  xxxl: 32,
+};
+
+export const RADIUS = {
+  sm: 8,  md: 12,  lg: 16,  xl: 20,  xxl: 24,  full: 999,
+};
+
+export const TYPOGRAPHY = {
+  h1:    { fontSize: 26, fontWeight: '800', letterSpacing: -0.5 },
+  h2:    { fontSize: 22, fontWeight: '700', letterSpacing: -0.3 },
+  h3:    { fontSize: 18, fontWeight: '700', letterSpacing: -0.2 },
+  h4:    { fontSize: 16, fontWeight: '700' },
+  body:  { fontSize: 15, fontWeight: '400', lineHeight: 22 },
+  bodyS: { fontSize: 13, fontWeight: '400', lineHeight: 19 },
+  label: { fontSize: 11, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' },
+  mono:  { fontSize: 12, fontWeight: '600', letterSpacing: 2 },
+};
+
 
 export default COLORS;
