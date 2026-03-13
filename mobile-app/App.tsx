@@ -11,7 +11,7 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import EventsAttendedListScreen from './src/screens/events/eventsAttendedListScreen';
+import CreateStoryScreen from './src/screens/createStoryScreen';
 
 
 
@@ -21,7 +21,8 @@ function App() {
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <EventsAttendedListScreen />
+      {/* Passing a mock navigation prop to satisfy TypeScript while testing the UI standalone */}
+      <CreateStoryScreen navigation={{ goBack: () => { } } as any} />
     </SafeAreaProvider>
   );
 }
