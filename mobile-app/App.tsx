@@ -8,6 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 //import SplashScreen from './src/screens/SplashScreen';
 //import OnBoardingScreen from './src/screens/OnBoardingScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import EditProfileScreen from './src/screens/EditProfileScreen';
 
 // Note: Keeping these commented if they aren't merged yet 
 // to avoid "Module not found" errors
@@ -28,6 +29,7 @@ function App() {
           screenOptions={{ headerShown: false }}
         >
           <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
           
           {/* Add more screens here as you create new PR branches */}
         </Stack.Navigator>
