@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
 
     topBar: {
         position: "absolute",
-        top: 20,
+        top: 70,
         left: 15,
         right: 15,
         flexDirection: "row",
