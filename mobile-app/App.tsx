@@ -1,17 +1,19 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React from 'react';
+import { StatusBar, useColorScheme } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
-import HomeScreen from './src/screens/HomeScreen';
+// Import the screens you are working on
+//import SplashScreen from './src/screens/SplashScreen';
+//import OnBoardingScreen from './src/screens/OnBoardingScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
+
+// Note: Keeping these commented if they aren't merged yet 
+// to avoid "Module not found" errors
+
+
+const Stack = createStackNavigator();
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -19,29 +21,19 @@ function App() {
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      {/* <SignupScreen navigation={undefined} /> */}
-      <HomeScreen />
+      <NavigationContainer>
+        <Stack.Navigator 
+          // SET THIS TO "Profile" to test your current PR
+          initialRouteName="Profile" 
+          screenOptions={{ headerShown: false }}
+        >
+          <Stack.Screen name="Profile" component={ProfileScreen} />
+          
+          {/* Add more screens here as you create new PR branches */}
+        </Stack.Navigator>
+      </NavigationContainer>
     </SafeAreaProvider>
   );
 }
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
 
 export default App;
