@@ -11,9 +11,7 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import FavoritesScreen from './src/screens/favoritesScreen';
-
-
+import HomeScreen from './src/screens/HomeScreen';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -21,9 +19,8 @@ function App() {
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      {/* Passing a mock navigation prop to satisfy TypeScript while testing the UI standalone */}
-      {/* <CreateStoryScreen navigation={{ goBack: () => { } } as any} /> */}
-      <FavoritesScreen />
+      {/* <SignupScreen navigation={undefined} /> */}
+      <HomeScreen />
     </SafeAreaProvider>
   );
 }
