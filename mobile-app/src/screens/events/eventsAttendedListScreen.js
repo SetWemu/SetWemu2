@@ -1,70 +1,183 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
+  ScrollView,
   StyleSheet,
-  FlatList,
+  Image,
+  TouchableOpacity,
+  StatusBar
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
-const events = [
-  {
-    id: "1",
-    title: "Colombo Music Night",
-    date: "12 Feb 2026",
-    location: "Colombo",
-  },
-  {
-    id: "2",
-    title: "Startup Networking Expo",
-    date: "28 Jan 2026",
-    location: "BMICH",
-  },
+import COLORS from "../../constants/colors";
+
+const dummyEvents = [
+  { id: "1", title: "Colombo Music Festival", date: "Oct 12", location: "Colombo", image: "https://picsum.photos/400/300" },
+  { id: "2", title: "Street Food Carnival", date: "Oct 18", location: "Kandy", image: "https://picsum.photos/401/300" },
+  { id: "3", title: "Beach Party", date: "Nov 2", location: "Mount Lavinia", image: "https://picsum.photos/402/300" },
+  { id: "4", title: "DJ Night", date: "Nov 10", location: "Colombo", image: "https://picsum.photos/403/300" },
+  { id: "5", title: "Tech Meetup", date: "Nov 12", location: "Colombo", image: "https://picsum.photos/404/300" },
+  { id: "6", title: "Startup Expo", date: "Nov 15", location: "Colombo", image: "https://picsum.photos/405/300" }
 ];
 
-const EventsAttendedListScreen = () => {
-  const renderItem = ({ item }) => (
+
+export default function EventsAttendedListScreen() {
+
+  const [events, setEvents] = useState(dummyEvents);
+
+  const renderEvent = ({ item }) => (
+
     <View style={styles.card}>
-      <View style={styles.thumbnail} />
-      <View style={{ flex: 1 }}>
+
+      <Image source={{ uri: item.image }} style={styles.image} />
+
+      <View style={styles.cardContent}>
+
         <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.meta}>{item.date}</Text>
-        <Text style={styles.meta}>{item.location}</Text>
+
+        <View style={styles.metaRow}>
+          <Text style={styles.metaIcon}>📅</Text>
+          <Text style={styles.metaText}>{item.date}</Text>
+        </View>
+
+        <View style={styles.metaRow}>
+          <Text style={styles.metaIcon}>📍</Text>
+          <Text style={styles.metaText}>{item.location}</Text>
+        </View>
+
+        <TouchableOpacity style={styles.reviewButton}>
+          <Text style={styles.reviewText}>Write Review</Text>
+        </TouchableOpacity>
+
       </View>
+
     </View>
+
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Events Attended</Text>
-      <FlatList
-        data={events}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-      />
-    </SafeAreaView>
-  );
-};
+    <View style={styles.container}>
 
-export default EventsAttendedListScreen;
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={COLORS.background.secondary}
+      />
+
+      <Text style={styles.header}>🎉 Events Attended</Text>
+
+      <ScrollView
+        showsVerticalScrollIndicator={true}
+        contentContainerStyle={{ paddingBottom: 60 }}
+      >
+
+        {events.map((item) => (
+          <View key={item.id} style={styles.card}>
+
+            <Image source={{ uri: item.image }} style={styles.image} />
+
+            <View style={styles.cardContent}>
+
+              <Text style={styles.title}>{item.title}</Text>
+
+              <View style={styles.metaRow}>
+                <Text style={styles.metaIcon}>📅</Text>
+                <Text style={styles.metaText}>{item.date}</Text>
+              </View>
+
+              <View style={styles.metaRow}>
+                <Text style={styles.metaIcon}>📍</Text>
+                <Text style={styles.metaText}>{item.location}</Text>
+              </View>
+
+              <TouchableOpacity style={styles.reviewButton}>
+                <Text style={styles.reviewText}>Write Review</Text>
+              </TouchableOpacity>
+
+            </View>
+
+          </View>
+        ))}
+
+      </ScrollView>
+
+
+    </View>
+  );
+
+
+}
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#071B2E", padding: 15 },
-  header: { fontSize: 22, color: "#fff", fontWeight: "bold", marginBottom: 15 },
+
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background.secondary,
+    paddingHorizontal: 16
+  },
+
+  header: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: COLORS.text.primary,
+    marginBottom: 15,
+    marginTop: 40
+  },
+
   card: {
+    backgroundColor: COLORS.background.card,
+    borderRadius: 16,
+    marginBottom: 18,
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
+    overflow: "hidden"
+  },
+
+  image: {
+    width: "100%",
+    height: 180
+  },
+
+  cardContent: {
+    padding: 15
+  },
+
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: COLORS.text.primary,
+    marginBottom: 8
+  },
+
+  metaRow: {
     flexDirection: "row",
-    backgroundColor: "#0E2A47",
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 12,
+    alignItems: "center",
+    marginBottom: 5
   },
-  thumbnail: {
-    width: 70,
-    height: 70,
+
+  metaIcon: {
+    marginRight: 6
+  },
+
+  metaText: {
+    color: COLORS.text.secondary,
+    fontSize: 14
+  },
+
+  reviewButton: {
+    marginTop: 12,
+    backgroundColor: COLORS.button.primary.background,
+    paddingVertical: 10,
     borderRadius: 10,
-    backgroundColor: "#1C3A57",
-    marginRight: 12,
+    alignItems: "center"
   },
-  title: { color: "#fff", fontWeight: "bold", marginBottom: 4 },
-  meta: { color: "#aaa", fontSize: 12 },
+
+  reviewText: {
+    color: COLORS.button.primary.text,
+    fontWeight: "600",
+    fontSize: 14
+  }
+
 });
