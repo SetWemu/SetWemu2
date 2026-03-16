@@ -18,6 +18,5 @@ ALTER PUBLICATION supabase_realtime ADD TABLE messages;
 \`\`\`
 *(Note: This has already been executed on the current Supabase instance).*
 
-## Usage Example (Frontend Integration)
-Here is how you can import and use this utility inside a React Native component or frontend screen:
+
 
