@@ -1,28 +1,22 @@
-# SetWemu - Analytics API
+# SetWemu - Realtime Chat Utility
 
 ## Overview
-This module provides real-time data aggregation for event organizers on the SetWemu platform. It calculates key performance metrics—specifically total page views, ticket sales volume, and gross revenue—by pulling relational data directly from the Supabase database.
+This module handles the live, bidirectional WebSocket connection between the SetWemu frontend and the Supabase database. Instead of relying on manual API polling (HTTP GET requests) to fetch new messages, this utility listens for database insert events and instantly broadcasts them to the active chat room.
 
 ## Location
-* **Controller:** `src/controllers/analyticsController.js`
-* **Routes:** `src/routes/analyticsRoutes.js`
+`src/utils/chatRealtime.js`
 
-## Location
-* **Controller:** `src/controllers/analyticsController.js`
-* **Routes:** `src/routes/analyticsRoutes.js`
+## Features
+* **Instant Message Delivery:** Powered by Supabase Realtime (`postgres_changes`).
+* **Room-Specific Channels:** Filters incoming database changes so users only receive messages for the specific `conversationId` they are currently viewing.
+* **Memory Management:** Includes a dedicated cleanup function to disconnect from channels when a user leaves a chat screen.
 
-## Endpoints
-### `GET /api/analytics/:eventId`
-Fetches the analytics dashboard data for a specific event.
+## Database Prerequisites
+For this utility to work, the Supabase database must be configured to broadcast changes for the `messages` table. This is handled via the following SQL command:
+\`\`\`sql
+ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+\`\`\`
+*(Note: This has already been executed on the current Supabase instance).*
 
-**Expected JSON Response (Success):**
-```json
-{
-  "success": true,
-  "data": {
-    "eventId": "123e4567-e89b-12d3-a456-426614174000",
-    "views": 1250,
-    "sales": 85,
-    "revenue": 4250.00
-  }
-}
+
+
