@@ -3,6 +3,7 @@ import cors from 'cors';
 import { supabase } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import chatRoutes from './routes/chatRoutes.js'; 
+import analyticsRoutes from './routes/analyticsRoutes.js';
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -13,6 +14,7 @@ app.use(express.json());
 // ROUTES
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/analytics', analyticsRoutes);
 // HEALTH CHECK
 app.get('/', (req, res) => {
   res.send('Event Marketplace API is Online - V1.0');
