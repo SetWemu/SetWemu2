@@ -1,22 +1,28 @@
-# SetWemu - Realtime Chat Utility
+# SetWemu - Authentication & Login API
 
 ## Overview
-This module handles the live, bidirectional WebSocket connection between the SetWemu frontend and the Supabase database. Instead of relying on manual API polling (HTTP GET requests) to fetch new messages, this utility listens for database insert events and instantly broadcasts them to the active chat room.
-
-## Location
-`src/utils/chatRealtime.js`
+This module handles user authentication and profile management for the SetWemu platform. It integrates with Supabase Auth for secure credential management and seamlessly links authenticated users to our custom `profiles` table using UUIDs.
 
 ## Features
-* **Instant Message Delivery:** Powered by Supabase Realtime (`postgres_changes`).
-* **Room-Specific Channels:** Filters incoming database changes so users only receive messages for the specific `conversationId` they are currently viewing.
-* **Memory Management:** Includes a dedicated cleanup function to disconnect from channels when a user leaves a chat screen.
+* **Secure User Login/Registration:** Powered by Supabase Authentication.
+* **Profile Syncing:** Automatically connects the secure auth vault to the public `profiles` table.
+* **Role-Based Access:** Supports `personal` and `business` user roles for tailored app experiences.
+* **UUID Integration:** Uses secure, globally unique identifiers for all relational data.
 
-## Database Prerequisites
-For this utility to work, the Supabase database must be configured to broadcast changes for the `messages` table. This is handled via the following SQL command:
-\`\`\`sql
-ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+## Database Schema (`profiles` table)
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | UUID | Primary Key, linked directly to Supabase `auth.users` |
+| `email` | String | User's email address |
+| `full_name` | String | User's display name |
+| `role` | String | `personal` or `business` |
+| `location` | String | User's primary city/location |
+
+## Testing Locally
+To test the login flow and endpoints locally, ensure your development database is seeded with our standard test accounts (Mueena, Dulmin, Oneth, Isa, and Diara):
+
+\`\`\`bash
+node src/scripts/seedData.js
 \`\`\`
-*(Note: This has already been executed on the current Supabase instance).*
 
-
-
+Once seeded, start the local server (`npm run dev`) and use Thunder Client to send POST requests to the authentication endpoints.
