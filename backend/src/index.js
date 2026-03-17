@@ -4,6 +4,7 @@ import { supabase } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import chatRoutes from './routes/chatRoutes.js'; 
 import eventRoutes from './routes/eventRoutes.js';
+import postRoutes from './routes/postRoutes.js';
 
 import analyticsRoutes from './routes/analyticsRoutes.js';
 const app = express();
@@ -18,6 +19,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/posts', postRoutes);
 
 // HEALTH CHECK
 app.get('/', (req, res) => {

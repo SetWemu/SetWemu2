@@ -3,15 +3,15 @@ import { supabase } from '../config/db.js';
 // 1. Create a new social post
 export const createPost = async (req, res) => {
     try {
-        // We expect the frontend to send who is posting, what they said, and an optional image
-        const { profileId, content, imageUrl } = req.body;
+        // We expect userId and content, and optionally an eventId
+        const { userId, content, eventId } = req.body;
 
         const { data, error } = await supabase
             .from('posts')
             .insert([{ 
-                profile_id: profileId, 
-                content: content, 
-                image_url: imageUrl 
+                user_id: userId, 
+                content: content,
+                event_id: eventId || null
             }])
             .select();
 
@@ -27,17 +27,17 @@ export const createPost = async (req, res) => {
 // 2. Fetch the timeline feed
 export const getFeed = async (req, res) => {
     try {
-        // Fetch posts and automatically join the profiles table to get the author's details
+        // Fetch posts and explicitly join the profiles table using the author relationship
         const { data, error } = await supabase
             .from('posts')
             .select(`
                 id,
                 content,
-                image_url,
-                created_at,
-                profiles ( id, username, full_name, role )
+                user_id,
+                event_id,
+                profiles!posts_user_id_fkey ( id, username, full_name, role )
             `)
-            .order('created_at', { ascending: false }); // Newest posts first!
+            .order('id', { ascending: false }); // Highest ID = newest post
 
         if (error) throw error;
 
