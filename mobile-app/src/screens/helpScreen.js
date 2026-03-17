@@ -9,18 +9,52 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const HelpScreen = () => {
-    // Function to open the phone's default email app
+/* ================= DESIGN SYSTEM ================= */
+const COLORS = {
+    bg: { primary: '#141416', card: '#1C1C1E' },
+    blue: {
+        light: '#ADF3FF',
+        brand: '#4CC1D4',
+        border: 'rgba(173,243,255,0.22)'
+    },
+    text: {
+        primary: '#F2F2F7',
+        secondary: '#ABABAB',
+        tertiary: '#6B6B6B',
+        inverse: '#141416'
+    },
+    border: {
+        subtle: 'rgba(255,255,255,0.06)'
+    }
+};
+
+const HelpScreen = ({ navigation }) => {
+
     const handleEmailSupport = () => {
         Linking.openURL("mailto:support@setwemu.com?subject=SetWemu Support Request");
+    };
+
+    // BACK PLACEHOLDER (replace later if needed)
+    const handleBack = () => {
+        console.log("GO BACK");
+        if (navigation) {
+            navigation.goBack();
+        }
     };
 
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView showsVerticalScrollIndicator={false}>
 
-                {/* HEADER */}
-                <Text style={styles.header}>Help Center</Text>
+                <View style={styles.headerContainer}>
+
+                    <TouchableOpacity onPress={handleBack} style={styles.backBtn}>
+                        <Text style={styles.backText}>‹</Text>
+                    </TouchableOpacity>
+
+                    <Text style={styles.header}>Help Center</Text>
+                    <Text style={styles.subHeader}>Need help? We got you.</Text>
+                </View>
 
                 {/* ================= General ================= */}
                 <View style={styles.section}>
@@ -49,8 +83,7 @@ const HelpScreen = () => {
                     <TouchableOpacity style={styles.row} onPress={handleEmailSupport}>
                         <View>
                             <Text style={styles.rowText}>Email Support</Text>
-                            {/* Inline style for subtext to keep your main StyleSheet exactly the same */}
-                            <Text style={{ color: "#6b8cb3", fontSize: 13, marginTop: 4 }}>
+                            <Text style={styles.subText}>
                                 support@setwemu.com
                             </Text>
                         </View>
@@ -74,7 +107,7 @@ const HelpScreen = () => {
 
                     <View style={styles.row}>
                         <Text style={styles.rowText}>App Version</Text>
-                        <Text style={[styles.arrow, { fontSize: 15 }]}>1.0.0</Text>
+                        <Text style={styles.version}>1.0.0</Text>
                     </View>
                 </View>
 
@@ -87,33 +120,59 @@ const HelpScreen = () => {
 
 export default HelpScreen;
 
-// EXACT styles from your SettingsScreen
+/* ================= STYLES ================= */
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#071B2E",
+        backgroundColor: COLORS.bg.primary,
+    },
+
+    headerContainer: {
+        padding: 20,
+        paddingTop: 20,
+    },
+
+    backBtn: {
+        marginBottom: 10,
+    },
+
+    backText: {
+        color: COLORS.blue.light,
+        fontSize: 20,
+        fontWeight: "600",
     },
 
     header: {
-        fontSize: 22,
-        fontWeight: "600",
-        color: "white",
-        padding: 20,
+        fontSize: 25,
+        fontWeight: "900",
+        color: COLORS.text.primary,
+        marginBottom: 6,
+        letterSpacing: -0.4,
+    },
+
+    subHeader: {
+        fontSize: 14,
+        color: COLORS.text.secondary,
     },
 
     section: {
         marginTop: 15,
-        backgroundColor: "#0E2A47",
-        borderRadius: 12,
-        marginHorizontal: 15,
-        paddingVertical: 5,
+        backgroundColor: COLORS.bg.card,
+        borderRadius: 16,
+        marginHorizontal: 16,
+        paddingVertical: 6,
+        borderWidth: 1,
+        borderColor: COLORS.border.subtle,
     },
 
     sectionTitle: {
-        color: "#aaa",
-        fontSize: 13,
-        paddingHorizontal: 15,
+        color: COLORS.text.tertiary,
+        fontSize: 12,
+        paddingHorizontal: 16,
         paddingVertical: 10,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
     },
 
     row: {
@@ -121,18 +180,30 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         paddingVertical: 16,
-        paddingHorizontal: 15,
-        borderTopWidth: 0.5,
-        borderTopColor: "#1E3A5F",
+        paddingHorizontal: 16,
+        borderTopWidth: 1,
+        borderTopColor: COLORS.border.subtle,
     },
 
     rowText: {
-        color: "white",
-        fontSize: 16,
+        color: COLORS.text.primary,
+        fontSize: 15,
+        fontWeight: "500",
+    },
+
+    subText: {
+        color: COLORS.text.secondary,
+        fontSize: 12,
+        marginTop: 4,
     },
 
     arrow: {
-        color: "#888",
-        fontSize: 18,
+        color: COLORS.text.tertiary,
+        fontSize: 20,
+    },
+
+    version: {
+        color: COLORS.text.secondary,
+        fontSize: 14,
     },
 });
