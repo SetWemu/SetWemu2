@@ -117,4 +117,5 @@ dependencies {
         implementation jscFlavor
     }
 }
-apply from: new File(rootProject.projectDir, "../../node_modules/react-native-vector-icons/fonts.gradle")
+
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
