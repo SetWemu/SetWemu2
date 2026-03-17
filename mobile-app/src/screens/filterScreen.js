@@ -7,53 +7,56 @@ import {
     ScrollView,
     Modal,
     Animated,
-    Dimensions
 } from "react-native";
 import Slider from "@react-native-community/slider";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const { height } = Dimensions.get("window");
+const COLORS = {
+    bg: { primary: '#141416', card: '#1C1C1E', elevated: '#242428' },
+    blue: {
+        light: '#ADF3FF',
+        brand: '#4CC1D4',
+        glow: 'rgba(173,243,255,0.10)',
+        border: 'rgba(173,243,255,0.22)'
+    },
+    text: {
+        primary: '#F2F2F7',
+        secondary: '#ABABAB',
+        tertiary: '#6B6B6B',
+        inverse: '#141416'
+    },
+    border: {
+        subtle: 'rgba(255,255,255,0.06)',
+        light: 'rgba(255,255,255,0.10)'
+    },
+    error: '#FF453A'
+};
 
 const FilterModal = ({ visible, onClose, onApply }) => {
 
-    // --- STATE ---
     const [selectedDate, setSelectedDate] = useState("Anytime");
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [price, setPrice] = useState(0);
 
-    // Animation for TOP SLIDE
-    const slideAnim = useState(new Animated.Value(-height))[0];
+    const slideAnim = useState(new Animated.Value(-400))[0];
 
     React.useEffect(() => {
         if (visible) {
+            slideAnim.setValue(-400);
             Animated.timing(slideAnim, {
                 toValue: 0,
-                duration: 300,
-                useNativeDriver: true,
-            }).start();
-        } else {
-            Animated.timing(slideAnim, {
-                toValue: -height,
                 duration: 300,
                 useNativeDriver: true,
             }).start();
         }
     }, [visible]);
 
-    // --- OPTIONS ---
     const dateOptions = ["Anytime", "Today", "Tomorrow", "This Weekend", "Next Week"];
     const categoryOptions = [
-        "Live Music",
-        "Nightlife",
-        "Food & Drink",
-        "Arts & Culture",
-        "Sports",
-        "Networking",
-        "Comedy",
-        "Health & Wellness"
+        "Live Music", "Nightlife", "Food & Drink", "Arts & Culture",
+        "Sports", "Networking", "Comedy", "Health & Wellness"
     ];
 
-    // --- FUNCTIONS ---
     const toggleCategory = (category) => {
         if (selectedCategories.includes(category)) {
             setSelectedCategories(selectedCategories.filter((c) => c !== category));
@@ -68,12 +71,21 @@ const FilterModal = ({ visible, onClose, onApply }) => {
         setPrice(0);
     };
 
+
     const handleApply = () => {
-        onApply({
+
+        const filters = {
             date: selectedDate,
             categories: selectedCategories,
             price: price,
-        });
+        };
+
+        console.log("APPLY FILTERS:", filters);
+
+        if (onApply) {
+            onApply(filters);
+        }
+
         onClose();
     };
 
@@ -82,12 +94,16 @@ const FilterModal = ({ visible, onClose, onApply }) => {
 
             <View style={styles.overlay}>
 
-                <Animated.View
-                    style={[
-                        styles.modal,
-                        { transform: [{ translateY: slideAnim }] }
-                    ]}
-                >
+                {/* CLICK OUTSIDE */}
+                <TouchableOpacity style={{ flex: 1 }} onPress={onClose} />
+
+                <Animated.View style={[
+                    styles.modal,
+                    { transform: [{ translateY: slideAnim }] }
+                ]}>
+
+                    {/* DRAG HANDLE */}
+                    <View style={styles.handle} />
 
                     {/* HEADER */}
                     <View style={styles.header}>
@@ -154,9 +170,11 @@ const FilterModal = ({ visible, onClose, onApply }) => {
                             </View>
                         </View>
 
-                        {/* PRICE SLIDER */}
+                        {/* PRICE */}
                         <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Price: Rs {price}</Text>
+                            <Text style={styles.sectionTitle}>
+                                Price: Rs {price === 0 ? "Free" : price}
+                            </Text>
 
                             <Slider
                                 minimumValue={0}
@@ -164,9 +182,9 @@ const FilterModal = ({ visible, onClose, onApply }) => {
                                 step={500}
                                 value={price}
                                 onValueChange={(val) => setPrice(val)}
-                                minimumTrackTintColor="#4a86c4"
-                                maximumTrackTintColor="#1E3A5F"
-                                thumbTintColor="#ffffff"
+                                minimumTrackTintColor={COLORS.blue.brand}
+                                maximumTrackTintColor={COLORS.border.light}
+                                thumbTintColor={COLORS.blue.light}
                             />
 
                             <View style={styles.priceLabels}>
@@ -187,13 +205,13 @@ const FilterModal = ({ visible, onClose, onApply }) => {
                     <SafeAreaView edges={["bottom"]} />
 
                 </Animated.View>
-
             </View>
         </Modal>
     );
 };
 
 export default FilterModal;
+
 
 const styles = StyleSheet.create({
 
@@ -203,11 +221,25 @@ const styles = StyleSheet.create({
     },
 
     modal: {
-        backgroundColor: "#071B2E",
-        height: "100%",
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "70%",
+        backgroundColor: COLORS.bg.primary,
         borderBottomLeftRadius: 24,
         borderBottomRightRadius: 24,
-        paddingTop: 20
+        borderWidth: 1,
+        borderColor: COLORS.border.subtle,
+    },
+
+    handle: {
+        width: 40,
+        height: 5,
+        backgroundColor: COLORS.border.light,
+        borderRadius: 10,
+        alignSelf: "center",
+        marginVertical: 10
     },
 
     header: {
@@ -218,26 +250,30 @@ const styles = StyleSheet.create({
     },
 
     title: {
-        color: "white",
+        color: COLORS.text.primary,
         fontSize: 18,
-        fontWeight: "bold"
+        fontWeight: "700"
     },
 
     reset: {
-        color: "#ff4d4d"
+        color: COLORS.error,
+        fontSize: 14
     },
 
     cancel: {
-        color: "#6b8cb3"
+        color: COLORS.text.secondary,
+        fontSize: 14
     },
 
     section: {
-        padding: 20
+        paddingHorizontal: 20,
+        paddingVertical: 12
     },
 
     sectionTitle: {
-        color: "white",
+        color: COLORS.text.primary,
         fontSize: 16,
+        fontWeight: "600",
         marginBottom: 10
     },
 
@@ -247,22 +283,28 @@ const styles = StyleSheet.create({
     },
 
     pill: {
-        backgroundColor: "#0E2A47",
-        padding: 10,
+        backgroundColor: COLORS.bg.card,
+        paddingVertical: 10,
+        paddingHorizontal: 14,
         borderRadius: 20,
-        margin: 5
+        margin: 5,
+        borderWidth: 1,
+        borderColor: COLORS.border.subtle
     },
 
     selected: {
-        backgroundColor: "#2b5c8f"
+        backgroundColor: COLORS.blue.glow,
+        borderColor: COLORS.blue.border
     },
 
     pillText: {
-        color: "#aaa"
+        color: COLORS.text.secondary,
+        fontSize: 13
     },
 
     selectedText: {
-        color: "#fff"
+        color: COLORS.blue.light,
+        fontWeight: "600"
     },
 
     footer: {
@@ -270,15 +312,21 @@ const styles = StyleSheet.create({
     },
 
     applyBtn: {
-        backgroundColor: "#fff",
-        padding: 15,
-        borderRadius: 10,
-        alignItems: "center"
+        backgroundColor: COLORS.blue.brand,
+        paddingVertical: 16,
+        borderRadius: 24,
+        alignItems: "center",
+        shadowColor: COLORS.blue.brand,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.4,
+        shadowRadius: 10,
+        elevation: 5,
     },
 
     applyText: {
-        color: "#071B2E",
-        fontWeight: "bold"
+        color: COLORS.text.inverse,
+        fontSize: 16,
+        fontWeight: "900"
     },
 
     priceLabels: {
@@ -288,7 +336,8 @@ const styles = StyleSheet.create({
     },
 
     priceText: {
-        color: "#aaa"
+        color: COLORS.text.tertiary,
+        fontSize: 12
     }
 
 });
