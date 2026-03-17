@@ -6,16 +6,41 @@ import {
     TouchableOpacity,
     ScrollView,
     Modal,
-    SafeAreaView,
+    Animated,
+    Dimensions
 } from "react-native";
+import Slider from "@react-native-community/slider";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+const { height } = Dimensions.get("window");
 
 const FilterModal = ({ visible, onClose, onApply }) => {
-    // --- State for Filters ---
+
+    // --- STATE ---
     const [selectedDate, setSelectedDate] = useState("Anytime");
     const [selectedCategories, setSelectedCategories] = useState([]);
-    const [selectedPrice, setSelectedPrice] = useState("Any");
+    const [price, setPrice] = useState(0);
 
-    // --- Filter Options ---
+    // Animation for TOP SLIDE
+    const slideAnim = useState(new Animated.Value(-height))[0];
+
+    React.useEffect(() => {
+        if (visible) {
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            }).start();
+        } else {
+            Animated.timing(slideAnim, {
+                toValue: -height,
+                duration: 300,
+                useNativeDriver: true,
+            }).start();
+        }
+    }, [visible]);
+
+    // --- OPTIONS ---
     const dateOptions = ["Anytime", "Today", "Tomorrow", "This Weekend", "Next Week"];
     const categoryOptions = [
         "Live Music",
@@ -27,9 +52,8 @@ const FilterModal = ({ visible, onClose, onApply }) => {
         "Comedy",
         "Health & Wellness"
     ];
-    const priceOptions = ["Any", "Free", "$", "$$", "$$$"];
 
-    // --- Helper Functions ---
+    // --- FUNCTIONS ---
     const toggleCategory = (category) => {
         if (selectedCategories.includes(category)) {
             setSelectedCategories(selectedCategories.filter((c) => c !== category));
@@ -41,130 +65,129 @@ const FilterModal = ({ visible, onClose, onApply }) => {
     const handleReset = () => {
         setSelectedDate("Anytime");
         setSelectedCategories([]);
-        setSelectedPrice("Any");
+        setPrice(0);
     };
 
     const handleApply = () => {
-        if (onApply) {
-            onApply({
-                date: selectedDate,
-                categories: selectedCategories,
-                price: selectedPrice,
-            });
-        }
+        onApply({
+            date: selectedDate,
+            categories: selectedCategories,
+            price: price,
+        });
         onClose();
     };
 
     return (
-        <Modal
-            visible={visible}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={onClose}
-        >
-            <View style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
+        <Modal visible={visible} transparent animationType="none">
 
-                    {/* --- HEADER --- */}
+            <View style={styles.overlay}>
+
+                <Animated.View
+                    style={[
+                        styles.modal,
+                        { transform: [{ translateY: slideAnim }] }
+                    ]}
+                >
+
+                    {/* HEADER */}
                     <View style={styles.header}>
-                        <TouchableOpacity onPress={handleReset} style={styles.headerButton}>
-                            <Text style={styles.resetText}>Reset</Text>
+                        <TouchableOpacity onPress={handleReset}>
+                            <Text style={styles.reset}>Reset</Text>
                         </TouchableOpacity>
 
-                        <Text style={styles.headerTitle}>Filters</Text>
+                        <Text style={styles.title}>Filters</Text>
 
-                        <TouchableOpacity onPress={onClose} style={styles.headerButton}>
-                            <Text style={styles.closeText}>Cancel</Text>
+                        <TouchableOpacity onPress={onClose}>
+                            <Text style={styles.cancel}>Cancel</Text>
                         </TouchableOpacity>
                     </View>
 
-                    {/* --- FILTER SECTIONS --- */}
-                    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+                    <ScrollView showsVerticalScrollIndicator={false}>
 
-                        {/* 1. Date Section */}
+                        {/* DATE */}
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>When are you going?</Text>
-                            <View style={styles.pillContainer}>
-                                {dateOptions.map((date) => (
+
+                            <View style={styles.pills}>
+                                {dateOptions.map((d) => (
                                     <TouchableOpacity
-                                        key={date}
+                                        key={d}
                                         style={[
                                             styles.pill,
-                                            selectedDate === date && styles.pillSelected
+                                            selectedDate === d && styles.selected
                                         ]}
-                                        onPress={() => setSelectedDate(date)}
+                                        onPress={() => setSelectedDate(d)}
                                     >
                                         <Text style={[
                                             styles.pillText,
-                                            selectedDate === date && styles.pillTextSelected
+                                            selectedDate === d && styles.selectedText
                                         ]}>
-                                            {date}
+                                            {d}
                                         </Text>
                                     </TouchableOpacity>
                                 ))}
                             </View>
                         </View>
 
-                        {/* 2. Category Section */}
+                        {/* CATEGORY */}
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>Categories</Text>
-                            <View style={styles.pillContainer}>
-                                {categoryOptions.map((category) => (
+
+                            <View style={styles.pills}>
+                                {categoryOptions.map((c) => (
                                     <TouchableOpacity
-                                        key={category}
+                                        key={c}
                                         style={[
                                             styles.pill,
-                                            selectedCategories.includes(category) && styles.pillSelected
+                                            selectedCategories.includes(c) && styles.selected
                                         ]}
-                                        onPress={() => toggleCategory(category)}
+                                        onPress={() => toggleCategory(c)}
                                     >
                                         <Text style={[
                                             styles.pillText,
-                                            selectedCategories.includes(category) && styles.pillTextSelected
+                                            selectedCategories.includes(c) && styles.selectedText
                                         ]}>
-                                            {category}
+                                            {c}
                                         </Text>
                                     </TouchableOpacity>
                                 ))}
                             </View>
                         </View>
 
-                        {/* 3. Price Section */}
+                        {/* PRICE SLIDER */}
                         <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Price</Text>
-                            <View style={styles.pillContainer}>
-                                {priceOptions.map((price) => (
-                                    <TouchableOpacity
-                                        key={price}
-                                        style={[
-                                            styles.pill,
-                                            selectedPrice === price && styles.pillSelected
-                                        ]}
-                                        onPress={() => setSelectedPrice(price)}
-                                    >
-                                        <Text style={[
-                                            styles.pillText,
-                                            selectedPrice === price && styles.pillTextSelected
-                                        ]}>
-                                            {price}
-                                        </Text>
-                                    </TouchableOpacity>
-                                ))}
+                            <Text style={styles.sectionTitle}>Price: Rs {price}</Text>
+
+                            <Slider
+                                minimumValue={0}
+                                maximumValue={5000}
+                                step={500}
+                                value={price}
+                                onValueChange={(val) => setPrice(val)}
+                                minimumTrackTintColor="#4a86c4"
+                                maximumTrackTintColor="#1E3A5F"
+                                thumbTintColor="#ffffff"
+                            />
+
+                            <View style={styles.priceLabels}>
+                                <Text style={styles.priceText}>Free</Text>
+                                <Text style={styles.priceText}>5000+</Text>
                             </View>
                         </View>
 
-                        <View style={{ height: 40 }} />
                     </ScrollView>
 
-                    {/* --- FOOTER / APPLY BUTTON --- */}
+                    {/* APPLY BUTTON */}
                     <View style={styles.footer}>
-                        <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
-                            <Text style={styles.applyButtonText}>Show Results</Text>
+                        <TouchableOpacity style={styles.applyBtn} onPress={handleApply}>
+                            <Text style={styles.applyText}>Show Results</Text>
                         </TouchableOpacity>
                     </View>
 
-                    <SafeAreaView edges={['bottom']} />
-                </View>
+                    <SafeAreaView edges={["bottom"]} />
+
+                </Animated.View>
+
             </View>
         </Modal>
     );
@@ -173,104 +196,99 @@ const FilterModal = ({ visible, onClose, onApply }) => {
 export default FilterModal;
 
 const styles = StyleSheet.create({
-    modalOverlay: {
+
+    overlay: {
         flex: 1,
-        backgroundColor: "rgba(0, 0, 0, 0.6)",
-        justifyContent: "flex-end",
+        backgroundColor: "rgba(0,0,0,0.6)"
     },
-    modalContent: {
+
+    modal: {
         backgroundColor: "#071B2E",
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        height: "85%",
-        overflow: "hidden",
+        height: "100%",
+        borderBottomLeftRadius: 24,
+        borderBottomRightRadius: 24,
+        paddingTop: 20
     },
 
     header: {
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center",
         paddingHorizontal: 20,
-        paddingTop: 20,
-        paddingBottom: 15,
-        borderBottomWidth: 0.5,
-        borderBottomColor: "#1E3A5F",
-    },
-    headerTitle: {
-        color: "white",
-        fontSize: 18,
-        fontWeight: "600",
-    },
-    headerButton: {
-        paddingVertical: 5,
-    },
-    resetText: {
-        color: "#ff4d4d",
-        fontSize: 16,
-    },
-    closeText: {
-        color: "#6b8cb3",
-        fontSize: 16,
+        marginBottom: 10
     },
 
-    scrollContent: {
-        padding: 20,
+    title: {
+        color: "white",
+        fontSize: 18,
+        fontWeight: "bold"
     },
+
+    reset: {
+        color: "#ff4d4d"
+    },
+
+    cancel: {
+        color: "#6b8cb3"
+    },
+
     section: {
-        marginBottom: 30,
+        padding: 20
     },
+
     sectionTitle: {
         color: "white",
-        fontSize: 18,
-        fontWeight: "600",
-        marginBottom: 15,
+        fontSize: 16,
+        marginBottom: 10
     },
 
-    pillContainer: {
+    pills: {
         flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 10,
+        flexWrap: "wrap"
     },
+
     pill: {
         backgroundColor: "#0E2A47",
-        paddingVertical: 10,
-        paddingHorizontal: 16,
+        padding: 10,
         borderRadius: 20,
-        borderWidth: 1,
-        borderColor: "#1E3A5F",
-        marginRight: 8,
-        marginBottom: 8,
+        margin: 5
     },
-    pillSelected: {
-        backgroundColor: "#2b5c8f",
-        borderColor: "#4a86c4",
+
+    selected: {
+        backgroundColor: "#2b5c8f"
     },
+
     pillText: {
-        color: "#aaa",
-        fontSize: 14,
-        fontWeight: "500",
+        color: "#aaa"
     },
-    pillTextSelected: {
-        color: "white",
-        fontWeight: "600",
+
+    selectedText: {
+        color: "#fff"
     },
 
     footer: {
-        padding: 20,
-        paddingBottom: 30,
-        borderTopWidth: 0.5,
-        borderTopColor: "#1E3A5F",
-        backgroundColor: "#071B2E",
+        padding: 20
     },
-    applyButton: {
-        backgroundColor: "#ffffff",
-        paddingVertical: 16,
-        borderRadius: 12,
-        alignItems: "center",
+
+    applyBtn: {
+        backgroundColor: "#fff",
+        padding: 15,
+        borderRadius: 10,
+        alignItems: "center"
     },
-    applyButtonText: {
+
+    applyText: {
         color: "#071B2E",
-        fontSize: 16,
-        fontWeight: "bold",
+        fontWeight: "bold"
     },
+
+    priceLabels: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 5
+    },
+
+    priceText: {
+        color: "#aaa"
+    }
+
 });
