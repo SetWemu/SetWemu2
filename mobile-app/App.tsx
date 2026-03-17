@@ -11,8 +11,7 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import SettingsScreen from './src/screens/settingsScreen';
-
+import HelpScreen from './src/screens/helpScreen';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -20,7 +19,7 @@ function App() {
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <SettingsScreen />
+      <HelpScreen />
     </SafeAreaProvider>
   );
 }
