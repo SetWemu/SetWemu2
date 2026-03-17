@@ -13,20 +13,29 @@ export const getEventAnalytics = async (req, res) => {
 
         if (eventError) throw eventError;
 
-        // 2. Fetch all paid tickets for this event to calculate sales & revenue
+        // 2. Fetch all tickets, but join the ticket_tiers table to get the price and event_id
         const { data: ticketsData, error: ticketsError } = await supabase
             .from('tickets')
-            .select('price')
-            .eq('event_id', eventId)
-            .eq('status', 'paid'); // Assuming you track payment status!
+            .select(`
+                id,
+                ticket_tiers!inner (
+                    price,
+                    event_id
+                )
+            `)
+            .eq('ticket_tiers.event_id', eventId);
 
         if (ticketsError) throw ticketsError;
 
         // 3. Calculate the totals
         const totalSales = ticketsData.length;
-        const totalRevenue = ticketsData.reduce((sum, ticket) => sum + (ticket.price || 0), 0);
+        const totalRevenue = ticketsData.reduce((sum, ticket) => {
+            // Drill down into the joined table to grab the price
+            const tierPrice = ticket.ticket_tiers?.price || 0;
+            return sum + Number(tierPrice);
+        }, 0);
 
-        // 4. Send the analytics package back to the frontend
+        // 4. Send the analytics package back
         res.status(200).json({
             success: true,
             data: {
