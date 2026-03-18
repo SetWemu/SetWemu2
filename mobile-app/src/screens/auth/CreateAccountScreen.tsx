@@ -11,7 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Logo from '../assets/logo.svg'; // <--- CHANGED: Importing SVG
+import Logo from '../../assets/images/Logo.png';
 
 const CreateAccountScreen = ({ navigation }: any) => {  // Form State
   const [name, setName] = useState('');
