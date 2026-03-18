@@ -7,6 +7,7 @@ import OnboardingScreen from '../screens/auth/OnBoardingScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import CreateAccountScreen from '../screens/auth/CreateAccountScreen';
 import SignupScreen from '../screens/auth/SignupScreen';
+import TabNavigator from './TabNavigator';
 
 // ==================== HOME & FEED ====================
 import HomeScreen from '../screens/home/HomeScreen';
@@ -55,6 +56,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
+      <Stack.Screen name="Main" component={TabNavigator} />
       
       {/* ==================== HOME ==================== */}
       <Stack.Screen name="Home" component={HomeScreen} />
@@ -65,7 +67,7 @@ export default function AppNavigator() {
       <Stack.Screen name="EventsAttended" component={EventsAttendedListScreen} />
       
       {/* ==================== TICKETS ==================== */}
-      <Stack.Screen name="EventDetail" component={EventDetailScreen} />
+      <Stack.Screen name="MyTickets" component={MyTicketsScreen} /> 
       <Stack.Screen name="TicketDetail" component={TicketDetailScreen} />
       
       {/* TICKETING FLOW - Grouped for clarity */}
