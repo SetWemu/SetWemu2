@@ -30,7 +30,7 @@ const OnboardingScreen = ({ navigation }: any) => {
               <TouchableOpacity 
                 style={styles.button}
                 // Temporary navigation: goes to the screen we built earlier today!
-                onPress={() => navigation.replace('Login')} 
+                onPress={() => navigation.replace('CreateAccount')} 
               >
                 <Text style={styles.buttonText}>Get Started</Text>
               </TouchableOpacity>
