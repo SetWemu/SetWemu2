@@ -6,11 +6,10 @@ import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
   const isDarkMode = useColorScheme() === 'dark';
-  
+
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <FilterScreen visible={true} onClose={() => { }} onApply={() => { }} />
       <NavigationContainer>
         <AppNavigator />
       </NavigationContainer>
