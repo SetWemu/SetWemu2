@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,126 +6,214 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const stories = [
+import {
+  Heart,
+  ChatCircleDots,
+  PaperPlaneTilt,
+  MapPin,
+  Bell,
+  Plus,
+} from "phosphor-react-native";
+
+/* ================= STORIES ================= */
+
+const initialStories = [
   { id: "0", name: "Your Story", avatar: "https://i.pravatar.cc/100?img=10", isAdd: true },
-  { id: "1", name: "j_kovrikov", avatar: "https://i.pravatar.cc/100?img=1" },
-  { id: "2", name: "leavinhq", avatar: "https://i.pravatar.cc/100?img=2" },
-  { id: "3", name: "ladyinblack", avatar: "https://i.pravatar.cc/100?img=3" },
-  { id: "4", name: "beardman", avatar: "https://i.pravatar.cc/100?img=4" },
+  { id: "1", name: "Sarah", avatar: "https://i.pravatar.cc/100?img=5" },
+  { id: "2", name: "Alex", avatar: "https://i.pravatar.cc/100?img=11" },
+  { id: "3", name: "Emma", avatar: "https://i.pravatar.cc/100?img=3" },
 ];
 
-const posts = [
+/* ================= POSTS ================= */
+
+const initialPosts = [
   {
     id: "1",
-    user: "Bing Chin",
-    time: "2hrs ago",
-    caption: "Amazing artisan cheeses at the food market!",
-    image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
-    event: "Artisan Food Market",
-    date: "Oct 22, 2025",
-    location: "Colombo Market Square",
-    likes: 174,
-    comments: 14,
-    send:5,
+    user: "Sarah Chen",
+    avatar: "https://i.pravatar.cc/100?img=5",
+    time: "2h ago",
+    caption: "What an incredible night at the Summer Music Festival! 🎶✨",
+    image: "https://images.unsplash.com/photo-1506157786151-b8491531f063",
+    event: "Summer Music Festival 2025",
+    likes: 342,
+    liked: false,
+    comments: [
+      {
+        id: "c1",
+        user: "Alex Rivera",
+        text: "This looks amazing!",
+        replies: [{ id: "r1", user: "Sarah", text: "It was 🔥!" }],
+      },
+    ],
   },
   {
     id: "2",
-    user: "Nina Grey",
-    time: "5hrs ago",
-    caption: "Live music tonight was insane 🎸",
+    user: "Sarah Chen",
+    avatar: "https://i.pravatar.cc/100?img=5",
+    time: "2h ago",
+    caption: "What an incredible night at the Summer Music Festival! 🎶✨",
     image: "https://images.unsplash.com/photo-1506157786151-b8491531f063",
-    event: "City Music Fest",
-    date: "Oct 25, 2025",
-    location: "Colombo Arena",
-    likes: 220,
-    comments: 32,
-    send:8,
+    event: "Summer Music Festival 2025",
+    likes: 342,
+    liked: false,
+    comments: [
+      {
+        id: "c1",
+        user: "Alex Rivera",
+        text: "This looks amazing!",
+        replies: [{ id: "r1", user: "Sarah", text: "It was 🔥!" }],
+      },
+    ],
   },
   {
     id: "3",
-    user: "Adam Lee",
-    time: "1day ago",
-    caption: "Best street food experience ever 🔥",
-    image: "https://images.unsplash.com/photo-1498654896293-37aacf113fd9",
-    event: "Street Food Carnival",
-    date: "Oct 27, 2025",
-    location: "Galle Face",
-    likes: 301,
-    comments: 48,
-    send:2,
+    user: "Sarah Chen",
+    avatar: "https://i.pravatar.cc/100?img=5",
+    time: "2h ago",
+    caption: "What an incredible night at the Summer Music Festival! 🎶✨",
+    image: "https://images.unsplash.com/photo-1506157786151-b8491531f063",
+    event: "Summer Music Festival 2025",
+    likes: 342,
+    liked: false,
+    comments: [
+      {
+        id: "c1",
+        user: "Alex Rivera",
+        text: "This looks amazing!",
+        replies: [{ id: "r1", user: "Sarah", text: "It was 🔥!" }],
+      },
+    ],
   },
 ];
 
-const HomeScreen = () => {
+/* ================= MAIN ================= */
 
-  const renderStory = ({ item }) => (
-    <View style={styles.storyItem}>
-      <View>
-        <Image source={{ uri: item.avatar }} style={styles.storyAvatar} />
+export default function HomeScreen({ navigation }) {
+  const [stories, setStories] = useState(
+    initialStories.map((s) => ({ ...s, viewed: false }))
+  );
+
+  const [posts, setPosts] = useState(initialPosts);
+  const [selectedComments, setSelectedComments] = useState(null);
+
+  /* ---------- STORY CLICK ---------- */
+  const handleStoryClick = (index) => {
+    const updated = [...stories];
+    updated[index].viewed = true;
+    setStories(updated);
+
+    if (stories[index].isAdd) {
+      navigation?.navigate("CreateStory");
+    } else {
+      navigation?.navigate("StoryViewer");
+    }
+  };
+
+  /* ---------- LIKE ---------- */
+  const toggleLike = (id) => {
+    setPosts((prev) =>
+      prev.map((post) => {
+        if (post.id === id) {
+          const liked = post.liked;
+          return {
+            ...post,
+            liked: !liked,
+            likes: liked ? post.likes - 1 : post.likes + 1,
+          };
+        }
+        return post;
+      })
+    );
+  };
+
+  /* ---------- RENDER STORY ---------- */
+  const renderStory = ({ item, index }) => (
+    <TouchableOpacity
+      style={styles.storyItem}
+      onPress={() => handleStoryClick(index)}
+    >
+      <View
+        style={[
+          styles.storyCircle,
+          item.viewed && { opacity: 0.4 },
+        ]}
+      >
+        <Image source={{ uri: item.avatar }} style={styles.storyImage} />
 
         {item.isAdd && (
-          <View style={styles.addStoryIcon}>
-            <Text style={styles.plusText}>+</Text>
+          <View style={styles.plusBadge}>
+            <Plus size={12} color="#000" />
           </View>
         )}
       </View>
+
       <Text style={styles.storyName}>{item.name}</Text>
-    </View>
+    </TouchableOpacity>
   );
 
+  /* ---------- RENDER POST ---------- */
   const renderPost = ({ item }) => (
     <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.user}>{item.user}</Text>
-        <Text style={styles.time}>{item.time}</Text>
+
+      {/* HEADER */}
+      <View style={styles.headerRow}>
+        <Image source={{ uri: item.avatar }} style={styles.avatar} />
+        <View>
+          <Text style={styles.user}>{item.user}</Text>
+          <Text style={styles.time}>{item.time}</Text>
+        </View>
       </View>
 
+      {/* CAPTION */}
       <Text style={styles.caption}>{item.caption}</Text>
 
-      <Image source={{ uri: item.image }} style={styles.postImage} />
+      {/* EVENT TAG */}
+      <TouchableOpacity
+        style={styles.eventTag}
+        onPress={() => navigation?.navigate("EventDetail", { event: item })}
+      >
+        <MapPin size={14} color="#8DDFF5" />
+        <Text style={styles.eventText}>{item.event}</Text>
+      </TouchableOpacity>
 
-      <View style={styles.eventInfo}>
-        <Text style={styles.eventTitle}>{item.event}</Text>
-        <Text style={styles.eventMeta}>
-          {item.date} • {item.location}
-        </Text>
-      </View>
+      {/* IMAGE */}
+      <Image source={{ uri: item.image }} style={styles.image} />
 
+      {/* ACTIONS */}
       <View style={styles.actions}>
-        <TouchableOpacity>
-          <View style={styles.actionContainer}>
-            <Image 
-              source={{ uri: 'https://img.icons8.com/?size=100&id=64767&format=png&color=ffffff' }}
-              style={styles.actionIcon}
+
+        {/* LIKE */}
+        <TouchableOpacity onPress={() => toggleLike(item.id)}>
+          <View style={styles.actionItem}>
+            <Heart
+              size={22}
+              color={item.liked ? "#FF453A" : "#ABABAB"}
+              weight={item.liked ? "fill" : "regular"}
             />
-            <Text style={styles.actionCount}>{item.likes}</Text>
+            <Text style={styles.actionText}>{item.likes}</Text>
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity>
-          <View style={styles.actionContainer}>
-            <Image 
-              source={{ uri: 'https://img.icons8.com/?size=100&id=61876&format=png&color=ffffff' }}
-              style={styles.actionIcon}
-            />
-            <Text style={styles.actionCount}>{item.comments}</Text>
+        {/* COMMENT */}
+        <TouchableOpacity onPress={() => setSelectedComments(item.comments)}>
+          <View style={styles.actionItem}>
+            <ChatCircleDots size={22} color="#ABABAB" />
+            <Text style={styles.actionText}>
+              {item.comments ? item.comments.length : 0}
+            </Text>
           </View>
         </TouchableOpacity>
 
-        {/* SEND BUTTON */}
-        <TouchableOpacity>
-          <View style={styles.actionContainer}>
-            <Image 
-              source={{ uri: 'https://img.icons8.com/?size=100&id=100004&format=png&color=ffffff' }}
-              style={styles.actionIcon}
-            />
-            <Text style={styles.actionCount}>{item.send}</Text>
-          </View>
-        </TouchableOpacity>
+        {/* SHARE */}
+        <View style={styles.actionItem}>
+          <PaperPlaneTilt size={22} color="#ABABAB" />
+        </View>
       </View>
+
     </View>
   );
 
@@ -133,20 +221,26 @@ const HomeScreen = () => {
     <SafeAreaView style={styles.container}>
 
       {/* HEADER */}
-      <View style={styles.headerBar}>
-        <Text style={styles.headerTitle}>Home Feed</Text>
+      <View style={styles.topBar}>
+        <Text style={styles.title}>Feed</Text>
 
-        <View style={styles.headerIcons}>
-          <TouchableOpacity>
-            <Text style={styles.icon}>+</Text>
+        <View style={{ flexDirection: "row", gap: 16 }}>
+          <TouchableOpacity onPress={() => navigation?.navigate("CreatePost")}>
+            <Plus size={24} color="#ADF3FF" />
           </TouchableOpacity>
-          <TouchableOpacity>
-            <Text style={styles.icon}>💬</Text>
+
+          <TouchableOpacity onPress={() => navigation?.navigate("Notifications")}>
+            <Bell size={24} color="#F2F2F7" />
           </TouchableOpacity>
         </View>
       </View>
 
+      {/* FEED */}
       <FlatList
+        data={posts}
+        renderItem={renderPost}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <FlatList
             data={stories}
@@ -154,120 +248,153 @@ const HomeScreen = () => {
             keyExtractor={(item) => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}
-            style={styles.stories}
+            style={{ paddingHorizontal: 16, marginBottom: 10 }}
           />
         }
-        data={posts}
-        renderItem={renderPost}
-        keyExtractor={(item) => item.id}
       />
 
-      {/* BOTTOM NAV */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <Image 
-            source={{ uri: 'https://img.icons8.com/?size=100&id=86527&format=png&color=ffffff' }}
-            style={styles.navIconImage}
-          />
-        </TouchableOpacity>
+      {/* COMMENTS MODAL */}
+      <Modal visible={!!selectedComments} animationType="slide">
+        <SafeAreaView style={styles.modal}>
+          <Text style={styles.modalTitle}>Comments</Text>
 
-        <TouchableOpacity style={styles.navItem}>
-          <Image 
-            source={{ uri: 'https://img.icons8.com/?size=100&id=87981&format=png&color=ffffff' }}
-            style={styles.navIconImage}
-          />
-        </TouchableOpacity>
+          {selectedComments?.map((c) => (
+            <View key={c.id} style={styles.comment}>
+              <Text style={styles.commentUser}>{c.user}</Text>
+              <Text style={styles.commentText}>{c.text}</Text>
 
-        <TouchableOpacity style={styles.navItem}>
-          <Image 
-            source={{ uri: 'https://img.icons8.com/?size=100&id=9fYfwBJNoMpV&format=png&color=ffffff' }}
-            style={styles.navIconImage}
-          />
-        </TouchableOpacity>
+              {/* Added optional chaining (?.) here to prevent crashes if replies don't exist */}
+              {c.replies?.map((r) => (
+                <View key={r.id} style={styles.reply}>
+                  <Text style={styles.commentUser}>{r.user}</Text>
+                  <Text style={styles.commentText}>{r.text}</Text>
+                </View>
+              ))}
+            </View>
+          ))}
 
-        <TouchableOpacity style={styles.navItem}>
-          <Image 
-            source={{ uri: 'https://img.icons8.com/?size=100&id=Hh5ONdvsAI4P&format=png&color=ffffff' }}
-            style={styles.navIconImage}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.navItem}>
-          <Image 
-            source={{ uri: 'https://img.icons8.com/?size=100&id=77883&format=png&color=ffffff' }}
-            style={styles.navIconImage}
-          />
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={styles.closeBtn}
+            onPress={() => setSelectedComments(null)}
+          >
+            <Text style={{ color: "#fff", fontWeight: "bold" }}>Close</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
+      </Modal>
 
     </SafeAreaView>
   );
-};
+}
 
-export default HomeScreen;
+/* ================= STYLES ================= */
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#071B2E" },
-
-  headerBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 15,
+  container: {
+    flex: 1,
+    backgroundColor: "#0E0E10",
   },
 
-  headerTitle: { color: "white", fontSize: 20, fontWeight: "600" },
+  topBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 16,
+  },
 
-  headerIcons: { flexDirection: "row" },
+  title: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "bold",
+  },
 
-  icon: { color: "white", fontSize: 20, marginLeft: 15 },
-
-  stories: { paddingHorizontal: 10, paddingVertical: 10 },
-
-  storyItem: { alignItems: "center", marginRight: 15 },
-
-  storyAvatar: { width: 65, height: 65, borderRadius: 32 },
-
-  addStoryIcon: {
-    position: "absolute",
-    bottom: -2,
-    right: -2,
-    backgroundColor: "#2E90FA",
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-    justifyContent: "center",
+  /* STORIES */
+  storyItem: {
     alignItems: "center",
+    marginRight: 14,
   },
 
-  plusText: { color: "white", fontSize: 14, fontWeight: "bold" },
+  storyCircle: {
+    borderWidth: 2,
+    borderColor: "#8DDFF5",
+    borderRadius: 40,
+    padding: 2,
+  },
 
-  storyName: { color: "white", fontSize: 12, marginTop: 5 },
+  storyImage: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+  },
 
+  storyName: {
+    color: "#ABABAB",
+    fontSize: 12,
+    marginTop: 5,
+  },
+
+  plusBadge: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#8DDFF5",
+    borderRadius: 10,
+    padding: 2,
+  },
+
+  /* POST */
   card: {
-    backgroundColor: "#0E2A47",
-    margin: 10,
-    borderRadius: 15,
-    padding: 12,
+    backgroundColor: "#1C1C1E",
+    margin: 16,
+    borderRadius: 18,
+    padding: 14,
   },
 
-  cardHeader: {
+  headerRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    gap: 10,
+    marginBottom: 8,
   },
 
-  user: { color: "white", fontWeight: "600" },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
 
-  time: { color: "#aaa", fontSize: 12 },
+  user: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
 
-  caption: { color: "white", marginVertical: 10 },
+  time: {
+    color: "#6B6B6B",
+    fontSize: 12,
+  },
 
-  postImage: { width: "100%", height: 200, borderRadius: 10 },
+  caption: {
+    color: "#fff",
+    marginVertical: 8,
+  },
 
-  eventInfo: { marginTop: 8 },
+  eventTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#8DDFF520",
+    padding: 6,
+    borderRadius: 20,
+    marginBottom: 10,
+    alignSelf: "flex-start", // Added to prevent tag from stretching across the screen
+  },
 
-  eventTitle: { color: "white", fontWeight: "600" },
+  eventText: {
+    color: "#8DDFF5",
+    marginLeft: 5,
+  },
 
-  eventMeta: { color: "#ccc", fontSize: 12 },
+  image: {
+    width: "100%",
+    height: 200,
+    borderRadius: 12,
+  },
 
   actions: {
     flexDirection: "row",
@@ -275,40 +402,52 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
-  actionText: { color: "white" },
-
-  actionContainer: {
+  actionItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: 5,
   },
 
-  actionIcon: {
-    width: 24,
-    height: 24,
+  actionText: {
+    color: "#ABABAB",
   },
 
-  actionCount: {
-    color: "white",
-    fontSize: 12,
+  /* MODAL */
+  modal: {
+    flex: 1,
+    backgroundColor: "#141416",
+    padding: 20,
   },
 
-  bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 12,
-    backgroundColor: "#051423",
+  modalTitle: {
+    color: "#fff",
+    fontSize: 20,
+    marginBottom: 20,
   },
 
-  navItem: {
+  comment: {
+    marginBottom: 15,
+  },
+
+  commentUser: {
+    color: "#ADF3FF",
+    fontWeight: "bold",
+  },
+
+  commentText: {
+    color: "#fff",
+  },
+
+  reply: {
+    marginLeft: 15,
+    marginTop: 5,
+  },
+
+  closeBtn: {
+    marginTop: 20,
+    backgroundColor: "#333",
+    padding: 15, // Increased padding for easier tapping
     alignItems: "center",
+    borderRadius: 10,
   },
-
-  navIconImage: {
-    width: 24,
-    height: 24,
-    marginBottom: 4,
-  },
-
-  navIcon: { color: "white", fontSize: 12 },
 });
