@@ -16,6 +16,7 @@ import CreateStoryScreen from '../screens/home/CreateStoryScreen';
 // ==================== EVENTS ====================
 import EventDetailScreen from '../screens/events/EventDetailScreen';
 import EventsAttendedListScreen from '../screens/events/EventsAttendedListScreen';
+import AttendeesListScreen from '../screens/events/AttendeesListScreen';
 
 // ==================== TICKETS ====================
 import MyTicketsScreen from '../screens/tickets/MyTicketsScreen';
@@ -50,58 +51,31 @@ export default function AppNavigator() {
       initialRouteName="Splash"
       screenOptions={{ headerShown: false }}
     >
-      {/* ==================== AUTH FLOW ==================== */}
       <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="OnBoarding" component={OnboardingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
       <Stack.Screen name="Main" component={TabNavigator} />
-      
-      {/* ==================== HOME ==================== */}
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="CreateStory" component={CreateStoryScreen} />
-      
-      {/* ==================== EVENTS ==================== */}
       <Stack.Screen name="EventDetail" component={EventDetailScreen} />
       <Stack.Screen name="EventsAttended" component={EventsAttendedListScreen} />
-      
-      {/* ==================== TICKETS ==================== */}
+      <Stack.Screen name="AttendeesList" component={AttendeesListScreen} />
       <Stack.Screen name="MyTickets" component={MyTicketsScreen} /> 
       <Stack.Screen name="TicketDetail" component={TicketDetailScreen} />
-      
-      {/* TICKETING FLOW - Grouped for clarity */}
-      <Stack.Screen 
-        name="Checkout" 
-        component={CheckoutScreen} 
-        options={{ animation: 'slide_from_bottom' }} // Makes it feel like a modal
-      />
-      <Stack.Screen 
-        name="Payment" 
-        component={PaymentScreen} 
-      />
-      <Stack.Screen 
-        name="Success" 
-        component={SuccessScreen} 
-        options={{ gestureEnabled: false }} // Prevents user from swiping back to payment
-      />
-      
-      {/* ==================== SOCIAL ==================== */}
+      <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="Payment" component={PaymentScreen} />
+      <Stack.Screen name="Success" component={SuccessScreen} options={{ gestureEnabled: false }} />
       <Stack.Screen name="Favorites" component={FavoritesScreen} />
       <Stack.Screen name="Followers" component={FollowersListScreen} />
       <Stack.Screen name="Following" component={FollowingListScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="Reviews" component={ReviewsListScreen} />
-      
-      {/* ==================== PROFILE ==================== */}
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-      
-      {/* ==================== CHAT ==================== */}
       <Stack.Screen name="ChatList" component={ChatListScreen} />
       <Stack.Screen name="ChatConversation" component={ChatConversationScreen} />
-      
-      {/* ==================== TEST ==================== */}
       <Stack.Screen name="Test" component={TestScreen} />
     </Stack.Navigator>
   );
