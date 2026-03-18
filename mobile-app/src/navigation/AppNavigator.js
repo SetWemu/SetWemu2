@@ -17,6 +17,7 @@ import CreateStoryScreen from '../screens/createStoryScreen';
 import EventDetailScreen from '../screens/events/EventDetailScreen';
 import EventsAttendedListScreen from '../screens/events/EventsAttendedListScreen';
 import OrganizerProfileScreen from '../screens/OrganizerProfileScreen'; // YOUR NEW SCREEN
+import AttendeesListScreen from '../screens/events/AttendeesListScreen';
 
 // ==================== TICKETS ====================
 import MyTicketsScreen from '../screens/tickets/MyTicketsScreen';
@@ -69,6 +70,11 @@ export default function AppNavigator() {
       <Stack.Screen name="OrganizerProfile" component={OrganizerProfileScreen} />
       
       {/* TICKETS */}
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="CreateStory" component={CreateStoryScreen} />
+      <Stack.Screen name="EventDetail" component={EventDetailScreen} />
+      <Stack.Screen name="EventsAttended" component={EventsAttendedListScreen} />
+      <Stack.Screen name="AttendeesList" component={AttendeesListScreen} />
       <Stack.Screen name="MyTickets" component={MyTicketsScreen} /> 
       <Stack.Screen name="TicketDetail" component={TicketDetailScreen} />
       <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ animation: 'slide_from_bottom' }} />
