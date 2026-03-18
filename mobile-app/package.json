@@ -11,7 +11,11 @@
   },
   "dependencies": {
     "@react-native-camera-roll/camera-roll": "^7.10.2",
+<<<<<<< HEAD
     "@react-native-community/slider": "^5.1.2",
+=======
+    "@react-native-community/datetimepicker": "^9.1.0",
+>>>>>>> 774f559c3274c7bf718dbbb8dfd2bb6715e7f1de
     "@react-native/new-app-screen": "0.83.1",
     "@react-navigation/bottom-tabs": "^7.13.0",
     "@react-navigation/native": "^7.1.33",
