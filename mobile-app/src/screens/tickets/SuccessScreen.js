@@ -17,7 +17,7 @@ const SuccessScreen = ({ route, navigation }) => {
         <Text style={ss.btnText}>View in My Tickets</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={ss.homeBtn} onPress={() => navigation.popToTop()}>
+      <TouchableOpacity style={ss.homeBtn} onPress={() => navigation.navigate('Main', { screen: 'HomeTab' })}>
         <House size={18} color="#ADF3FF" />
         <Text style={ss.homeText}>Back to Discovery</Text>
       </TouchableOpacity>

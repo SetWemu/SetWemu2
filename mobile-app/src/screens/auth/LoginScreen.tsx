@@ -10,283 +10,177 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { EnvelopeSimple, Lock, Eye, EyeSlash } from 'phosphor-react-native';
 
-const LoginScreen = ({ navigation }: any) => {  const [username, setUsername] = useState('');
+const C = {
+  bg: { primary: '#141416', card: '#1C1C1E', elevated: '#242428' },
+  blue: { light: '#ADF3FF', mid: '#8DDFF5' },
+  text: { primary: '#F2F2F7', secondary: '#ABABAB', tertiary: '#6B6B6B' },
+  border: { light: 'rgba(255,255,255,0.10)' },
+};
+
+const LoginScreen = ({ navigation }: any) => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0F172A" />
-      
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+    <View style={s.container}>
+      <StatusBar barStyle="light-content" />
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent}
+        <ScrollView
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={s.scroll}
         >
-
-          {/* Logo Section - IMAGE */}
-          <View style={styles.logoContainer}>
-          <Text style={{ color: 'white', fontSize: 24 }}>Logo Goes Here</Text>          
-          </View>
-
           {/* Header */}
-          <View style={styles.headerContainer}>
-            <Text style={styles.headerTitle}>Login</Text>
-            <Text style={styles.headerSubtitle}>Please sign in to continue.</Text>
+          <View style={s.header}>
+            <Text style={s.title}>Welcome Back</Text>
+            <Text style={s.subtitle}>Login to continue discovering events</Text>
           </View>
 
-          {/* Input Fields */}
-          <View style={styles.formContainer}>
-            
-            {/* Username */}
-            <View style={styles.inputWrapper}>
-              <Text style={styles.inputLabel}>Username or Email</Text>
-              <TextInput
-                style={styles.input}
-                placeholder=""
-                placeholderTextColor="#64748b"
-                value={username}
-                onChangeText={setUsername}
-              />
-            </View>
+          {/* Email Input */}
+          <View style={s.inputWrap}>
+            <EnvelopeSimple size={18} color={C.blue.light} weight="regular" />
+            <TextInput
+              style={s.input}
+              placeholder="Email Address"
+              placeholderTextColor={C.text.tertiary}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
+            />
+          </View>
 
-            {/* Password */}
-            <View style={styles.inputWrapper}>
-              <Text style={styles.inputLabel}>Password</Text>
-              <View style={styles.passwordContainer}>
-                <TextInput
-                    style={styles.passwordInput}
-                    placeholder=""
-                    placeholderTextColor="#64748b"
-                    secureTextEntry={!isPasswordVisible}
-                    value={password}
-                    onChangeText={setPassword}
-                />
-                <TouchableOpacity 
-                    onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-                    style={styles.eyeIcon}
-                >
-                    <Icon 
-                    name={isPasswordVisible ? "eye-off-outline" : "eye-outline"} 
-                    size={20} 
-                    color="#94a3b8" 
-                    />
-                </TouchableOpacity>
-              </View>
-            </View>
+          {/* Password Input */}
+          <View style={s.inputWrap}>
+            <Lock size={18} color={C.blue.light} weight="regular" />
+            <TextInput
+              style={s.input}
+              placeholder="Password"
+              placeholderTextColor={C.text.tertiary}
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              {showPassword ? (
+                <EyeSlash size={18} color={C.text.tertiary} />
+              ) : (
+                <Eye size={18} color={C.text.tertiary} />
+              )}
+            </TouchableOpacity>
+          </View>
 
-            {/* Remember Me & Forgot Password */}
-            <View style={styles.optionsRow}>
-                <TouchableOpacity 
-                style={styles.rememberContainer}
-                onPress={() => setRememberMe(!rememberMe)}
-                >
-                <Icon 
-                    name={rememberMe ? "checkbox" : "square-outline"} 
-                    size={20} 
-                    color={rememberMe ? "#38bdf8" : "#94a3b8"} 
-                />
-                <Text style={styles.rememberText}>Remember me</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity>
-                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* Login Button */}
-            <TouchableOpacity 
-              style={styles.loginButton}
-              onPress={() => navigation.navigate('Main')}  // ← CHANGE THIS
+          {/* Remember Me & Forgot Password */}
+          <View style={s.optionsRow}>
+            <TouchableOpacity
+              style={s.rememberRow}
+              onPress={() => setRememberMe(!rememberMe)}
             >
-              <Text style={styles.loginButtonText}>Login</Text>
+              <View style={[s.checkbox, rememberMe && s.checkboxActive]}>
+                {rememberMe && <Text style={s.checkmark}>✓</Text>}
+              </View>
+              <Text style={s.rememberText}>Remember me</Text>
             </TouchableOpacity>
-
-          </View>
-
-          {/* Social Login Section */}
-          <View style={styles.socialContainer}>
-            <Text style={styles.orText}>Or Login with</Text>
-            
-            <View style={styles.socialIcons}>
-               {/* Google */}
-               <TouchableOpacity style={styles.socialButton}>
-                  <Icon name="logo-google" size={24} color="#fff" />
-               </TouchableOpacity>
-               {/* Facebook */}
-               <TouchableOpacity style={styles.socialButton}>
-                  <Icon name="logo-facebook" size={24} color="#fff" />
-               </TouchableOpacity>
-               {/* Apple */}
-               <TouchableOpacity style={styles.socialButton}>
-                  <Icon name="logo-apple" size={24} color="#fff" />
-               </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Footer */}
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
-               <Text style={styles.linkText}>Signup</Text>
+            <TouchableOpacity>
+              <Text style={s.forgotText}>Forgot Password?</Text>
             </TouchableOpacity>
           </View>
 
+          {/* Login Button */}
+          <TouchableOpacity
+            style={s.loginBtn}
+            onPress={() => navigation.replace('Main')}
+          >
+            <Text style={s.loginBtnText}>Login</Text>
+          </TouchableOpacity>
+
+          {/* Sign Up Link */}
+          <View style={s.footer}>
+            <Text style={s.footerText}>Don't have an account? </Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('CreateAccount')}
+            >
+              <Text style={s.footerLink}>Sign Up</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0F172A',
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
+const s = StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.bg.primary },
+  scroll: {
     padding: 24,
+    paddingTop: 80,
+    justifyContent: 'center',
+    flexGrow: 1,
   },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  logoImage: {
-    width: 150, // Adjustable width
-    height: 80, // Adjustable height
-    marginBottom: 10,
-  },
-  headerContainer: {
-    marginBottom: 30,
-    width: '100%',
-  },
-  headerTitle: {
+  header: { marginBottom: 40 },
+  title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: '900',
+    color: C.text.primary,
     marginBottom: 8,
+    letterSpacing: -0.5,
   },
-  headerSubtitle: {
-    fontSize: 16,
-    color: '#94a3b8',
-  },
-  formContainer: {
-    marginBottom: 20,
-    width: '100%',
-  },
-  inputWrapper: {
-    marginBottom: 20,
-  },
-  inputLabel: {
-      color: '#fff',
-      fontSize: 14,
-      fontWeight: '600',
-      marginBottom: 8,
-      marginLeft: 4,
-  },
-  input: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#334155',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: '#fff',
-  },
-  passwordContainer: {
+  subtitle: { fontSize: 14, color: C.text.secondary },
+
+  inputWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#334155',
+    backgroundColor: C.bg.card,
     borderRadius: 12,
     paddingHorizontal: 16,
-    height: 56,
+    height: 54,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: C.border.light,
+    gap: 12,
   },
-  passwordInput: {
-      flex: 1,
-      fontSize: 16,
-      color: '#fff',
-      height: '100%',
-  },
-  eyeIcon: {
-    marginLeft: 10,
-  },
+  input: { flex: 1, color: C.text.primary, fontSize: 15, fontWeight: '600' },
+
   optionsRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 30,
-  },
-  rememberContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 30,
   },
-  rememberText: {
-    color: '#94a3b8',
-    marginLeft: 10,
-    fontSize: 14,
+  rememberRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: C.border.light,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  forgotPasswordText: {
-      color: '#38bdf8',
-      fontWeight: '600',
-      fontSize: 14,
-  },
-  loginButton: {
-    backgroundColor: '#334155',
-    borderRadius: 12,
+  checkboxActive: { backgroundColor: C.blue.light, borderColor: C.blue.light },
+  checkmark: { color: '#141416', fontSize: 12, fontWeight: '900' },
+  rememberText: { color: C.text.secondary, fontSize: 13 },
+  forgotText: { color: C.blue.light, fontWeight: '700', fontSize: 13 },
+
+  loginBtn: {
+    backgroundColor: C.blue.light,
+    borderRadius: 16,
     paddingVertical: 16,
     alignItems: 'center',
-  },
-  loginButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  socialContainer: {
-      alignItems: 'center',
-      marginBottom: 30,
-  },
-  orText: {
-      color: '#94a3b8',
-      marginBottom: 20,
-      fontSize: 14,
-  },
-  socialIcons: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      gap: 20,
-  },
-  socialButton: {
-      width: 50,
-      height: 50,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: '#334155',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: '#1e293b',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
     marginBottom: 20,
   },
-  footerText: {
-    color: '#94a3b8',
-  },
-  linkText: {
-    color: '#38bdf8',
-    fontWeight: 'bold',
-  },
-  
-});
+  loginBtnText: { color: '#141416', fontSize: 16, fontWeight: '900' },
 
+  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 20 },
+  footerText: { color: C.text.secondary, fontSize: 14 },
+  footerLink: { color: C.blue.light, fontWeight: '700', fontSize: 14 },
+});
 
 export default LoginScreen;
