@@ -108,6 +108,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0E2A47',
     alignItems: 'center',
   },
+  header: { padding: 20, paddingTop: 60, backgroundColor: '#0E2A47', alignItems: 'center' },
   emoji: { fontSize: 48, marginBottom: 12 },
   title: { fontSize: 28, fontWeight: 'bold', color: '#fff', marginBottom: 4 },
   subtitle: { fontSize: 14, color: '#94a3b8' },

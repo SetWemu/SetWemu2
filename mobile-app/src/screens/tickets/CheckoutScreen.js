@@ -30,7 +30,6 @@ const C = {
 
 const CheckoutScreen = ({ route, navigation }) => {
   const { event, ticket, quantity } = route.params;
-
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [promoCode, setPromoCode] = useState('');

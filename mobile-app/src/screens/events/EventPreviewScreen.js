@@ -35,7 +35,6 @@ const C = {
 const EventPreviewScreen = ({ route, navigation }) => {
   // Get event data from CreateEvent form
   const { eventData } = route.params || {};
-
   const {
     title = 'Event Title Preview',
     description = 'Event description will appear here...',

@@ -47,6 +47,7 @@ const Stack = createNativeStackNavigator();
 export default function AppNavigator() {
   return (
     <Stack.Navigator
+    <Stack.Navigator 
       initialRouteName="Splash"
       screenOptions={{ headerShown: false }}
     >
@@ -86,6 +87,35 @@ export default function AppNavigator() {
         options={{ gestureEnabled: false }} // Prevents user from swiping back to payment
       />
 
+      
+      {/* ==================== HOME ==================== */}
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="CreateStory" component={CreateStoryScreen} />
+      
+      {/* ==================== EVENTS ==================== */}
+      <Stack.Screen name="EventDetail" component={EventDetailScreen} />
+      <Stack.Screen name="EventsAttended" component={EventsAttendedListScreen} />
+      
+      {/* ==================== TICKETS ==================== */}
+      <Stack.Screen name="MyTickets" component={MyTicketsScreen} /> 
+      <Stack.Screen name="TicketDetail" component={TicketDetailScreen} />
+      
+      {/* TICKETING FLOW - Grouped for clarity */}
+      <Stack.Screen 
+        name="Checkout" 
+        component={CheckoutScreen} 
+        options={{ animation: 'slide_from_bottom' }} // Makes it feel like a modal
+      />
+      <Stack.Screen 
+        name="Payment" 
+        component={PaymentScreen} 
+      />
+      <Stack.Screen 
+        name="Success" 
+        component={SuccessScreen} 
+        options={{ gestureEnabled: false }} // Prevents user from swiping back to payment
+      />
+      
       {/* ==================== SOCIAL ==================== */}
       <Stack.Screen name="Favorites" component={FavoritesScreen} />
       <Stack.Screen name="Followers" component={FollowersListScreen} />
@@ -104,8 +134,18 @@ export default function AppNavigator() {
         component={ChatConversationScreen}
       />
 
+      
+      {/* ==================== PROFILE ==================== */}
+      <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      
+      {/* ==================== CHAT ==================== */}
+      <Stack.Screen name="ChatList" component={ChatListScreen} />
+      <Stack.Screen name="ChatConversation" component={ChatConversationScreen} />
+      
       {/* ==================== TEST ==================== */}
       <Stack.Screen name="Test" component={TestScreen} />
     </Stack.Navigator>
   );
+}
 }

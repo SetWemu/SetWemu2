@@ -17,6 +17,7 @@ const CreateEventStack = () => {
         name="EventPublishSuccess"
         component={EventPublishSuccessScreen}
       />
+      <Stack.Screen name="EventPublishSuccess" component={EventPublishSuccessScreen} />
     </Stack.Navigator>
   );
 };
