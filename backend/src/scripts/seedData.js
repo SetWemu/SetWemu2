@@ -1,68 +1,24 @@
 import { supabase } from '../config/db.js';
 
-const seedDatabase = async () => {
-    try {
-        console.log("🌱 Starting full database seed...");
+const seedData = async () => {
+    const user1 = "3db47b32-bbc7-40e5-85fe-db585a28d270";
+    const user2 = "c318071e-8b8b-4f42-b00c-a2225cfe93b0";
 
-        // 1. SEED 5 USERS
-        const users = [
-            { id: '00000000-0000-0000-0000-000000000001', email: 'mueena@example.com', full_name: 'Mueena Shahmy', role: 'personal', location: 'Colombo' },
-            { id: '00000000-0000-0000-0000-000000000002', email: 'dulmin@example.com', full_name: 'Dulmin Fernando', role: 'personal', location: 'Galle' },
-            { id: '00000000-0000-0000-0000-000000000003', email: 'oneth@setwemu.com', full_name: 'Oneth Kurukulasuriya', role: 'business', location: 'Kandy' },
-            { id: '00000000-0000-0000-0000-000000000004', email: 'isa@example.com', full_name: 'Isa Farman', role: 'business', location: 'Colombo' },
-            { id: '00000000-0000-0000-0000-000000000005', email: 'diara@setwemu.com', full_name: 'Diara Batagodage', role: 'business', location: 'Negombo' }
-        ];
-        
-        await supabase.from('Profile').upsert(users);
-        console.log("✅ 5 Users seeded.");
+    const events = [
+        { title: "Colombo Tech Expo", description: "Main tech event", location: "BMICH", price: 500, category_id: 1, host_id: user1, date: "2026-06-01" },
+        { title: "Galle Face Food Fest", description: "Street food", location: "Colombo", price: 0, category_id: 3, host_id: user2, date: "2026-06-05" },
+        { title: "Kandy Esala Perahera View", description: "Private balcony view", location: "Kandy", price: 5000, category_id: 4, host_id: user1, date: "2026-08-15" },
+        { title: "Hikkaduwa Surf Open", description: "Surfing competition", location: "Hikkaduwa", price: 0, category_id: 2, host_id: user2, date: "2026-07-20" },
+        { title: "Jaffna Music Night", description: "Traditional & Modern", location: "Jaffna", price: 1500, category_id: 2, host_id: user1, date: "2026-09-10" },
+        { title: "Negombo Seafood Bash", description: "All you can eat", location: "Negombo", price: 4500, category_id: 3, host_id: user2, date: "2026-06-30" },
+        { title: "Cloud Meetup SL", description: "AWS & Azure talks", location: "Trace City", price: 0, category_id: 1, host_id: user1, date: "2026-07-12" }
+    ];
 
-        // 2. SEED 15 EVENTS
-        const eventData = [
-            { id: 1, title: 'Lanka Tech Summit', category: 'Tech', location: 'Colombo', price: 1000, date: '2026-02-15' },
-            { id: 2, title: 'Unawatuna Beach Fest', category: 'Music', location: 'Galle', price: 2000, date: '2026-02-02' },
-            { id: 3, title: 'Kandy Esala Expo', category: 'Food', location: 'Kandy', price: 500, date: '2026-01-20' },
-            { id: 4, title: 'Jaffna Cricket Open', category: 'Sports', location: 'Jaffna', price: 0, date: '2026-03-01' },
-            { id: 5, title: 'Negombo Seafood Night', category: 'Food', location: 'Negombo', price: 5000, date: '2026-02-10' },
-            { id: 6, title: 'Colombo Jazz Night', category: 'Music', location: 'Colombo', price: 2000, date: '2026-02-25' },
-            { id: 7, title: 'AI Workshop Sri Lanka', category: 'Tech', location: 'Colombo', price: 1000, date: '2026-02-05' },
-            { id: 8, title: 'Hikkaduwa Surf Meet', category: 'Sports', location: 'Galle', price: 0, date: '2026-03-12' },
-            { id: 9, title: 'Cloud Computing Day', category: 'Tech', location: 'Kandy', price: 500, date: '2026-02-20' },
-            { id: 10, title: 'Bailatronic Colombo', category: 'Music', location: 'Colombo', price: 1000, date: '2026-01-15' },
-            { id: 11, title: 'Cyber Security Forum', category: 'Tech', location: 'Colombo', price: 1500, date: '2026-04-01' },
-            { id: 12, title: 'Lankan Street Food Fest', category: 'Food', location: 'Negombo', price: 500, date: '2026-02-14' },
-            { id: 13, title: 'Island Beats 2026', category: 'Music', location: 'Jaffna', price: 1000, date: '2026-05-20' },
-            { id: 14, title: 'Art & Culture Expo', category: 'Other', location: 'Colombo', price: 0, date: '2026-02-02' },
-            { id: 15, title: 'Community Wellness Fair', category: 'Other', location: 'Kandy', price: 0, date: '2026-03-20' }
-        ];
-        await supabase.from('events').upsert(eventData);
-        console.log("✅ 15 Events seeded.");
-
-        // 3. SEED 20 POSTS
-        const posts = [];
-        for (let i = 1; i <= 10; i++) {
-            posts.push({
-                content: `General SetWemu update #${i}!`,
-                user_id: '00000000-0000-0000-0000-000000000001',
-                event_id: null 
-            });
-        }
-        for (let i = 1; i <= 10; i++) {
-            posts.push({
-                content: `Excited for Event #${i}!`,
-                user_id: '00000000-0000-0000-0000-000000000002',
-                event_id: i 
-            });
-        }
-        await supabase.from('posts').insert(posts);
-        console.log("✅ 20 Posts seeded.");
-
-        console.log("🏁 All data successfully seeded to Supabase!");
-
-    } catch (err) {
-        // The missing catch block
-        console.error("❌ Seeding failed:", err.message);
-    }
+    console.log("Seeding realistic events...");
+    const { error } = await supabase.from('events').insert(events);
+    
+    if (error) console.error("Seed Error:", error.message);
+    else console.log("Success: Database populated for demo.");
 };
 
-// You must actually call the function
-seedDatabase();
+seedData();
