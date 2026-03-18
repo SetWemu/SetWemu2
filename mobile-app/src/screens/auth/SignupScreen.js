@@ -53,7 +53,7 @@ const SignupScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Image
-        source={require('../../assests/Logo Base (6).png')}
+        source={require('../../assets/images/Logo.png')}
         style={styles.logo}
       />
       <Text style={styles.title}>Signup</Text>
