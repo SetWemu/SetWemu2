@@ -10,7 +10,6 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <FilterScreen visible={true} onClose={() => { }} onApply={() => { }} />
       <NavigationContainer>
         <AppNavigator />
       </NavigationContainer>
