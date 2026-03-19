@@ -5,7 +5,7 @@ import authRoutes from './routes/authRoutes.js';
 import chatRoutes from './routes/chatRoutes.js'; 
 import eventRoutes from './routes/eventRoutes.js';
 import postRoutes from './routes/postRoutes.js';
-
+import profileRoutes from './routes/profileRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 const app = express();
 const port = process.env.PORT || 3000;
@@ -20,6 +20,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/profiles', profileRoutes);
 
 // HEALTH CHECK
 app.get('/', (req, res) => {
