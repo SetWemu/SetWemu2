@@ -9,17 +9,54 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const SettingsScreen = () => {
+/* ================= DESIGN SYSTEM ================= */
+const COLORS = {
+  bg: { primary: '#141416', card: '#1C1C1E' },
+  blue: {
+    light: '#ADF3FF',
+    brand: '#4CC1D4',
+    border: 'rgba(173,243,255,0.22)'
+  },
+  text: {
+    primary: '#F2F2F7',
+    secondary: '#ABABAB',
+    tertiary: '#6B6B6B',
+    inverse: '#141416'
+  },
+  border: {
+    subtle: 'rgba(255,255,255,0.06)'
+  },
+  error: '#FF453A'
+};
+
+const SettingsScreen = ({ navigation }) => {
+
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(false);
   const [privateAccount, setPrivateAccount] = useState(false);
+
+  // BACK PLACEHOLDER
+  const handleBack = () => {
+    console.log("GO BACK SETTINGS");
+    if (navigation) {
+      navigation.goBack();
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
 
         {/* HEADER */}
-        <Text style={styles.header}>Settings</Text>
+        <View style={styles.headerContainer}>
+
+          <TouchableOpacity onPress={handleBack}>
+            <Text style={styles.backText}>‹</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.header}>Settings</Text>
+          <Text style={styles.subHeader}>Control your experience</Text>
+        </View>
 
         {/* ================= Notifications ================= */}
         <View style={styles.section}>
@@ -30,6 +67,11 @@ const SettingsScreen = () => {
             <Switch
               value={pushNotifications}
               onValueChange={setPushNotifications}
+              trackColor={{
+                false: COLORS.border.subtle,
+                true: COLORS.blue.border
+              }}
+              thumbColor={pushNotifications ? COLORS.blue.brand : "#888"}
             />
           </View>
 
@@ -38,6 +80,11 @@ const SettingsScreen = () => {
             <Switch
               value={emailNotifications}
               onValueChange={setEmailNotifications}
+              trackColor={{
+                false: COLORS.border.subtle,
+                true: COLORS.blue.border
+              }}
+              thumbColor={emailNotifications ? COLORS.blue.brand : "#888"}
             />
           </View>
 
@@ -56,6 +103,11 @@ const SettingsScreen = () => {
             <Switch
               value={privateAccount}
               onValueChange={setPrivateAccount}
+              trackColor={{
+                false: COLORS.border.subtle,
+                true: COLORS.blue.border
+              }}
+              thumbColor={privateAccount ? COLORS.blue.brand : "#888"}
             />
           </View>
 
@@ -90,7 +142,7 @@ const SettingsScreen = () => {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.row}>
-            <Text style={[styles.rowText, { color: "#ff4d4d" }]}>
+            <Text style={[styles.rowText, { color: COLORS.error }]}>
               Log Out
             </Text>
           </TouchableOpacity>
@@ -105,32 +157,56 @@ const SettingsScreen = () => {
 
 export default SettingsScreen;
 
+/* ================= STYLES ================= */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#071B2E",
+    backgroundColor: COLORS.bg.primary,
+  },
+
+  headerContainer: {
+    padding: 20,
+    paddingTop: 10,
+  },
+
+  backText: {
+    color: COLORS.blue.light,
+    fontSize: 20,
+    fontWeight: "600",
+    marginBottom: 10,
   },
 
   header: {
-    fontSize: 22,
+    fontSize: 25,
     fontWeight: "600",
-    color: "white",
-    padding: 20,
+    color: COLORS.text.primary,
+    marginBottom: 6,
+    letterSpacing: -0.4,
+  },
+
+  subHeader: {
+    fontSize: 14,
+    color: COLORS.text.secondary,
   },
 
   section: {
     marginTop: 15,
-    backgroundColor: "#0E2A47",
-    borderRadius: 12,
-    marginHorizontal: 15,
-    paddingVertical: 5,
+    backgroundColor: COLORS.bg.card,
+    borderRadius: 16,
+    marginHorizontal: 16,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: COLORS.border.subtle,
   },
 
   sectionTitle: {
-    color: "#aaa",
-    fontSize: 13,
-    paddingHorizontal: 15,
+    color: COLORS.text.tertiary,
+    fontSize: 12,
+    paddingHorizontal: 16,
     paddingVertical: 10,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
 
   row: {
@@ -138,18 +214,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 16,
-    paddingHorizontal: 15,
-    borderTopWidth: 0.5,
-    borderTopColor: "#1E3A5F",
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border.subtle,
   },
 
   rowText: {
-    color: "white",
-    fontSize: 16,
+    color: COLORS.text.primary,
+    fontSize: 15,
+    fontWeight: "500",
   },
 
   arrow: {
-    color: "#888",
+    color: COLORS.text.tertiary,
     fontSize: 18,
   },
 });
