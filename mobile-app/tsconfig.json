@@ -3,6 +3,10 @@
   "compilerOptions": {
     "types": ["jest"],
   },
+<<<<<<< Updated upstream
   "include": ["**/*.ts", "**/*.tsx"],
+=======
+  "include": ["**/*.ts", "**/*.tsx", "App.js", "src/screens/profile/ProfileScreen.js", "src/screens/profile/EditProfileScreen.js"],
+>>>>>>> Stashed changes
   "exclude": ["**/node_modules", "**/Pods"]
 }

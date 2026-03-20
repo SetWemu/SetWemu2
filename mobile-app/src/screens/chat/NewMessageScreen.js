@@ -9,71 +9,54 @@ import {
   SafeAreaView,
   TextInput,
 } from 'react-native';
-import {
-  ArrowLeft,
-  MagnifyingGlass,
-  PencilSimple,
-} from 'phosphor-react-native';
+import { ArrowLeft, MagnifyingGlass } from 'phosphor-react-native';
 
 const COLORS = {
   bg: { primary: '#141416', card: '#1C1C1E' },
-  blue: { light: '#ADF3FF', brand: '#4CC1D4' },
+  blue: { brand: '#4CC1D4' },
   text: { primary: '#F2F2F7', secondary: '#ABABAB', tertiary: '#6B6B6B' },
   border: { subtle: 'rgba(255,255,255,0.06)', light: 'rgba(255,255,255,0.10)' },
-  success: '#30D158',
 };
 
-const ChatListScreen = ({ navigation }) => {
+const NewMessageScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const chats = [
+  const contacts = [
     {
       id: '1',
       name: 'Sarah Wilson',
       avatar: 'https://i.pravatar.cc/150?img=1',
-      lastMessage: 'See you at the event!',
-      time: '2m ago',
-      unread: 2,
+      username: '@sarah_w',
     },
     {
       id: '2',
-      name: 'Tech Events SL',
-      avatar: `https://ui-avatars.com/api/?name=Sarah&background=4CC1D4&color=141416&size=150`,
-      lastMessage: 'New event this weekend',
-      time: '1h ago',
-      unread: 0,
+      name: 'David Chen',
+      avatar: 'https://i.pravatar.cc/150?img=2',
+      username: '@dchen',
     },
     {
       id: '3',
-      name: 'David Chen',
-      avatar: 'https://i.pravatar.cc/150?img=2',
-      lastMessage: 'Thanks for the ticket',
-      time: '3h ago',
-      unread: 1,
+      name: 'Emma Brown',
+      avatar: 'https://i.pravatar.cc/150?img=3',
+      username: '@emmab',
+    },
+    {
+      id: '4',
+      name: 'Tech Events SL',
+      avatar: 'https://i.pravatar.cc/150?img=5',
+      username: '@techevents',
     },
   ];
 
-  const renderChat = ({ item }) => (
+  const renderContact = ({ item }) => (
     <TouchableOpacity
-      style={styles.chatItem}
+      style={styles.contactItem}
       onPress={() => navigation.navigate('ChatConversation', { chat: item })}
     >
       <Image source={{ uri: item.avatar }} style={styles.avatar} />
-      <View style={styles.chatInfo}>
-        <View style={styles.chatHeader}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.time}>{item.time}</Text>
-        </View>
-        <View style={styles.messageRow}>
-          <Text style={styles.lastMessage} numberOfLines={1}>
-            {item.lastMessage}
-          </Text>
-          {item.unread > 0 && (
-            <View style={styles.unreadBadge}>
-              <Text style={styles.unreadText}>{item.unread}</Text>
-            </View>
-          )}
-        </View>
+      <View style={styles.contactInfo}>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.username}>{item.username}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -88,13 +71,8 @@ const ChatListScreen = ({ navigation }) => {
         >
           <ArrowLeft size={20} color={COLORS.text.primary} weight="bold" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Messages</Text>
-        <TouchableOpacity
-          style={styles.newMessageBtn}
-          onPress={() => navigation.navigate('NewMessage')}
-        >
-          <PencilSimple size={20} color={COLORS.blue.brand} weight="bold" />
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>New Message</Text>
+        <View style={{ width: 40 }} />
       </View>
 
       {/* Search */}
@@ -102,17 +80,18 @@ const ChatListScreen = ({ navigation }) => {
         <MagnifyingGlass size={18} color={COLORS.text.tertiary} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search messages..."
+          placeholder="Search contacts..."
           placeholderTextColor={COLORS.text.tertiary}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          autoFocus
         />
       </View>
 
-      {/* Chat List */}
+      {/* Contacts */}
       <FlatList
-        data={chats}
-        renderItem={renderChat}
+        data={contacts}
+        renderItem={renderContact}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
       />
@@ -142,16 +121,6 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border.light,
   },
   headerTitle: { fontSize: 18, fontWeight: '800', color: COLORS.text.primary },
-  newMessageBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: COLORS.bg.card,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border.light,
-  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -170,37 +139,22 @@ const styles = StyleSheet.create({
     color: COLORS.text.primary,
   },
   list: { paddingHorizontal: 20 },
-  chatItem: {
+  contactItem: {
     flexDirection: 'row',
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border.subtle,
-  },
-  avatar: { width: 56, height: 56, borderRadius: 28, marginRight: 12 },
-  chatInfo: { flex: 1, justifyContent: 'center' },
-  chatHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  name: { fontSize: 16, fontWeight: '700', color: COLORS.text.primary },
-  time: { fontSize: 12, color: COLORS.text.tertiary },
-  messageRow: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
-  lastMessage: { fontSize: 14, color: COLORS.text.secondary, flex: 1 },
-  unreadBadge: {
-    backgroundColor: COLORS.success,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 6,
+  avatar: { width: 50, height: 50, borderRadius: 25, marginRight: 12 },
+  contactInfo: { flex: 1 },
+  name: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.text.primary,
+    marginBottom: 2,
   },
-  unreadText: { fontSize: 11, fontWeight: '700', color: '#FFF' },
+  username: { fontSize: 13, color: COLORS.text.secondary },
 });
 
-export default ChatListScreen;
+export default NewMessageScreen;
