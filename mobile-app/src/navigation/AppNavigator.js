@@ -32,6 +32,13 @@ import FollowingListScreen from '../screens/profile/FollowingListScreen';
 import NotificationsScreen from '../screens/home/NotificationsScreen';
 import ReviewsListScreen from '../screens/events/ReviewsListScreen';
 
+import ManageEventsScreen from '../screens/manage/ManageEventsScreen';
+import EventAnalyticsScreen from '../screens/manage/EventAnalyticsScreen';
+import AttendeesListScreen from '../screens/manage/AttendeesListScreen';
+import QRScannerScreen from '../screens/manage/QRScannerScreen';
+
+import CreatePostScreen from '../screens/profile/CreatePostScreen';
+import PostDetailsScreen from '../screens/profile/PostDetailsScreen';
 
 // Modal Screens - Profile
 import EditProfileScreen from '../screens/profile/EditProfileScreen';
@@ -40,7 +47,8 @@ const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   return (
-    <Stack.Navigator 
+    <Stack.Navigator
+      id="AppNavigator"
       initialRouteName="Splash"
       screenOptions={{ headerShown: false }}
     >
@@ -59,14 +67,14 @@ export default function AppNavigator() {
 
       {/* ==================== TICKETS & CHECKOUT ==================== */}
       <Stack.Screen name="TicketDetail" component={TicketDetailScreen} />
-      <Stack.Screen 
-        name="Checkout" 
+      <Stack.Screen
+        name="Checkout"
         component={CheckoutScreen}
         options={{ animation: 'slide_from_bottom' }}
       />
       <Stack.Screen name="Payment" component={PaymentScreen} />
-      <Stack.Screen 
-        name="Success" 
+      <Stack.Screen
+        name="Success"
         component={SuccessScreen}
         options={{ gestureEnabled: false }}
       />
@@ -81,6 +89,13 @@ export default function AppNavigator() {
 
       {/* ==================== PROFILE ==================== */}
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="CreatePost" component={CreatePostScreen} />
+      <Stack.Screen name="PostDetails" component={PostDetailsScreen} />
+
+      <Stack.Screen name="ManageEvents" component={ManageEventsScreen} />
+      <Stack.Screen name="EventAnalytics" component={EventAnalyticsScreen} />
+      <Stack.Screen name="AttendeesList" component={AttendeesListScreen} />
+      <Stack.Screen name="QRScanner" component={QRScannerScreen} />
     </Stack.Navigator>
   );
 }

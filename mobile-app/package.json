@@ -10,7 +10,6 @@
     "test": "jest"
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "^3.0.1",
     "@react-native-camera-roll/camera-roll": "^7.10.2",
     "@react-native-community/datetimepicker": "^9.1.0",
     "@react-native/new-app-screen": "0.83.1",
@@ -20,7 +19,8 @@
     "phosphor-react-native": "^3.0.3",
     "react": "19.2.0",
     "react-native": "0.83.1",
-    "react-native-country-picker-modal": "^2.0.0",
+    "react-native-country-codes-picker": "^2.3.5",
+    "react-native-image-crop-picker": "^0.51.1",
     "react-native-image-picker": "^8.2.1",
     "react-native-qrcode-svg": "^6.3.21",
     "react-native-safe-area-context": "^5.6.2",

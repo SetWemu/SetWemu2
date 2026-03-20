@@ -13,7 +13,7 @@ import { ArrowLeft, Check } from 'phosphor-react-native';
 const COLORS = {
   bg: { primary: '#141416', card: '#1C1C1E' },
   blue: { light: '#ADF3FF' },
-  text: { primary: '#F2F2F7', secondary: '#ABABAB', inverse: '#141416' },
+  text: { primary: '#F2F2F7', secondary: '#ABABAB' },
   border: { subtle: 'rgba(255,255,255,0.06)', light: 'rgba(255,255,255,0.10)' },
 };
 
@@ -23,34 +23,46 @@ const FollowingListScreen = ({ navigation }) => {
       id: '1',
       name: 'Tech Events SL',
       username: '@techevents',
-      avatar: 'https://i.pravatar.cc/150?img=5',
+      avatar:
+        'https://ui-avatars.com/api/?name=Tech+Events&background=4CC1D4&color=141416&size=150',
     },
     {
       id: '2',
       name: 'Food Festival',
       username: '@foodfest',
-      avatar: 'https://i.pravatar.cc/150?img=6',
+      avatar:
+        'https://ui-avatars.com/api/?name=Food+Festival&background=FF6B9D&color=fff&size=150',
     },
     {
       id: '3',
       name: 'Music Colombo',
       username: '@musiccmb',
-      avatar: 'https://i.pravatar.cc/150?img=7',
+      avatar:
+        'https://ui-avatars.com/api/?name=Music+Colombo&background=9D4EDD&color=fff&size=150',
     },
   ];
 
   const renderItem = ({ item }) => (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => navigation.navigate('PublicProfile', { userId: item.id })}
+    >
       <Image source={{ uri: item.avatar }} style={styles.avatar} />
       <View style={styles.userInfo}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.username}>{item.username}</Text>
       </View>
-      <TouchableOpacity style={styles.followingBtn}>
+      <TouchableOpacity
+        style={styles.followingBtn}
+        onPress={e => {
+          e.stopPropagation();
+          // Unfollow logic here
+        }}
+      >
         <Check size={16} color={COLORS.text.primary} weight="bold" />
         <Text style={styles.followingText}>Following</Text>
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 
   return (

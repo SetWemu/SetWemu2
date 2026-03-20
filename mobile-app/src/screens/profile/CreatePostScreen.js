@@ -1,6 +1,11 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import ImagePicker from 'react-native-image-crop-picker';
+import { launchImageLibrary } from 'react-native-image-picker';
+
+const COLORS = {
+  bg: { primary: '#141416' },
+  text: { secondary: '#ABABAB' },
+};
 
 export default function CreatePostScreen({ navigation }) {
   useEffect(() => {
@@ -8,22 +13,18 @@ export default function CreatePostScreen({ navigation }) {
   }, []);
 
   const openGallery = () => {
-    ImagePicker.openPicker({
-      width: 400,
-      height: 400,
-      cropping: true,
-    })
-      .then(img => {
-        navigation.replace('PostDetails', { image: img });
-      })
-      .catch(() => {
-        navigation.goBack(); // if user cancels
-      });
+    launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, response => {
+      if (!response.didCancel && response.assets?.[0]) {
+        navigation.replace('PostDetails', { image: response.assets[0] });
+      } else {
+        navigation.goBack();
+      }
+    });
   };
 
   return (
     <View style={styles.container}>
-      <Text style={{ color: 'white' }}>Opening gallery...</Text>
+      <Text style={styles.text}>Opening gallery...</Text>
     </View>
   );
 }
@@ -31,8 +32,9 @@ export default function CreatePostScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0E0E10',
+    backgroundColor: COLORS.bg.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  text: { color: COLORS.text.secondary, fontSize: 14 },
 });
