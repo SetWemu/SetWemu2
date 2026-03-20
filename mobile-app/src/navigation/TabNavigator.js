@@ -7,6 +7,7 @@ import HomeStack        from './HomeStack';
 import ExploreStack     from './ExploreStack';
 import ProfileStack     from './ProfileStack';
 import CreateEventStack from './CreateEventStack';
+import LiveMapScreen from '../screens/map/LiveMapScreen';
 
 const MapPlaceholder = () => (
   <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#141416' }}>
@@ -81,7 +82,7 @@ const TabNavigator = () => (
       }}
     />
     <Tab.Screen
-      name="MapTab" component={MapPlaceholder}
+      name="MapTab" component={LiveMapScreen}
       options={{
         tabBarLabel: 'Map',
         tabBarIcon: ({ focused, color }) => (

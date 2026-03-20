@@ -6,7 +6,7 @@ import ExploreScreen from '../screens/explore/ExploreScreen';
 import SearchResultsScreen from '../screens/explore/SearchResultsScreen';
 import SwipeScreen from '../screens/explore/SwipeScreen';
 import EventDetailScreen from '../screens/events/EventDetailScreen';
-import FavoritesScreen from '../screens/social/FavoritesScreen';
+import FavoritesScreen from '../screens/explore/FavoritesScreen';
 
 const Stack = createNativeStackNavigator();
 
