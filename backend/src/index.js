@@ -10,6 +10,7 @@ import analyticsRoutes from './routes/analyticsRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
 import favoriteRoutes from './routes/favoriteRoutes.js';
 import followRoutes from './routes/followRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -28,6 +29,7 @@ app.use('/api/profiles', profileRoutes);
 app.use('/api/bookings', bookingRoutes)
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/follows', followRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // HEALTH CHECK
 app.get('/', (req, res) => {
