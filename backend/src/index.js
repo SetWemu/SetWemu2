@@ -7,6 +7,8 @@ import eventRoutes from './routes/eventRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import bookingRoutes from './routes/bookingRoutes.js';
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -21,6 +23,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/profiles', profileRoutes);
+app.use('/api/bookings', bookingRoutes)
 
 // HEALTH CHECK
 app.get('/', (req, res) => {
