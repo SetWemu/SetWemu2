@@ -2,21 +2,21 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // ==================== AUTH SCREENS ====================
-import SplashScreen from '../screens/SplashScreen';
-import OnboardingScreen from '../screens/OnBoardingScreen';
-import LoginScreen from '../screens/LoginScreen';
-import CreateAccountScreen from '../screens/CreateAccountScreen';
+import SplashScreen from '../screens/auth/SplashScreen';
+import OnboardingScreen from '../screens/auth/OnBoardingScreen';
+import LoginScreen from '../screens/auth/LoginScreen';
+import CreateAccountScreen from '../screens/auth/CreateAccountScreen';
 import SignupScreen from '../screens/auth/SignupScreen';
 import TabNavigator from './TabNavigator';
 
 // ==================== HOME & FEED ====================
-import HomeScreen from '../screens/homeScreen';
-import CreateStoryScreen from '../screens/createStoryScreen';
+import HomeScreen from '../screens/home/HomeScreen'; 
+import CreateStoryScreen from '../screens/home/CreateStoryScreen';
 
 // ==================== EVENTS ====================
 import EventDetailScreen from '../screens/events/EventDetailScreen';
-import EventsAttendedListScreen from '../screens/events/EventsAttendedListScreen';
-import OrganizerProfileScreen from '../screens/OrganizerProfileScreen'; // YOUR NEW SCREEN
+import EventsAttendedListScreen from '../screens/events/eventsAttendedListScreen'; // Note lowercase 'e' in list
+import OrganizerProfileScreen from '../screens/OrganizerProfileScreen'; 
 import AttendeesListScreen from '../screens/events/AttendeesListScreen';
 
 // ==================== TICKETS ====================
@@ -27,19 +27,19 @@ import PaymentScreen from '../screens/tickets/PaymentScreen';
 import SuccessScreen from '../screens/tickets/SuccessScreen';
 
 // ==================== SOCIAL ====================
-import FavoritesScreen from '../screens/favoritesScreen';
-import FollowersListScreen from '../screens/followersListScreen';
-import FollowingListScreen from '../screens/followingListScreen';
-import NotificationsScreen from '../screens/notificationsScreen';
-import ReviewsListScreen from '../screens/reviewListScreen';
+import FavoritesScreen from '../screens/social/FavoritesScreen';
+import FollowersListScreen from '../screens/social/FollowersListScreen';
+import FollowingListScreen from '../screens/social/FollowingListScreen';
+import NotificationsScreen from '../screens/social/NotificationsScreen';
+import ReviewsListScreen from '../screens/social/ReviewsListScreen';
 
 // ==================== PROFILE ====================
-import ProfileScreen from '../screens/ProfileScreen';
-import EditProfileScreen from '../screens/EditProfileScreen';
+import ProfileScreen from '../screens/profile/ProfileScreen';
+import EditProfileScreen from '../screens/profile/EditProfileScreen';
 
 // ==================== CHAT ====================
-import ChatListScreen from '../screens/ChatListScreen';
-import ChatConversationScreen from '../screens/ChatConversationScreen';
+import ChatListScreen from '../screens/chat/ChatListScreen';
+import ChatConversationScreen from '../screens/chat/ChatConversationScreen';
 
 // ==================== TEST ====================
 import TestScreen from '../screens/TestScreen';
@@ -49,7 +49,7 @@ const Stack = createNativeStackNavigator();
 export default function AppNavigator() {
   return (
     <Stack.Navigator 
-      initialRouteName="OrganizerProfile" // Kept as your screen for testing
+      initialRouteName="Splash" 
       screenOptions={{ headerShown: false }}
     >
       {/* AUTH FLOW */}
@@ -60,21 +60,15 @@ export default function AppNavigator() {
       <Stack.Screen name="Signup" component={SignupScreen} />
       <Stack.Screen name="Main" component={TabNavigator} />
       
-      {/* HOME */}
+      {/* CORE SCREENS */}
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="CreateStory" component={CreateStoryScreen} />
-      
-      {/* EVENTS */}
       <Stack.Screen name="EventDetail" component={EventDetailScreen} />
       <Stack.Screen name="EventsAttended" component={EventsAttendedListScreen} />
       <Stack.Screen name="OrganizerProfile" component={OrganizerProfileScreen} />
-      
-      {/* TICKETS */}
-      <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="CreateStory" component={CreateStoryScreen} />
-      <Stack.Screen name="EventDetail" component={EventDetailScreen} />
-      <Stack.Screen name="EventsAttended" component={EventsAttendedListScreen} />
       <Stack.Screen name="AttendeesList" component={AttendeesListScreen} />
+      
+      {/* TICKETS & CHECKOUT */}
       <Stack.Screen name="MyTickets" component={MyTicketsScreen} /> 
       <Stack.Screen name="TicketDetail" component={TicketDetailScreen} />
       <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ animation: 'slide_from_bottom' }} />
