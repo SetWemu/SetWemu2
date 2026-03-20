@@ -9,6 +9,7 @@ import profileRoutes from './routes/profileRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
 import favoriteRoutes from './routes/favoriteRoutes.js';
+import followRoutes from './routes/followRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -26,6 +27,7 @@ app.use('/api/posts', postRoutes);
 app.use('/api/profiles', profileRoutes);
 app.use('/api/bookings', bookingRoutes)
 app.use('/api/favorites', favoriteRoutes);
+app.use('/api/follows', followRoutes);
 
 // HEALTH CHECK
 app.get('/', (req, res) => {
