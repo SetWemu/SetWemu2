@@ -1,8 +1,33 @@
 import { supabase } from '../config/db.js';
 
 /**
- * Handles User Login and updates 'last_login'
- * Requirement: Updates last_login in the profiles table
+ * Handles User Signup
+ * Creates a record in Supabase Auth AND the 'profiles' table.
+ */
+export const signup = async (req, res) => {
+    const { email, password, fullName, role } = req.body;
+    try {
+        const { data, error: authError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { full_name: fullName, role: role } }
+        });
+
+        // ADD THIS: Log the error if auth fails
+        if (authError) {
+            console.error('SUPABASE AUTH ERROR:', authError); // This is the key line
+            return res.status(400).json({ error: authError.message });
+        }
+
+        res.status(201).json({ message: 'Success', user: data.user });
+    } catch (err) {
+        console.error('SERVER CRASH ERROR:', err); // Log the full object, not just .message
+        res.status(500).json({ error: 'Server error during signup' });
+    }
+};
+
+/**
+ * Handles User Login
  */
 export const login = async (req, res) => {
     const { email, password } = req.body;
@@ -19,24 +44,21 @@ export const login = async (req, res) => {
         }
 
         // 2. Update the last_login timestamp in your 'profiles' table
-        // Note: Ensure your table is named 'profiles' (lowercase) in Supabase
         const { error: updateError } = await supabase
-            .from('Profile')
+            .from('profiles')
             .update({ last_login: new Date() })
             .eq('id', data.user.id);
 
         if (updateError) {
             console.error('Error updating last login:', updateError.message);
-            // We don't block the login if just the timestamp fails
         }
 
-        // 3. Return success and user data to the React Native frontend
+        // 3. Return success and user data
         res.status(200).json({
             message: 'Login successful',
             user: {
                 id: data.user.id,
                 email: data.user.email,
-                // Add other profile fields if needed
             },
             session: data.session
         });
