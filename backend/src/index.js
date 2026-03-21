@@ -51,7 +51,10 @@ app.get('/test-db', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
+// LISTEN BLOCK
+app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on port ${port}`);
-  console.log(`Test the connection at: http://localhost:${port}/test-db`);
+  console.log(`Local:            http://localhost:${port}`);
+  
+  console.log(`Network/Mobile:   http://0.0.0.0:${port}`); 
 });
