@@ -134,6 +134,12 @@ const EventDetailScreen = ({ route, navigation }) => {
           const availableTier = data.ticket_tiers.find(t => t.sold_count < t.capacity);
           setSelectedTicket(availableTier || data.ticket_tiers[0]);
         }
+        if (user?.id) {
+          const favRes = await fetch(`${API_URL}/favorites/${user.id}`);
+          const favs = await favRes.json();
+          const isCurrentlyFav = favs.some(f => f.id === eventId);
+          setIsFav(isCurrentlyFav);
+        }
       } catch (e) {
         console.error("Fetch error:", e);
       } finally {
@@ -141,7 +147,7 @@ const EventDetailScreen = ({ route, navigation }) => {
       }
     };
     if (eventId) fetchEvent();
-  }, [eventId]);
+  }, [eventId, user?.id]);
 
   if (loading || !event) {
     return (
@@ -153,7 +159,35 @@ const EventDetailScreen = ({ route, navigation }) => {
 
   const tickets = event.ticket_tiers || [];
   const totalPrice = selectedTicket ? (selectedTicket.price || 0) * quantity : 0;
+  const handleToggleFavorite = async () => {
+    if (!user) {
+      Alert.alert("Login Required", "You need to be logged in to favorite events.");
+      return;
+    }
 
+    // Optimistic UI update
+    const previousFavState = isFav;
+    setIsFav(!isFav);
+
+    try {
+      const response = await fetch(`${API_URL}/favorites/toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          user_id: user.id, 
+          event_id: eventId 
+        }),
+      });
+
+      const result = await response.json();
+      // Ensure state matches what the server says
+      setIsFav(result.favorited);
+    } catch (error) {
+      console.error("Toggle Favorite Error:", error);
+      setIsFav(previousFavState); // Revert on failure
+      Alert.alert("Error", "Could not update favorites.");
+    }
+  };
   return (
     <View style={s.safe}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
@@ -162,7 +196,9 @@ const EventDetailScreen = ({ route, navigation }) => {
         <TouchableOpacity style={s.navBtn} onPress={() => navigation.goBack()}>
           <ArrowLeftIcon size={20} color="#fff" weight="bold" />
         </TouchableOpacity>
-        <TouchableOpacity style={s.navBtn} onPress={() => setIsFav(!isFav)}>
+        
+        {/* Logic: Call the backend function instead of just toggling state */}
+        <TouchableOpacity style={s.navBtn} onPress={handleToggleFavorite}>
           <HeartIcon size={18} color={isFav ? C.error : '#fff'} weight={isFav ? 'fill' : 'regular'} />
         </TouchableOpacity>
       </View>
