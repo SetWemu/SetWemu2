@@ -9,8 +9,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import { EnvelopeSimple, Lock, Eye, EyeSlash } from 'phosphor-react-native';
+import apiClient from '../../api/apiClient';
 
 const C = {
   bg: { primary: '#141416', card: '#1C1C1E', elevated: '#242428' },
@@ -24,6 +27,34 @@ const LoginScreen = ({ navigation }: any) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await apiClient.post('/auth/login', {
+        email: email.trim().toLowerCase(),
+        password: password,
+      });
+
+      if (response.status === 200) {
+        console.log('Login Successful');
+        // Ensure 'Main' matches your route name in AppNavigator.js
+        navigation.replace('Main'); 
+      }
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.error || "Invalid email or password";
+      Alert.alert("Login Failed", errorMsg);
+      console.error("Login Error:", error.response?.data || error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={s.container}>
@@ -95,10 +126,15 @@ const LoginScreen = ({ navigation }: any) => {
 
           {/* Login Button */}
           <TouchableOpacity
-            style={s.loginBtn}
-            onPress={() => navigation.replace('Main')}
+            style={[s.loginBtn, loading && { opacity: 0.7 }]}
+            onPress={handleLogin}
+            disabled={loading}
           >
-            <Text style={s.loginBtnText}>Login</Text>
+            {loading ? (
+              <ActivityIndicator color="#141416" />
+            ) : (
+              <Text style={s.loginBtnText}>Login</Text>
+            )}
           </TouchableOpacity>
 
           {/* Sign Up Link */}
@@ -133,7 +169,6 @@ const s = StyleSheet.create({
     letterSpacing: -0.5,
   },
   subtitle: { fontSize: 14, color: C.text.secondary },
-
   inputWrap: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -147,7 +182,6 @@ const s = StyleSheet.create({
     gap: 12,
   },
   input: { flex: 1, color: C.text.primary, fontSize: 15, fontWeight: '600' },
-
   optionsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -168,7 +202,6 @@ const s = StyleSheet.create({
   checkmark: { color: '#141416', fontSize: 12, fontWeight: '900' },
   rememberText: { color: C.text.secondary, fontSize: 13 },
   forgotText: { color: C.blue.light, fontWeight: '700', fontSize: 13 },
-
   loginBtn: {
     backgroundColor: C.blue.light,
     borderRadius: 16,
@@ -177,7 +210,6 @@ const s = StyleSheet.create({
     marginBottom: 20,
   },
   loginBtnText: { color: '#141416', fontSize: 16, fontWeight: '900' },
-
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 20 },
   footerText: { color: C.text.secondary, fontSize: 14 },
   footerLink: { color: C.blue.light, fontWeight: '700', fontSize: 14 },
