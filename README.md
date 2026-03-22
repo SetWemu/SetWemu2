@@ -37,3 +37,4 @@ SetWemu is a personalized event discovery platform designed for the modern socia
 
     * Flow: Use Thunder Client to test the /api/swipe/swipe and /api/swipe/recommendations/:userId endpoints before testing on the mobile UI
 
+
