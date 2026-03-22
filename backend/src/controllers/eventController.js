@@ -58,3 +58,24 @@ export const getAllEvents = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+export const getEventById = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { data, error } = await supabase
+        .from('events')
+        .select(`
+          *,
+          category:categories!category_id (name),
+          host:profiles!host_id (username),
+          ticket_tiers (*) 
+        `) 
+        .eq('id', id)
+        .single();
+  
+      if (error) throw error;
+      res.status(200).json(data);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
