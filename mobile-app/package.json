@@ -67,6 +67,9 @@
     "preset": "react-native",
     "transformIgnorePatterns": [
       "node_modules/(?!(react-native|@react-native|@react-navigation|react-native-vector-icons|phosphor-react-native|react-native-gesture-handler|react-native-screens|react-native-safe-area-context|react-native-country-codes-picker)/)"
+    ],
+    "setupFiles": [
+      "./node_modules/@react-native-async-storage/async-storage/jest/async-storage-mock.js"
     ]
   }
 }
