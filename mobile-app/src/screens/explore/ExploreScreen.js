@@ -1,3 +1,4 @@
+import { API_URL } from '../../config/api';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -9,6 +10,7 @@ import {
   Image,
   StyleSheet,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -26,113 +28,7 @@ const C = {
   border: { subtle: 'rgba(255,255,255,0.06)', light: 'rgba(255,255,255,0.10)' },
 };
 
-// Mock event data
-const MOCK_EVENTS = {
-  today: [
-    {
-      id: '1',
-      title: 'Tech Conference 2026',
-      location: 'Colombo',
-      date: 'Today, 6:00 PM',
-      image: 'https://picsum.photos/400/300?random=1',
-      category: 'Technology',
-    },
-    {
-      id: '2',
-      title: 'Jazz Night Live',
-      location: 'Galle Face',
-      date: 'Today, 8:00 PM',
-      image: 'https://picsum.photos/400/300?random=2',
-      category: 'Music',
-    },
-    {
-      id: '3',
-      title: 'Art Gallery Opening',
-      location: 'Kollupitiya',
-      date: 'Today, 5:00 PM',
-      image: 'https://picsum.photos/400/300?random=3',
-      category: 'Art',
-    },
-  ],
-  weekend: [
-    {
-      id: '4',
-      title: 'Beach Party Festival',
-      location: 'Mount Lavinia',
-      date: 'Saturday, 7:00 PM',
-      image: 'https://picsum.photos/400/300?random=4',
-      category: 'Party',
-    },
-    {
-      id: '5',
-      title: 'Food Truck Fair',
-      location: 'Viharamahadevi Park',
-      date: 'Sunday, 12:00 PM',
-      image: 'https://picsum.photos/400/300?random=5',
-      category: 'Food',
-    },
-    {
-      id: '6',
-      title: 'Indie Rock Concert',
-      location: 'Nelum Pokuna',
-      date: 'Saturday, 9:00 PM',
-      image: 'https://picsum.photos/400/300?random=6',
-      category: 'Music',
-    },
-  ],
-  week: [
-    {
-      id: '7',
-      title: 'Startup Pitch Night',
-      location: 'Crescat',
-      date: 'Wednesday, 6:30 PM',
-      image: 'https://picsum.photos/400/300?random=7',
-      category: 'Business',
-    },
-    {
-      id: '8',
-      title: 'Comedy Show',
-      location: 'Liberty Plaza',
-      date: 'Thursday, 8:00 PM',
-      image: 'https://picsum.photos/400/300?random=8',
-      category: 'Comedy',
-    },
-    {
-      id: '9',
-      title: 'Yoga Retreat',
-      location: 'Diyatha Uyana',
-      date: 'Friday, 6:00 AM',
-      image: 'https://picsum.photos/400/300?random=9',
-      category: 'Wellness',
-    },
-  ],
-  trending: [
-    {
-      id: '10',
-      title: 'EDM Festival 2026',
-      location: 'BMICH',
-      date: 'Next Friday',
-      image: 'https://picsum.photos/400/300?random=10',
-      category: 'Music',
-    },
-    {
-      id: '11',
-      title: 'Fashion Week',
-      location: 'Shangri-La',
-      date: 'March 25',
-      image: 'https://picsum.photos/400/300?random=11',
-      category: 'Fashion',
-    },
-    {
-      id: '12',
-      title: 'Film Premiere',
-      location: 'Savoy Cinema',
-      date: 'March 22',
-      image: 'https://picsum.photos/400/300?random=12',
-      category: 'Film',
-    },
-  ],
-};
+
 
 const SEARCH_SUGGESTIONS = [
   'Tech Conference',
@@ -149,6 +45,36 @@ const ExploreScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  
+  // ADD THESE TWO LINES BACK IF THEY ARE MISSING:
+  const [realEvents, setRealEvents] = useState({ today: [], weekend: [], week: [], trending: [] });
+  const [loading, setLoading] = useState(true);
+  // FETCH FROM BACKEND
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        // Logic check: Ensure your server is running!
+        const response = await fetch(`${API_URL}/events`);
+        const data = await response.json();
+
+        // Organize the data into the categories the UI expects
+        setRealEvents({
+          today: data.slice(0, 3), 
+          weekend: data.slice(3, 6),
+          week: data.slice(6, 9),
+          trending: data 
+        });
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
 
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -162,6 +88,14 @@ const ExploreScreen = ({ navigation }) => {
       setShowSuggestions(false);
     }
   }, [searchQuery]);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#141416' }}>
+        <ActivityIndicator size="large" color="#ADF3FF" />
+      </View>
+    );
+  }
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -184,10 +118,12 @@ const ExploreScreen = ({ navigation }) => {
       }
       activeOpacity={0.8}
     >
-      <Image source={{ uri: event.image }} style={s.eventImage} />
+      <Image source={{ uri: event.image_url || event.image }} style={s.eventImage} />
       <View style={s.eventOverlay}>
         <View style={s.categoryBadge}>
-          <Text style={s.categoryText}>{event.category}</Text>
+          <Text style={s.categoryText}>
+            {event.category?.name || event.category || 'General'}
+          </Text>
         </View>
       </View>
       <View style={s.eventInfo}>
@@ -287,22 +223,17 @@ const ExploreScreen = ({ navigation }) => {
 
         <CategorySection
           title="Happening Today"
-          data={MOCK_EVENTS.today}
+          data={realEvents.today}
           icon={CalendarBlank}
         />
         <CategorySection
           title="This Weekend"
-          data={MOCK_EVENTS.weekend}
-          icon={CalendarBlank}
-        />
-        <CategorySection
-          title="This Week"
-          data={MOCK_EVENTS.week}
+          data={realEvents.weekend}
           icon={CalendarBlank}
         />
         <CategorySection
           title="Trending"
-          data={MOCK_EVENTS.trending}
+          data={realEvents.trending}
           icon={Fire}
         />
 
