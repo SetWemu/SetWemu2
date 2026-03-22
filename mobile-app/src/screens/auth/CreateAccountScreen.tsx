@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   StatusBar, KeyboardAvoidingView, Platform, ScrollView,
+  Alert, ActivityIndicator
 } from 'react-native';
 import { EnvelopeSimple, Lock, User, Eye, EyeSlash } from 'phosphor-react-native';
+import apiClient from '../../api/apiClient';
 
 const C = {
   bg: { primary: '#141416', card: '#1C1C1E', elevated: '#242428' },
@@ -21,6 +23,50 @@ const CreateAccountScreen = ({ navigation }: any) => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [accountType, setAccountType] = useState<'personal' | 'business'>('personal');
   const [agreed, setAgreed] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSignup = async () => {
+    if (!name.trim() || !email.trim() || !password) {
+      Alert.alert('Error', 'Please fill in all required fields.');
+      return;
+    }
+    if (!email.includes('@')) {
+      Alert.alert('Error', 'Please enter a valid email.');
+      return;
+    }
+    if (password.length < 8) {
+      Alert.alert('Error', 'Password must be at least 8 characters.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match.');
+      return;
+    }
+    if (!agreed) {
+      Alert.alert('Error', 'You must agree to the Terms & Conditions.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Node/Express payload
+      await apiClient.post('/auth/signup', {
+        fullName: name,
+        email: email.toLowerCase(),
+        password: password,
+        role: accountType, // Sends 'personal' or 'business'
+      });
+
+      setLoading(false);
+      Alert.alert('Success', 'Account created! Please log in.');
+      navigation.replace('Login');
+    } catch (error: any) {
+      setLoading(false);
+      const msg = error.response?.data?.error || 'Signup failed. Check backend.';
+      Alert.alert('Error', msg);
+    }
+  };
 
   return (
     <View style={s.container}>
@@ -134,8 +180,16 @@ const CreateAccountScreen = ({ navigation }: any) => {
           </TouchableOpacity>
 
           {/* Sign Up Button */}
-          <TouchableOpacity style={s.signupBtn} onPress={() => navigation.replace('Main')}>
-            <Text style={s.signupBtnText}>Create Account</Text>
+          <TouchableOpacity 
+            style={[s.signupBtn, loading && { opacity: 0.7 }]} 
+            onPress={handleSignup}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#141416" />
+            ) : (
+              <Text style={s.signupBtnText}>Create Account</Text>
+            )}
           </TouchableOpacity>
 
           {/* Login Link */}

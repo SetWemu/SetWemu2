@@ -12,12 +12,15 @@ import SignupScreen from '../screens/auth/SignupScreen';
 import TabNavigator from './TabNavigator';
 
 // ==================== HOME & FEED ====================
-import HomeScreen from '../screens/home/HomeScreen';
+import HomeScreen from '../screens/home/HomeScreen'; 
 import CreateStoryScreen from '../screens/home/CreateStoryScreen';
 import StoriesScreen from '../screens/home/StoriesScreen';
 
 // Modal Screens
 import EventDetailScreen from '../screens/events/EventDetailScreen';
+import EventsAttendedListScreen from '../screens/events/eventsAttendedListScreen'; // Note lowercase 'e' in list
+import OrganizerProfileScreen from '../screens/OrganizerProfileScreen'; 
+import AttendeesListScreen from '../screens/events/AttendeesListScreen';
 
 // Modal Screens - Tickets
 import TicketDetailScreen from '../screens/tickets/TicketDetailScreen';
@@ -47,9 +50,8 @@ const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   return (
-    <Stack.Navigator
-      id="AppNavigator"
-      initialRouteName="Splash"
+    <Stack.Navigator 
+      initialRouteName="Splash" 
       screenOptions={{ headerShown: false }}
     >
       {/* AUTH FLOW */}
@@ -61,41 +63,39 @@ export default function AppNavigator() {
 
       {/* ==================== MAIN APP ==================== */}
       <Stack.Screen name="Main" component={TabNavigator} />
-
-      {/* ==================== EVENTS ==================== */}
+      
+      {/* CORE SCREENS */}
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="CreateStory" component={CreateStoryScreen} />
       <Stack.Screen name="EventDetail" component={EventDetailScreen} />
-
-      {/* ==================== TICKETS & CHECKOUT ==================== */}
+      <Stack.Screen name="EventsAttended" component={EventsAttendedListScreen} />
+      <Stack.Screen name="OrganizerProfile" component={OrganizerProfileScreen} />
+      <Stack.Screen name="AttendeesList" component={AttendeesListScreen} />
+      
+      {/* TICKETS & CHECKOUT */}
+      <Stack.Screen name="MyTickets" component={MyTicketsScreen} /> 
       <Stack.Screen name="TicketDetail" component={TicketDetailScreen} />
-      <Stack.Screen
-        name="Checkout"
-        component={CheckoutScreen}
-        options={{ animation: 'slide_from_bottom' }}
-      />
+      <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ animation: 'slide_from_bottom' }} />
       <Stack.Screen name="Payment" component={PaymentScreen} />
-      <Stack.Screen
-        name="Success"
-        component={SuccessScreen}
-        options={{ gestureEnabled: false }}
-      />
-
-      {/* ==================== SOCIAL ==================== */}
+      <Stack.Screen name="Success" component={SuccessScreen} options={{ gestureEnabled: false }} />
+      
+      {/* SOCIAL */}
       <Stack.Screen name="Favorites" component={FavoritesScreen} />
       <Stack.Screen name="Followers" component={FollowersListScreen} />
       <Stack.Screen name="Following" component={FollowingListScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="Reviews" component={ReviewsListScreen} />
-      <Stack.Screen name="Stories" component={StoriesScreen} />
-
-      {/* ==================== PROFILE ==================== */}
+      
+      {/* PROFILE */}
+      <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-      <Stack.Screen name="CreatePost" component={CreatePostScreen} />
-      <Stack.Screen name="PostDetails" component={PostDetailsScreen} />
-
-      <Stack.Screen name="ManageEvents" component={ManageEventsScreen} />
-      <Stack.Screen name="EventAnalytics" component={EventAnalyticsScreen} />
-      <Stack.Screen name="AttendeesList" component={AttendeesListScreen} />
-      <Stack.Screen name="QRScanner" component={QRScannerScreen} />
+      
+      {/* CHAT */}
+      <Stack.Screen name="ChatList" component={ChatListScreen} />
+      <Stack.Screen name="ChatConversation" component={ChatConversationScreen} />
+      
+      {/* TEST */}
+      <Stack.Screen name="Test" component={TestScreen} />
     </Stack.Navigator>
   );
 }

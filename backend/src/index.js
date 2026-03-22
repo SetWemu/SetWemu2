@@ -4,8 +4,14 @@ import { supabase } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import chatRoutes from './routes/chatRoutes.js'; 
 import eventRoutes from './routes/eventRoutes.js';
-
+import postRoutes from './routes/postRoutes.js';
+import profileRoutes from './routes/profileRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import bookingRoutes from './routes/bookingRoutes.js';
+import favoriteRoutes from './routes/favoriteRoutes.js';
+import followRoutes from './routes/followRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -18,6 +24,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/profiles', profileRoutes);
+app.use('/api/bookings', bookingRoutes)
+app.use('/api/favorites', favoriteRoutes);
+app.use('/api/follows', followRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // HEALTH CHECK
 app.get('/', (req, res) => {
@@ -39,7 +51,10 @@ app.get('/test-db', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
+// LISTEN BLOCK
+app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on port ${port}`);
-  console.log(`Test the connection at: http://localhost:${port}/test-db`);
+  console.log(`Local:            http://localhost:${port}`);
+  
+  console.log(`Network/Mobile:   http://0.0.0.0:${port}`); 
 });
