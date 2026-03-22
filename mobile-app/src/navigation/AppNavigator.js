@@ -1,48 +1,50 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// ==================== AUTH SCREENS ====================
+// Auth Screens
 import SplashScreen from '../screens/auth/SplashScreen';
-import OnboardingScreen from '../screens/auth/OnBoardingScreen';
+import OnBoardingScreen from '../screens/auth/OnBoardingScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import CreateAccountScreen from '../screens/auth/CreateAccountScreen';
 import SignupScreen from '../screens/auth/SignupScreen';
+
+// Main App
 import TabNavigator from './TabNavigator';
 
 // ==================== HOME & FEED ====================
 import HomeScreen from '../screens/home/HomeScreen'; 
 import CreateStoryScreen from '../screens/home/CreateStoryScreen';
+import StoriesScreen from '../screens/home/StoriesScreen';
 
-// ==================== EVENTS ====================
+// Modal Screens
 import EventDetailScreen from '../screens/events/EventDetailScreen';
 import EventsAttendedListScreen from '../screens/events/eventsAttendedListScreen'; // Note lowercase 'e' in list
 import OrganizerProfileScreen from '../screens/OrganizerProfileScreen'; 
 import AttendeesListScreen from '../screens/events/AttendeesListScreen';
 
-// ==================== TICKETS ====================
-import MyTicketsScreen from '../screens/tickets/MyTicketsScreen';
+// Modal Screens - Tickets
 import TicketDetailScreen from '../screens/tickets/TicketDetailScreen';
 import CheckoutScreen from '../screens/tickets/CheckoutScreen';
 import PaymentScreen from '../screens/tickets/PaymentScreen';
 import SuccessScreen from '../screens/tickets/SuccessScreen';
 
-// ==================== SOCIAL ====================
-import FavoritesScreen from '../screens/social/FavoritesScreen';
-import FollowersListScreen from '../screens/social/FollowersListScreen';
-import FollowingListScreen from '../screens/social/FollowingListScreen';
-import NotificationsScreen from '../screens/social/NotificationsScreen';
-import ReviewsListScreen from '../screens/social/ReviewsListScreen';
+// Modal Screens - Social
+import FavoritesScreen from '../screens/explore/FavoritesScreen';
+import FollowersListScreen from '../screens/profile/FollowersListScreen';
+import FollowingListScreen from '../screens/profile/FollowingListScreen';
+import NotificationsScreen from '../screens/home/NotificationsScreen';
+import ReviewsListScreen from '../screens/events/ReviewsListScreen';
 
-// ==================== PROFILE ====================
-import ProfileScreen from '../screens/profile/ProfileScreen';
+import ManageEventsScreen from '../screens/manage/ManageEventsScreen';
+import EventAnalyticsScreen from '../screens/manage/EventAnalyticsScreen';
+import AttendeesListScreen from '../screens/manage/AttendeesListScreen';
+import QRScannerScreen from '../screens/manage/QRScannerScreen';
+
+import CreatePostScreen from '../screens/profile/CreatePostScreen';
+import PostDetailsScreen from '../screens/profile/PostDetailsScreen';
+
+// Modal Screens - Profile
 import EditProfileScreen from '../screens/profile/EditProfileScreen';
-
-// ==================== CHAT ====================
-import ChatListScreen from '../screens/chat/ChatListScreen';
-import ChatConversationScreen from '../screens/chat/ChatConversationScreen';
-
-// ==================== TEST ====================
-import TestScreen from '../screens/TestScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -54,10 +56,12 @@ export default function AppNavigator() {
     >
       {/* AUTH FLOW */}
       <Stack.Screen name="Splash" component={SplashScreen} />
-      <Stack.Screen name="OnBoarding" component={OnboardingScreen} />
+      <Stack.Screen name="OnBoarding" component={OnBoardingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
+
+      {/* ==================== MAIN APP ==================== */}
       <Stack.Screen name="Main" component={TabNavigator} />
       
       {/* CORE SCREENS */}
