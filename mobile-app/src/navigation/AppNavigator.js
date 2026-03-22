@@ -1,5 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useAuth } from '../context/AuthContext';
+import { ActivityIndicator, View } from 'react-native';
 
 // ==================== AUTH SCREENS ====================
 import SplashScreen from '../screens/auth/SplashScreen';
@@ -47,51 +49,59 @@ import TestScreen from '../screens/TestScreen';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
+  const { user, isLoading } = useAuth();
+
+  // default to the Login screen while it's still reading the disk.
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#141416' }}>
+        <ActivityIndicator size="large" color="#ADF3FF" />
+      </View>
+    );
+  }
+
   return (
-    <Stack.Navigator 
-      initialRouteName="Splash" 
-      screenOptions={{ headerShown: false }}
-    >
-      {/* AUTH FLOW */}
-      <Stack.Screen name="Splash" component={SplashScreen} />
-      <Stack.Screen name="OnBoarding" component={OnboardingScreen} />
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
-      <Stack.Screen name="Signup" component={SignupScreen} />
-      <Stack.Screen name="Main" component={TabNavigator} />
-      
-      {/* CORE SCREENS */}
-      <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="CreateStory" component={CreateStoryScreen} />
-      <Stack.Screen name="EventDetail" component={EventDetailScreen} />
-      <Stack.Screen name="EventsAttended" component={EventsAttendedListScreen} />
-      <Stack.Screen name="OrganizerProfile" component={OrganizerProfileScreen} />
-      <Stack.Screen name="AttendeesList" component={AttendeesListScreen} />
-      
-      {/* TICKETS & CHECKOUT */}
-      <Stack.Screen name="MyTickets" component={MyTicketsScreen} /> 
-      <Stack.Screen name="TicketDetail" component={TicketDetailScreen} />
-      <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ animation: 'slide_from_bottom' }} />
-      <Stack.Screen name="Payment" component={PaymentScreen} />
-      <Stack.Screen name="Success" component={SuccessScreen} options={{ gestureEnabled: false }} />
-      
-      {/* SOCIAL */}
-      <Stack.Screen name="Favorites" component={FavoritesScreen} />
-      <Stack.Screen name="Followers" component={FollowersListScreen} />
-      <Stack.Screen name="Following" component={FollowingListScreen} />
-      <Stack.Screen name="Notifications" component={NotificationsScreen} />
-      <Stack.Screen name="Reviews" component={ReviewsListScreen} />
-      
-      {/* PROFILE */}
-      <Stack.Screen name="Profile" component={ProfileScreen} />
-      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-      
-      {/* CHAT */}
-      <Stack.Screen name="ChatList" component={ChatListScreen} />
-      <Stack.Screen name="ChatConversation" component={ChatConversationScreen} />
-      
-      {/* TEST */}
-      <Stack.Screen name="Test" component={TestScreen} />
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {user ? (
+        // 1. AUTHENTICATED GROUP
+        <Stack.Group>
+          <Stack.Screen name="Main" component={TabNavigator} />
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="CreateStory" component={CreateStoryScreen} />
+          <Stack.Screen name="EventDetail" component={EventDetailScreen} />
+          <Stack.Screen name="EventsAttended" component={EventsAttendedListScreen} />
+          <Stack.Screen name="OrganizerProfile" component={OrganizerProfileScreen} />
+          <Stack.Screen name="AttendeesList" component={AttendeesListScreen} />
+          
+          <Stack.Screen name="MyTickets" component={MyTicketsScreen} /> 
+          <Stack.Screen name="TicketDetail" component={TicketDetailScreen} />
+          <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="Payment" component={PaymentScreen} />
+          <Stack.Screen name="Success" component={SuccessScreen} options={{ gestureEnabled: false }} />
+          
+          <Stack.Screen name="Favorites" component={FavoritesScreen} />
+          <Stack.Screen name="Followers" component={FollowersListScreen} />
+          <Stack.Screen name="Following" component={FollowingListScreen} />
+          <Stack.Screen name="Notifications" component={NotificationsScreen} />
+          <Stack.Screen name="Reviews" component={ReviewsListScreen} />
+          
+          <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          
+          <Stack.Screen name="ChatList" component={ChatListScreen} />
+          <Stack.Screen name="ChatConversation" component={ChatConversationScreen} />
+          <Stack.Screen name="Test" component={TestScreen} />
+        </Stack.Group>
+      ) : (
+        // 2. UNAUTHENTICATED GROUP
+        <Stack.Group>
+          <Stack.Screen name="Splash" component={SplashScreen} />
+          <Stack.Screen name="OnBoarding" component={OnboardingScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
+          <Stack.Screen name="Signup" component={SignupScreen} />
+        </Stack.Group>
+      )}
     </Stack.Navigator>
   );
 }
