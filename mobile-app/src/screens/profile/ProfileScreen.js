@@ -23,6 +23,7 @@ import {
   Crown,
   CaretRight,
 } from 'phosphor-react-native';
+import { useAuth } from '../../context/AuthContext';
 
 const { width } = Dimensions.get('window');
 
@@ -50,6 +51,7 @@ const COLORS = {
 const ProfileScreen = ({ navigation, route }) => {
   const [activeTab, setActiveTab] = useState('posts');
   const [isBusiness, setIsBusiness] = useState(false);
+  const { logout } = useAuth();
 
   const [userData, setUserData] = useState({
     name: 'Mueena Shahmy',
@@ -268,7 +270,7 @@ const ProfileScreen = ({ navigation, route }) => {
             label="Logout"
             icon={SignOut}
             color="#FF453A"
-            onPress={() => console.log('Logout')}
+            onPress={logout}
             isLast
           />
         </View>

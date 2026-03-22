@@ -3,50 +3,62 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuth } from '../context/AuthContext';
 import { ActivityIndicator, View } from 'react-native';
 
-// Auth Screens
+// --- AUTH ---
 import SplashScreen from '../screens/auth/SplashScreen';
 import OnBoardingScreen from '../screens/auth/OnBoardingScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
 import CreateAccountScreen from '../screens/auth/CreateAccountScreen';
 import SignupScreen from '../screens/auth/SignupScreen';
 
-// Main App
+// --- MAIN ---
 import TabNavigator from './TabNavigator';
 
-// ==================== HOME & FEED ====================
+// --- HOME & FEED ---
 import HomeScreen from '../screens/home/HomeScreen'; 
 import CreateStoryScreen from '../screens/home/CreateStoryScreen';
 import StoriesScreen from '../screens/home/StoriesScreen';
+import NotificationsScreen from '../screens/home/NotificationsScreen';
 
-// Modal Screens
+// --- EVENTS ---
 import EventDetailScreen from '../screens/events/EventDetailScreen';
-import EventsAttendedListScreen from '../screens/events/eventsAttendedListScreen'; // Note lowercase 'e' in list
-import OrganizerProfileScreen from '../screens/OrganizerProfileScreen'; 
-import AttendeesListScreen from '../screens/events/AttendeesListScreen';
+import EventsAttendedListScreen from '../screens/events/eventsAttendedListScreen'; // Lowercase 'e'
+import ReviewsListScreen from '../screens/events/ReviewsListScreen';
 
-// Modal Screens - Tickets
+// --- TICKETS & CHECKOUT ---
 import TicketDetailScreen from '../screens/tickets/TicketDetailScreen';
 import CheckoutScreen from '../screens/tickets/CheckoutScreen';
 import PaymentScreen from '../screens/tickets/PaymentScreen';
 import SuccessScreen from '../screens/tickets/SuccessScreen';
+import MyTicketsScreen from '../screens/tickets/MyTicketsScreen';
 
-// Modal Screens - Social
+// --- EXPLORE & MAP ---
 import FavoritesScreen from '../screens/explore/FavoritesScreen';
-import FollowersListScreen from '../screens/profile/FollowersListScreen';
-import FollowingListScreen from '../screens/profile/FollowingListScreen';
-import NotificationsScreen from '../screens/home/NotificationsScreen';
-import ReviewsListScreen from '../screens/events/ReviewsListScreen';
+import LiveMapScreen from '../screens/map/LiveMapScreen';
 
+// --- MANAGEMENT (Organizer Tools) ---
 import ManageEventsScreen from '../screens/manage/ManageEventsScreen';
 import EventAnalyticsScreen from '../screens/manage/EventAnalyticsScreen';
 import AttendeesListScreen from '../screens/manage/AttendeesListScreen';
 import QRScannerScreen from '../screens/manage/QRScannerScreen';
 
+// --- PROFILE ---
+import ProfileScreen from '../screens/profile/ProfileScreen';
+import EditProfileScreen from '../screens/profile/EditProfileScreen';
+import OrganizerProfileScreen from '../screens/profile/OrganizerProfileScreen';
+import FollowersListScreen from '../screens/profile/FollowersListScreen';
+import FollowingListScreen from '../screens/profile/FollowingListScreen';
 import CreatePostScreen from '../screens/profile/CreatePostScreen';
 import PostDetailsScreen from '../screens/profile/PostDetailsScreen';
+import SettingsScreen from '../screens/profile/settingsScreen';
+import HelpScreen from '../screens/profile/helpScreen';
+import PublicProfileScreen from '../screens/profile/PublicProfileScreen';
 
-// Modal Screens - Profile
-import EditProfileScreen from '../screens/profile/EditProfileScreen';
+// --- CHAT ---
+import ChatListScreen from '../screens/chat/ChatListScreen';
+import ChatConversationScreen from '../screens/chat/ChatConversationScreen';
+
+// --- TEST ---
+import TestScreen from '../screens/TestScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -99,6 +111,21 @@ export default function AppNavigator() {
           <Stack.Screen name="ChatList" component={ChatListScreen} />
           <Stack.Screen name="ChatConversation" component={ChatConversationScreen} />
           
+          {/* MANAGEMENT & ORGANIZER */}
+          <Stack.Screen name="ManageEvents" component={ManageEventsScreen} />
+          <Stack.Screen name="EventAnalytics" component={EventAnalyticsScreen} />
+          <Stack.Screen name="QRScanner" component={QRScannerScreen} />
+
+          {/* ADDITIONAL PROFILE & SOCIAL */}
+          <Stack.Screen name="PublicProfile" component={PublicProfileScreen} />
+          <Stack.Screen name="CreatePost" component={CreatePostScreen} />
+          <Stack.Screen name="PostDetails" component={PostDetailsScreen} />
+          <Stack.Screen name="Settings" component={SettingsScreen} />
+          <Stack.Screen name="Help" component={HelpScreen} />
+
+          {/* MAP */}
+          <Stack.Screen name="LiveMap" component={LiveMapScreen} />
+
           {/* TEST */}
           <Stack.Screen name="Test" component={TestScreen} />
         </Stack.Group>

@@ -6,6 +6,7 @@ import HomeScreen from '../screens/home/HomeScreen';
 import CreateStoryScreen from '../screens/home/CreateStoryScreen';
 import StoriesScreen from '../screens/home/StoriesScreen';
 import EventDetailScreen from '../screens/events/EventDetailScreen';
+import NotificationsScreen from '../screens/home/NotificationsScreen';
 import ChatStack from './ChatStack';
 
 const Stack = createNativeStackNavigator();
@@ -17,6 +18,7 @@ const HomeStack = () => {
       <Stack.Screen name="CreateStory" component={CreateStoryScreen} />
       <Stack.Screen name="Stories" component={StoriesScreen} />
       <Stack.Screen name="EventDetail" component={EventDetailScreen} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} />
       
       {/* Chat screens accessible from Home */}
       <Stack.Screen name="ChatList" component={ChatStack} />
