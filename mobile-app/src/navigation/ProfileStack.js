@@ -26,21 +26,21 @@ const ProfileStack = () => {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {/* Main Profile */}
       <Stack.Screen name="Profile" component={ProfileScreen} />
-      
+
       {/* Profile Management */}
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="Help" component={HelpScreen} />
-      
+
       {/* Tickets */}
       <Stack.Screen name="MyTickets" component={MyTicketsScreen} />
       <Stack.Screen name="TicketDetail" component={TicketDetailScreen} />
-      
+
       {/* Social */}
       <Stack.Screen name="Favorites" component={FavoritesScreen} />
       <Stack.Screen name="Followers" component={FollowersListScreen} />
       <Stack.Screen name="Following" component={FollowingListScreen} />
-      
+
       {/* Events */}
       <Stack.Screen name="EventDetail" component={EventDetailScreen} />
     </Stack.Navigator>
