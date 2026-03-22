@@ -304,7 +304,11 @@ const EventDetailScreen = ({ route, navigation }) => {
 
           {/* Organizer */}
           <STitle title="Organizer" />
-          <View style={s.hostCard}>
+          <TouchableOpacity 
+            style={s.hostCard}
+            onPress={() => navigation.navigate('PublicProfile', { userId: event.host.id })}
+            activeOpacity={0.8}
+          >
             <Image source={{ uri: event.host.avatar_url }} style={s.hostAvatar} />
             <View style={s.hostInfo}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
@@ -318,7 +322,10 @@ const EventDetailScreen = ({ route, navigation }) => {
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <TouchableOpacity
                 style={[s.followBtn, isFollowing && s.followingBtn]}
-                onPress={() => setIsFollowing(!isFollowing)}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  setIsFollowing(!isFollowing);
+                }}
                 activeOpacity={0.8}
               >
                 {isFollowing
@@ -328,11 +335,23 @@ const EventDetailScreen = ({ route, navigation }) => {
                   {isFollowing ? 'Following' : 'Follow'}
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity style={s.chatBtn} activeOpacity={0.8}>
-                <ChatCircleIcon size={18} color={C.text.secondary} weight="regular" />
-              </TouchableOpacity>
-            </View>
-          </View>
+              <TouchableOpacity 
+                style={s.chatBtn} 
+                activeOpacity={0.8}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  navigation.navigate('ChatConversation', { 
+                    chat: { 
+                      name: event.host.full_name, 
+                      avatar: event.host.avatar_url 
+                    }
+                  });
+                }}
+    >
+      <ChatCircleIcon size={18} color={C.text.secondary} weight="regular" />
+    </TouchableOpacity>
+  </View>
+</TouchableOpacity>
 
           <View style={s.divider} />
 

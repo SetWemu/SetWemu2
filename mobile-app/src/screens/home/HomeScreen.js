@@ -245,7 +245,7 @@ export default function HomeScreen({ navigation }) {
           <FlatList
             data={stories}
             renderItem={renderStory}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item, index) => item.id + index}
             horizontal
             showsHorizontalScrollIndicator={false}
             style={{ paddingHorizontal: 16, marginBottom: 10 }}
