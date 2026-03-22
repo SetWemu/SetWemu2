@@ -1,3 +1,4 @@
+import { useAuth } from '../../context/AuthContext';
 import React, { useState } from 'react';
 import {
   View,
@@ -23,6 +24,7 @@ const C = {
 };
 
 const LoginScreen = ({ navigation }: any) => {
+  const { login } = useAuth() as any;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -43,8 +45,10 @@ const LoginScreen = ({ navigation }: any) => {
       });
 
       if (response.status === 200) {
+        await login(response.data.user); 
+        
         console.log('Login Successful');
-        // Ensure 'Main' matches your route name in AppNavigator.js
+        Alert.alert("Success", `Welcome back, ${response.data.user.full_name || 'User'}!`);
         navigation.replace('Main'); 
       }
     } catch (error: any) {
