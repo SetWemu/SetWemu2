@@ -21,7 +21,7 @@ import NotificationsScreen from '../screens/home/NotificationsScreen';
 
 // --- EVENTS ---
 import EventDetailScreen from '../screens/events/EventDetailScreen';
-import EventsAttendedListScreen from '../screens/events/eventsAttendedListScreen'; // Lowercase 'e'
+import EventsAttendedListScreen from '../screens/events/EventsAttendedListScreen'; // Lowercase 'e'
 import ReviewsListScreen from '../screens/events/ReviewsListScreen';
 
 // --- TICKETS & CHECKOUT ---
