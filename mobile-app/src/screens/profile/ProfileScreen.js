@@ -57,7 +57,7 @@ const ProfileScreen = ({ navigation, route }) => {
     name: 'Diara',
     avatar:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-    stats: { events: 2, following: 3, followers: 3 },
+    stats: { events: 3, following: 3, followers: 3 },
   });
 
   const posts = [
