@@ -3,8 +3,10 @@ import { handleSwipe, getRecommendations } from '../controllers/swipeController.
 
 const router = express.Router();
 
-router.post('/swipe', handleSwipe);
+// Path: POST /api/swipe/interact
+router.post('/interact', handleSwipe);
 
+// Path: GET /api/swipe/recommendations/:userId
 router.get('/recommendations/:userId', getRecommendations);
 
 export default router;
