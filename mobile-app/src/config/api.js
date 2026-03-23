@@ -1,8 +1,7 @@
 const ENV = {
   // Development (Local PC via USB/ADB)
   dev: {
-    //API_URL: 'http://localhost:3000/api'
-    API_URL: 'http://10.0.2.2:3000/api' 
+    API_URL: 'http://localhost:3000/api' 
   },
   
   // Production (For when deploying to Render/Railway)
