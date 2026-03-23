@@ -34,7 +34,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/follows', followRoutes);
 app.use('/api/reviews', reviewRoutes);
-app.use('/api/swipe', swipeRoutes); // Mounts to /api/swipe/interact and /api/swipe/recommendations
+app.use('/api/swipe', swipeRoutes); 
 
 // --- UTILITY ROUTES ---
 // Health Check: Verify if the server is live

@@ -57,13 +57,13 @@ const ExploreScreen = ({ navigation }) => {
         // Logic check: Ensure your server is running!
         const response = await fetch(`${API_URL}/events`);
         const data = await response.json();
-
+        console.log("API RESPONSE", data)
         // Organize the data into the categories the UI expects
         setRealEvents({
-          today: data.slice(0, 3), 
-          weekend: data.slice(3, 6),
-          week: data.slice(6, 9),
-          trending: data 
+          today: Array.isArray(data) ? data.slice(0, 3) : [],
+          weekend: Array.isArray(data) ? data.slice(3, 6) : [],
+          week: Array.isArray(data) ? data.slice(6, 9) : [],
+          trending: Array.isArray(data) ? data : [],
         });
       } catch (error) {
         console.error("Error fetching events:", error);

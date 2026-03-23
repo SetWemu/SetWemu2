@@ -107,7 +107,7 @@ const SwipeScreen = ({ navigation }) => {
     setEvents((prev) => prev.slice(1));
 
     try {
-      await fetch(`${API_URL}/swipe/swipe`, {
+      await fetch(`${API_URL}/swipe/interact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -387,4 +387,4 @@ const s = StyleSheet.create({
     fontWeight: '800', 
     color: '#141416' 
   },
-});
+})

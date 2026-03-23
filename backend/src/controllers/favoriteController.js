@@ -37,6 +37,6 @@ export const getUserFavorites = async (req, res) => {
     if (error) throw error;
     res.json(data.map(f => f.events)); // Returns flat array of event objects
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: errowr.message });
   }
 };
