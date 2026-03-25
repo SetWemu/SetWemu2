@@ -54,11 +54,10 @@ const ProfileScreen = ({ navigation, route }) => {
   const { logout } = useAuth();
 
   const [userData, setUserData] = useState({
-    name: 'Mueena Shahmy',
-    handle: '@mueena_s',
+    name: 'Diara',
     avatar:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-    stats: { events: 18, following: 142, followers: 845 },
+    stats: { events: 3, following: 3, followers: 3 },
   });
 
   const posts = [
@@ -76,21 +75,6 @@ const ProfileScreen = ({ navigation, route }) => {
       id: '3',
       image:
         'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400&h=400&fit=crop',
-    },
-    {
-      id: '4',
-      image:
-        'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=400&fit=crop',
-    },
-    {
-      id: '5',
-      image:
-        'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400&h=400&fit=crop',
-    },
-    {
-      id: '6',
-      image:
-        'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=400&fit=crop',
     },
   ];
 
@@ -119,7 +103,6 @@ const ProfileScreen = ({ navigation, route }) => {
           </View>
 
           <Text style={styles.nameText}>{userData.name}</Text>
-          <Text style={styles.handleText}>{userData.handle}</Text>
 
           {!isBusiness && (
             <TouchableOpacity
