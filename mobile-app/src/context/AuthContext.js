@@ -33,7 +33,11 @@ export const AuthProvider = ({ children }) => {
   // 3. Helper: Clear RAM AND Disk
   const logout = async () => {
     setUser(null);
-    await AsyncStorage.removeItem('user_data');
+    // Remove both the user data AND the API token
+  await Promise.all([
+    AsyncStorage.removeItem('user_data'),
+    AsyncStorage.removeItem('userToken')
+  ]);
   };
 
   return (

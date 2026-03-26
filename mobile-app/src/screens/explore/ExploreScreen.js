@@ -1,4 +1,4 @@
-import { API_URL } from '../../config/api';
+import apiClient from '../../api/apiClient';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -28,8 +28,6 @@ const C = {
   border: { subtle: 'rgba(255,255,255,0.06)', light: 'rgba(255,255,255,0.10)' },
 };
 
-
-
 const SEARCH_SUGGESTIONS = [
   'Tech Conference',
   'Jazz Night',
@@ -46,19 +44,22 @@ const ExploreScreen = ({ navigation }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   
-  // ADD THESE TWO LINES BACK IF THEY ARE MISSING:
+  // FIX: Added missing state definitions
   const [realEvents, setRealEvents] = useState({ today: [], weekend: [], week: [], trending: [] });
   const [loading, setLoading] = useState(true);
-  // FETCH FROM BACKEND
+
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        // Logic check: Ensure your server is running!
-        const response = await fetch(`${API_URL}/events`);
-        const data = await response.json();
-        console.log("API RESPONSE", data)
-        // Organize the data into the categories the UI expects
+        
+        // Using apiClient to ensure the JWT interceptor is used
+        const response = await apiClient.get('/events');
+        const data = response.data; 
+  
+        console.log("API RESPONSE", data);
+  
+        // Organize data for the UI categories
         setRealEvents({
           today: Array.isArray(data) ? data.slice(0, 3) : [],
           weekend: Array.isArray(data) ? data.slice(3, 6) : [],
@@ -66,15 +67,14 @@ const ExploreScreen = ({ navigation }) => {
           trending: Array.isArray(data) ? data : [],
         });
       } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching events:", error.response?.data || error.message);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchEvents();
   }, []);
-
 
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -89,14 +89,7 @@ const ExploreScreen = ({ navigation }) => {
     }
   }, [searchQuery]);
 
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#141416' }}>
-        <ActivityIndicator size="large" color="#ADF3FF" />
-      </View>
-    );
-  }
-
+  // Handle Search logic
   const handleSearch = () => {
     if (searchQuery.trim()) {
       navigation.navigate('SearchResults', { query: searchQuery });
@@ -110,6 +103,7 @@ const ExploreScreen = ({ navigation }) => {
     setShowSuggestions(false);
   };
 
+  // Helper Component: Event Card
   const EventCard = ({ event }) => (
     <TouchableOpacity
       style={s.eventCard}
@@ -142,6 +136,7 @@ const ExploreScreen = ({ navigation }) => {
     </TouchableOpacity>
   );
 
+  // Helper Component: Section List
   const CategorySection = ({ title, data, icon: Icon }) => (
     <View style={s.section}>
       <View style={s.sectionHeader}>
@@ -159,6 +154,15 @@ const ExploreScreen = ({ navigation }) => {
     </View>
   );
 
+  // Loading indicator must come after helper components are defined if used inside them, 
+  // but before the main return()
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#141416' }}>
+        <ActivityIndicator size="large" color="#ADF3FF" />
+      </View>
+    );
+  }
   return (
     <SafeAreaView style={s.container} edges={['top']}>
       <StatusBar barStyle="light-content" />

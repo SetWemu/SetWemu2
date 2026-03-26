@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../context/AuthContext';
 import React, { useState } from 'react';
 import {
@@ -31,30 +32,41 @@ const LoginScreen = ({ navigation }: any) => {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
 
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
-
+  
     setLoading(true);
     try {
       const response = await apiClient.post('/auth/login', {
         email: email.trim().toLowerCase(),
         password: password,
       });
-
+  
       if (response.status === 200) {
-        await login(response.data.user); 
+        const { user, token, session } = response.data;
+        const jwt = token || session?.access_token;
+  
+        if (!jwt) {
+          throw new Error("No access token received");
+        }
+  
+        // Save token for the apiClient interceptor
+        await AsyncStorage.setItem('userToken', jwt);
+        
+        // Save user to context (which also saves to disk)
+        await login(user); 
         
         console.log('Login Successful');
-        Alert.alert("Success", `Welcome back, ${response.data.user.full_name || 'User'}!`);
+        Alert.alert("Success", `Welcome back, ${user.full_name || 'User'}!`);
         navigation.replace('Main'); 
       }
     } catch (error: any) {
-      const errorMsg = error.response?.data?.error || "Invalid email or password";
+      const errorMsg = error.response?.data?.error || error.message || "Invalid credentials";
       Alert.alert("Login Failed", errorMsg);
-      console.error("Login Error:", error.response?.data || error.message);
     } finally {
       setLoading(false);
     }

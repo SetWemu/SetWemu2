@@ -70,14 +70,53 @@ export const createEvent = async (req, res) => {
     }
 };
 
+// 1. FOR MANAGEMENT: Only shows events created by the logged-in user
+export const getMyEvents = async (req, res) => {
+    try {
+        const userId = req.user.id; // Provided by the middleware
+
+        const { data, error } = await supabase
+            .from('events')
+            .select(`
+                *,
+                category:categories!category_id (name),
+                ticket_tiers (price, capacity, sold_count)
+            `)
+            .eq('host_id', userId) 
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Calculate totals for the management dashboard
+        const processedData = data.map(event => {
+            const tiers = event.ticket_tiers || [];
+            const totals = tiers.reduce((acc, tier) => {
+                acc.totalCapacity += (tier.capacity || 0);
+                acc.totalRevenue += (tier.price || 0) * (tier.sold_count || 0);
+                return acc;
+            }, { totalCapacity: 0, totalRevenue: 0 });
+
+            return {
+                ...event,
+                total_capacity: totals.totalCapacity,
+                total_revenue: totals.totalRevenue
+            };
+        });
+
+        res.status(200).json(processedData);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// 2. FOR EXPLORE: Shows ALL events to everyone (No middleware needed)
 export const getAllEvents = async (req, res) => {
     try {
         const { data, error } = await supabase
             .from('events')
             .select(`
                 *,
-                category:categories!category_id (name),
-                host:profiles!host_id (username)
+                category:categories!category_id (name)
             `)
             .order('created_at', { ascending: false });
 

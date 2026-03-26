@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -6,7 +7,6 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
-  SafeAreaView,
 } from 'react-native';
 import { ArrowLeft, CalendarBlank, Users, Plus } from 'phosphor-react-native';
 
