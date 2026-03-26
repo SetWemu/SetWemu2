@@ -18,7 +18,7 @@ const C = {
   stub:  {
     bg:        '#B8EEFF',             // THE ONE COLOR — entire stub top + bottom
     text:      '#0A2A35',             // dark navy on light blue
-    textMuted: 'rgba(10,42,53,0.50)',
+    textMuted: 'rgba(10,42,53,0.50)', // THE ONE COLOR — entire stub top + bottom
     divider:   'rgba(10,42,53,0.12)',
   },
   text:   { primary: '#F2F2F7', secondary: '#ABABAB', tertiary: '#6B6B6B' },
