@@ -66,16 +66,20 @@ const ProfileScreen = ({ navigation, route }) => {
   const fetchProfile = async () => {
     try {
       if (!user?.id) return;
-      const response = await apiClient.get(`/profile/${user.id}`);
+      console.log(`[ProfileScreen] Refreshing profile for ${user.id}...`);
+      const response = await apiClient.get(`/profiles/${user.id}`);
       if (response.data) {
+        // Sync our local state with the latest from the server
         setUserData(prev => ({
           ...prev,
-          name: response.data.full_name || response.data.fullName || response.data.username || user?.full_name || 'User',
-          avatar: response.data.avatar_url || prev.avatar,
+          name: response.data.full_name || user?.full_name || 'User',
+          avatar: response.data.avatar_url || user?.avatar_url || prev.avatar,
+          handle: response.data.username || user?.username || 'username',
+          bio: response.data.bio || user?.bio || '',
         }));
       }
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error("[ProfileScreen] Background fetch error:", error);
     } finally {
       setProfileLoading(false);
     }
@@ -119,7 +123,10 @@ const ProfileScreen = ({ navigation, route }) => {
         {/* Profile Header */}
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
-            <Image source={{ uri: userData.avatar }} style={styles.avatar} />
+            <Image
+              source={{ uri: user?.avatar_url || userData.avatar }}
+              style={styles.avatar}
+            />
             {isBusiness && (
               <View style={styles.crownBadge}>
                 <Crown size={14} color={COLORS.bg.primary} weight="fill" />
@@ -127,7 +134,12 @@ const ProfileScreen = ({ navigation, route }) => {
             )}
           </View>
 
-          <Text style={styles.nameText}>{userData.name}</Text>
+          <Text style={styles.nameText}>{user?.full_name || userData.name}</Text>
+          <Text style={styles.handleText}>@{user?.username || userData.handle || 'username'}</Text>
+
+          {(user?.bio || userData.bio) ? (
+            <Text style={styles.bioText}>{user?.bio || userData.bio}</Text>
+          ) : null}
 
           {!isBusiness && (
             <TouchableOpacity
@@ -330,7 +342,15 @@ const styles = StyleSheet.create({
     color: COLORS.text.secondary,
     fontSize: 13,
     fontWeight: '600',
+    marginBottom: 8,
+  },
+  bioText: {
+    color: COLORS.text.primary,
+    fontSize: 14,
+    textAlign: 'center',
+    paddingHorizontal: 40,
     marginBottom: 15,
+    lineHeight: 20,
   },
 
   businessCTA: {

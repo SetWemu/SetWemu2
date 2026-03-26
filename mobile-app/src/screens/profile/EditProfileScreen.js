@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -9,11 +10,14 @@ import {
   Platform,
   ScrollView,
   Image,
-  SafeAreaView,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { CountryPicker } from 'react-native-country-codes-picker';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useAuth } from '../../context/AuthContext';
+import profileService from '../../api/profileService';
 
 const COLORS = {
   bg: { primary: '#141416', card: '#1C1C1E' },
@@ -31,57 +35,107 @@ const COLORS = {
   border: { light: 'rgba(255,255,255,0.10)', subtle: 'rgba(255,255,255,0.06)' },
 };
 
-const EditProfileScreen = ({ navigation, route }) => {
-  const params = route.params || {};
+const EditProfileScreen = ({ navigation }) => {
+  const { user, updateUser } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const [name, setName] = useState(params.currentName || 'You');
-  const [username, setUsername] = useState(
-    params.currentUsername || '@username',
-  );
-  const [bio, setBio] = useState(params.currentBio || '');
-  const [phone, setPhone] = useState(params.currentPhone || '+1 234 567 890');
+  const [name, setName] = useState(user?.full_name || '');
+  const [username, setUsername] = useState(user?.username || '');
+  const [bio, setBio] = useState(user?.bio || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [location, setLocation] = useState(user?.location || '');
+  const [profileImage, setProfileImage] = useState(user?.avatar_url || null);
+
+  // Country Picker State
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [countryFlag, setCountryFlag] = useState('🇺🇸');
   const [countryCode, setCountryCode] = useState('+1');
-  const [countryName, setCountryName] = useState(
-    params.currentCountry || 'United States',
-  );
-  const [showCountryPicker, setShowCountryPicker] = useState(false);
-  const [profileImage, setProfileImage] = useState(params.currentImage || null);
-  const [selectedInterests, setSelectedInterests] = useState(
-    params.currentInterests || ['Music', 'Art'],
-  );
+  const [countryName, setCountryName] = useState('United States');
 
-  const availableInterests = [
-    'Music',
-    'Art',
-    'Food',
-    'Tech',
-    'Business',
-    'Wellness',
-    'Adventure',
-    'Fashion',
-  ];
-
-  const handleSave = () => {
-    const updatedData = {
-      name,
-      handle: username,
-      bio,
-      phone,
-      country: countryName,
-      avatar:
-        profileImage ||
-        `https://ui-avatars.com/api/?name=${name}&background=4CC1D4&color=141416`,
-      interests: selectedInterests,
-      stats: params.currentStats || {
-        events: 18,
-        following: 142,
-        followers: 845,
-      },
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user?.id) return;
+      try {
+        console.log(`[EditProfile] Refreshing profile data for ${user.id}...`);
+        const data = await profileService.getProfile(user.id);
+        
+        // Update states only if they differ from what we have
+        if (data.full_name) setName(data.full_name);
+        if (data.username) setUsername(data.username);
+        if (data.bio) setBio(data.bio);
+        if (data.phone) setPhone(data.phone);
+        if (data.location) setLocation(data.location);
+        if (data.avatar_url) setProfileImage(data.avatar_url);
+      } catch (error) {
+        console.error('Failed to load extra profile details:', error);
+      } finally {
+        setLoading(false);
+      }
     };
+    fetchProfile();
+  }, []); // Only fetch once on mount to avoid the "revert" loop after saving
 
-    navigation.navigate('Profile', { updatedData });
+  const handleSave = async () => {
+    if (!username.trim() || username.length < 3) {
+      Alert.alert('Invalid Username', 'Username must be at least 3 characters.');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      let finalAvatarUrl = profileImage;
+
+      // 1. Handle Photo Upload if it's a new local URI
+      if (profileImage && !profileImage.startsWith('http')) {
+        finalAvatarUrl = await profileService.uploadAvatar(user.id, {
+          uri: profileImage,
+          name: `avatar_${Date.now()}.jpg`,
+          type: 'image/jpeg',
+        });
+      }
+
+      // 2. Update Profile in Backend
+      const updatedData = {
+        full_name: name,
+        username,
+        bio,
+        phone,
+        location,
+        avatar_url: finalAvatarUrl,
+      };
+
+      const result = await profileService.updateProfile(user.id, updatedData);
+
+      // 3. Sync with AuthContext (Global State)
+      await updateUser({
+        full_name: name,
+        avatar_url: finalAvatarUrl,
+        username: username,
+        bio: bio,
+        phone: phone,
+        location: location,
+      });
+
+      Alert.alert('Success', 'Profile updated successfully!', [
+        { text: 'OK', onPress: () => navigation.goBack() }
+      ]);
+    } catch (error) {
+      console.error('Save Profile Error:', error);
+      Alert.alert('Update Failed', error.message || 'Something went wrong.');
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center' }]}>
+        <ActivityIndicator size="large" color={COLORS.blue.brand} />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -94,8 +148,12 @@ const EditProfileScreen = ({ navigation, route }) => {
             <Text style={styles.cancelButton}>Cancel</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Edit Profile</Text>
-          <TouchableOpacity onPress={handleSave}>
-            <Text style={styles.saveButton}>Save</Text>
+          <TouchableOpacity onPress={handleSave} disabled={isSaving}>
+            {isSaving ? (
+              <ActivityIndicator size="small" color={COLORS.blue.brand} />
+            ) : (
+              <Text style={styles.saveButton}>Save</Text>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -163,10 +221,10 @@ const EditProfileScreen = ({ navigation, route }) => {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>EMAIL</Text>
+              <Text style={styles.label}>EMAIL (READ-ONLY)</Text>
               <View style={[styles.input, styles.lockedInput]}>
                 <Text style={{ color: COLORS.text.tertiary }}>
-                  user@example.com
+                  {email || 'N/A'}
                 </Text>
                 <Icon
                   name="lock-closed"
@@ -178,68 +236,40 @@ const EditProfileScreen = ({ navigation, route }) => {
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>PHONE</Text>
-              <TextInput
-                style={styles.input}
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-                placeholderTextColor={COLORS.text.tertiary}
-              />
+              <View style={styles.phoneInputRow}>
+                <TouchableOpacity
+                  style={styles.countryPickerTrigger}
+                  onPress={() => setShowCountryPicker(true)}
+                >
+                  <Text style={styles.countryFlag}>{countryFlag}</Text>
+                  <Text style={styles.countryCodeText}>{countryCode}</Text>
+                </TouchableOpacity>
+                <TextInput
+                  style={[styles.input, { flex: 1, borderTopLeftRadius: 0, borderBottomLeftRadius: 0, borderLeftWidth: 0 }]}
+                  value={phone.replace(countryCode, '').trim()}
+                  onChangeText={(val) => setPhone(`${countryCode} ${val}`)}
+                  keyboardType="phone-pad"
+                  placeholder="234 567 890"
+                  placeholderTextColor={COLORS.text.tertiary}
+                />
+              </View>
             </View>
 
-            {/* Country / Location */}
+            {/* Location */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>LOCATION</Text>
+              <Text style={styles.label}>RESIDENCE</Text>
               <TouchableOpacity
-                style={[styles.input, styles.countryRow]}
+                style={styles.input}
                 onPress={() => setShowCountryPicker(true)}
               >
-                <View style={styles.countryLeft}>
-                  <Text style={styles.countryFlag}>{countryFlag}</Text>
-                  <Text style={styles.countryText}>{countryName}</Text>
-                </View>
-                <Text style={styles.countryCode}>{countryCode}</Text>
-                <Icon
-                  name="chevron-down"
-                  size={16}
-                  color={COLORS.text.tertiary}
-                  style={{ marginLeft: 6 }}
-                />
+                <Text style={{ color: location ? COLORS.text.primary : COLORS.text.tertiary }}>
+                  {location || 'Select Country'}
+                </Text>
+                <Icon name="chevron-down" size={16} color={COLORS.text.tertiary} />
               </TouchableOpacity>
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>INTERESTS</Text>
-              <View style={styles.interestsWrapper}>
-                {availableInterests.map(interest => (
-                  <TouchableOpacity
-                    key={interest}
-                    onPress={() =>
-                      setSelectedInterests(prev =>
-                        prev.includes(interest)
-                          ? prev.filter(i => i !== interest)
-                          : [...prev, interest],
-                      )
-                    }
-                    style={[
-                      styles.interestPill,
-                      selectedInterests.includes(interest) &&
-                        styles.interestPillActive,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.interestText,
-                        selectedInterests.includes(interest) &&
-                          styles.interestTextActive,
-                      ]}
-                    >
-                      {interest}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
+            {/* Interests logic stripped as per request */}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -251,7 +281,10 @@ const EditProfileScreen = ({ navigation, route }) => {
           setCountryFlag(item.flag);
           setCountryCode(item.dial_code);
           setCountryName(item.name?.en || item.name);
-          setPhone(item.dial_code + ' ');
+          setLocation(item.name?.en || item.name);
+          // Auto-format phone with new country code
+          const pureNumber = phone.replace(countryCode, '').trim();
+          setPhone(`${item.dial_code} ${pureNumber}`);
           setShowCountryPicker(false);
         }}
         onBackdropPress={() => setShowCountryPicker(false)}
@@ -358,8 +391,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  phoneInputRow: {
+    flexDirection: 'row',
+  },
+  countryPickerTrigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: COLORS.border.light,
+    borderRightWidth: 0,
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+    paddingHorizontal: 12,
+    gap: 6,
+  },
+  countryFlag: { fontSize: 20 },
+  countryCodeText: { color: COLORS.text.primary, fontSize: 14, fontWeight: '600' },
   countryLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  countryFlag: { fontSize: 22, marginRight: 10 },
   countryText: { color: COLORS.text.primary, fontSize: 14 },
   countryCode: { color: COLORS.text.secondary, fontSize: 13 },
   interestsWrapper: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

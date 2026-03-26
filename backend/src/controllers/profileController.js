@@ -16,7 +16,11 @@ export const getProfile = async (req, res) => {
       console.log(`[Self-Heal] Profile missing for ${id}. Initializing...`);
       const { data: newProfile, error: createError } = await supabase
         .from('profiles')
-        .insert([{ id, username: `user_${id.substring(0, 5)}` }])
+        .insert([{ 
+            id, 
+            username: `user_${id.substring(0, 5)}`,
+            email: 'user@example.com' // Ideal to pull from session, but using placeholder for now
+        }])
         .select()
         .single();
 
@@ -35,18 +39,46 @@ export const getProfile = async (req, res) => {
 };
 
 export const updateProfile = async (req, res) => {
-  const { username, bio } = req.body;
+  const { id } = req.params;
+  const {
+    username,
+    full_name,
+    bio,
+    phone,
+    location,
+    avatar_url
+  } = req.body;
 
-  if (!username || username.length < 3) {
-    return res.status(400).json({ error: "Username must be at least 3 characters" });
+  try {
+    // 1. Basic Validation
+    if (username && username.length < 3) {
+      return res.status(400).json({ error: "Username must be at least 3 characters" });
+    }
+
+    // 2. Perform the Update
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({
+        username,
+        full_name,
+        bio,
+        phone,
+        location,
+        avatar_url,
+        updated_at: new Date()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      profile: data
+    });
+  } catch (error) {
+    console.error(`[API] Profile update error for ${id}:`, error.message);
+    res.status(500).json({ error: error.message });
   }
-
-  const { data, error } = await supabase
-    .from('profiles')
-    .update({ username, bio })
-    .eq('id', req.params.id)
-    .select();
-
-  if (error) return res.status(400).json({ error: error.message });
-  res.json(data);
 };

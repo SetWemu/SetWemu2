@@ -34,7 +34,6 @@ export const AuthProvider = ({ children }) => {
   // 3. Helper: Clear RAM AND Disk
   const logout = async () => {
     setUser(null);
-    // Remove all session data
     await Promise.all([
       AsyncStorage.removeItem(STORAGE_KEYS.USER_DATA),
       AsyncStorage.removeItem(STORAGE_KEYS.USER_TOKEN),
@@ -42,8 +41,15 @@ export const AuthProvider = ({ children }) => {
     ]);
   };
 
+  // 4. Helper: Update partial user data
+  const updateUser = async (newData) => {
+    const updatedUser = { ...user, ...newData };
+    setUser(updatedUser);
+    await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(updatedUser));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
