@@ -143,6 +143,29 @@ export const getAllEvents = async (req, res) => {
     }
 };
 
+export const searchEvents = async (req, res) => {
+    try {
+        const { q } = req.query;
+        if (!q) {
+            return res.status(400).json({ error: "Search query is required" });
+        }
+
+        const { data, error } = await supabase
+            .from('events')
+            .select(`
+                *,
+                category:categories!category_id (name)
+            `)
+            .ilike('title', `%${q}%`)
+            .order('date', { ascending: true });
+
+        if (error) throw error;
+        res.status(200).json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 export const getEventById = async (req, res) => {
     try {
       const { id } = req.params;

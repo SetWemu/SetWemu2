@@ -45,7 +45,7 @@ const ExploreScreen = ({ navigation }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   
   // FIX: Added missing state definitions
-  const [realEvents, setRealEvents] = useState({ today: [], weekend: [], week: [], trending: [] });
+  const [realEvents, setRealEvents] = useState({ today: [], weekend: [], trending: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -60,11 +60,37 @@ const ExploreScreen = ({ navigation }) => {
         console.log("API RESPONSE", data);
   
         // Organize data for the UI categories
+        const todayStr = new Date().toISOString().split('T')[0];
+        
+        // Weekend Range Logic
+        const getWeekendRange = () => {
+          const now = new Date();
+          const day = now.getDay(); // 0-Sun, 1-Mon, ..., 6-Sat
+          const friday = new Date(now);
+          if (day === 0) friday.setDate(now.getDate() - 2); // Sun -> last Fri
+          else if (day <= 4) friday.setDate(now.getDate() + (5 - day)); // Mon-Thu -> next Fri
+          else if (day === 6) friday.setDate(now.getDate() - 1); // Sat -> yesterday Fri
+          // If Fri, friday is now
+          
+          const sunday = new Date(friday);
+          sunday.setDate(friday.getDate() + 2);
+          
+          return [friday.toISOString().split('T')[0], sunday.toISOString().split('T')[0]];
+        };
+
+        const [friStr, sunStr] = getWeekendRange();
+
+        const allEvents = Array.isArray(data) ? data : [];
+        
+        // Filter events
+        const todayEvents = allEvents.filter(e => e.date === todayStr);
+        const weekendEvents = allEvents.filter(e => e.date >= friStr && e.date <= sunStr);
+        const upcomingEvents = allEvents.filter(e => e.date >= todayStr);
+
         setRealEvents({
-          today: Array.isArray(data) ? data.slice(0, 3) : [],
-          weekend: Array.isArray(data) ? data.slice(3, 6) : [],
-          week: Array.isArray(data) ? data.slice(6, 9) : [],
-          trending: Array.isArray(data) ? data : [],
+          today: todayEvents,
+          weekend: weekendEvents,
+          trending: upcomingEvents, // All upcoming events for trending
         });
       } catch (error) {
         console.error("Error fetching events:", error.response?.data || error.message);
@@ -179,7 +205,7 @@ const ExploreScreen = ({ navigation }) => {
           <MagnifyingGlass size={20} color={C.text.tertiary} weight="bold" />
           <TextInput
             style={s.searchInput}
-            placeholder="Search events, artists, venues..."
+            placeholder="Search by event name"
             placeholderTextColor={C.text.tertiary}
             value={searchQuery}
             onChangeText={setSearchQuery}

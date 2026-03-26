@@ -8,6 +8,7 @@ import {
   Image,
   StyleSheet,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -17,6 +18,7 @@ import {
   CalendarBlank,
   SlidersHorizontal,
 } from 'phosphor-react-native';
+import eventService from '../../api/eventService';
 
 const C = {
   bg: { primary: '#141416', card: '#1C1C1E', elevated: '#242428' },
@@ -25,72 +27,33 @@ const C = {
   border: { subtle: 'rgba(255,255,255,0.06)', light: 'rgba(255,255,255,0.10)' },
 };
 
-// Mock search results
-const MOCK_RESULTS = [
-  {
-    id: '1',
-    title: 'Tech Conference 2026',
-    location: 'Colombo',
-    date: 'Today, 6:00 PM',
-    image: 'https://picsum.photos/400/300?random=1',
-    category: 'Technology',
-    attendees: 245,
-  },
-  {
-    id: '2',
-    title: 'Jazz Night Live',
-    location: 'Galle Face',
-    date: 'Today, 8:00 PM',
-    image: 'https://picsum.photos/400/300?random=2',
-    category: 'Music',
-    attendees: 180,
-  },
-  {
-    id: '3',
-    title: 'Startup Pitch Night',
-    location: 'Crescat',
-    date: 'Wednesday, 6:30 PM',
-    image: 'https://picsum.photos/400/300?random=7',
-    category: 'Business',
-    attendees: 120,
-  },
-  {
-    id: '4',
-    title: 'Beach Party Festival',
-    location: 'Mount Lavinia',
-    date: 'Saturday, 7:00 PM',
-    image: 'https://picsum.photos/400/300?random=4',
-    category: 'Party',
-    attendees: 500,
-  },
-  {
-    id: '5',
-    title: 'Art Gallery Opening',
-    location: 'Kollupitiya',
-    date: 'Today, 5:00 PM',
-    image: 'https://picsum.photos/400/300?random=3',
-    category: 'Art',
-    attendees: 85,
-  },
-  {
-    id: '6',
-    title: 'Comedy Show',
-    location: 'Liberty Plaza',
-    date: 'Thursday, 8:00 PM',
-    image: 'https://picsum.photos/400/300?random=8',
-    category: 'Comedy',
-    attendees: 200,
-  },
-];
 
 const SearchResultsScreen = ({ route, navigation }) => {
   const { query } = route.params;
   const [searchQuery, setSearchQuery] = useState(query);
-  const [results, setResults] = useState(MOCK_RESULTS);
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchResults = async (q) => {
+    try {
+      setLoading(true);
+      const data = await eventService.searchEvents(q);
+      setResults(data);
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchResults(query);
+  }, [query]);
 
   const handleSearch = () => {
-    // Simulate search - in real app, call API
-    console.log('Searching for:', searchQuery);
+    if (searchQuery.trim()) {
+      fetchResults(searchQuery);
+    }
   };
 
   const ResultCard = ({ event }) => (
@@ -101,10 +64,10 @@ const SearchResultsScreen = ({ route, navigation }) => {
       }
       activeOpacity={0.8}
     >
-      <Image source={{ uri: event.image }} style={s.resultImage} />
+      <Image source={{ uri: event.image_url || event.image }} style={s.resultImage} />
       <View style={s.resultInfo}>
         <View style={s.categoryBadge}>
-          <Text style={s.categoryText}>{event.category}</Text>
+          <Text style={s.categoryText}>{event.category?.name || event.category || 'Event'}</Text>
         </View>
         <Text style={s.resultTitle}>{event.title}</Text>
         <View style={s.resultMeta}>
@@ -115,7 +78,6 @@ const SearchResultsScreen = ({ route, navigation }) => {
           <CalendarBlank size={14} color={C.text.secondary} weight="regular" />
           <Text style={s.resultMetaText}>{event.date}</Text>
         </View>
-        <Text style={s.attendees}>{event.attendees} attending</Text>
       </View>
     </TouchableOpacity>
   );
@@ -136,7 +98,7 @@ const SearchResultsScreen = ({ route, navigation }) => {
           <MagnifyingGlass size={18} color={C.text.tertiary} weight="bold" />
           <TextInput
             style={s.searchInput}
-            placeholder="Search events..."
+            placeholder="Search by event name"
             placeholderTextColor={C.text.tertiary}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -157,13 +119,25 @@ const SearchResultsScreen = ({ route, navigation }) => {
       </View>
 
       {/* Results List */}
-      <FlatList
-        data={results}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => <ResultCard event={item} />}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
-        showsVerticalScrollIndicator={false}
-      />
+      {loading ? (
+        <View style={s.loader}>
+          <ActivityIndicator size="large" color={C.blue.light} />
+        </View>
+      ) : results.length > 0 ? (
+        <FlatList
+          data={results}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => <ResultCard event={item} />}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
+          showsVerticalScrollIndicator={false}
+        />
+      ) : (
+        <View style={s.emptyContainer}>
+          <MagnifyingGlass size={48} color={C.text.tertiary} weight="light" />
+          <Text style={s.emptyText}>No events found</Text>
+          <Text style={s.emptySubtext}>Try a different search term</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -276,6 +250,28 @@ const s = StyleSheet.create({
     color: C.blue.light,
     fontWeight: '700',
     marginTop: 4,
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 40,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: C.text.primary,
+    marginTop: 16,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: C.text.secondary,
+    marginTop: 8,
+  },
+  loader: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

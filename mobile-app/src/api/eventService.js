@@ -60,6 +60,21 @@ const eventService = {
       console.error('Error in createEvent:', error.response?.data || error.message);
       throw error;
     }
+  },
+
+  /**
+   * Search for events by query string
+   * @param {string} query 
+   * @returns {Promise<Array>} List of matching events
+   */
+  searchEvents: async (query) => {
+    try {
+      const response = await apiClient.get(`/events/search?q=${encodeURIComponent(query)}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error in searchEvents:', error.response?.data || error.message);
+      throw error;
+    }
   }
 };
 
