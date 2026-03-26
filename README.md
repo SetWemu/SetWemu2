@@ -1,7 +1,7 @@
 # SetWemu 
 
 ## Overview
-SetWemu is a personalized event discovery platform designed for the modern social scene in Colombo. Using a "Tinder-style" interaction model, SetWemu learns user preferences in real-time to serve a highly curated feed of events, from tech conferences at Trace Expert City to EDM festivals at BMICH.
+SetWemu is a personalized event discovery platform designed for the modern social scene in Colombo. Using a swipe style interaction model, SetWemu learns user preferences in real-time to serve a highly curated feed of events, from tech conferences at Trace Expert City to EDM festivals at BMICH.
 
 ## Core Modules
 1. **Recommendation Engine (/backend)**
@@ -11,7 +11,7 @@ SetWemu is a personalized event discovery platform designed for the modern socia
   
     * History Filtering: Automatically hides events a user has already swiped on.
  
-2. **Live Event Map (/frontend)**
+2. **Live Event Map (/mobile-app)**
   * A real-time geospatial visualization of the Colombo social scene.
  
       * Interactive Markers: Tap pins to see event "Quick Views" at Trace Expert City, BMICH, and more.
@@ -23,7 +23,7 @@ SetWemu is a personalized event discovery platform designed for the modern socia
 ## Tech Stack
 | Layer | Technology |  
 | :--- | :--- | 
-| `Frontend` | React Native (Expo) | 
+| `Frontend` | React Native | 
 | `Backend` | Node.js, Express.js  | 
 | `Database` | Supabase (PostgreSQL) | 
 | `Authentication` | Supabase Auth (UUID-linked) | 
