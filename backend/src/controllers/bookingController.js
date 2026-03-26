@@ -2,7 +2,7 @@ import { supabase } from '../config/db.js';
 import crypto from 'crypto';
 
 export const createBooking = async (req, res) => {
-  const { user_id, items } = req.body; 
+  const { user_id, items, payment_method } = req.body; 
 
   try {
     // 1. Fetch prices for all requested tiers to calculate total
@@ -23,13 +23,14 @@ export const createBooking = async (req, res) => {
       }
     });
 
-    // 3. Create the Booking Header with the CALCULATED total
+    // 3. Create the Booking Header
     const { data: booking, error: bError } = await supabase
       .from('bookings')
       .insert({ 
         user_id, 
         total_amount: calculatedTotal, 
-        status: 'confirmed' 
+        status: 'confirmed',
+        payment_method: payment_method || 'DEMO_PURCHASE'
       })
       .select().single();
 
@@ -59,6 +60,7 @@ export const createBooking = async (req, res) => {
     });
 
   } catch (error) {
+    console.error("Booking Creation Error:", error.message);
     res.status(400).json({ error: error.message });
   }
 };

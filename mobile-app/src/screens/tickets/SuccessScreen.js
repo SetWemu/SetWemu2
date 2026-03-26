@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, StatusBar } from 'react-nativ
 import { CheckCircle, Ticket, House } from 'phosphor-react-native';
 
 const SuccessScreen = ({ route, navigation }) => {
-  const { event } = route.params;
+  const { event, bookingId } = route.params;
 
   return (
     <View style={ss.container}>
@@ -12,6 +12,13 @@ const SuccessScreen = ({ route, navigation }) => {
       <Text style={ss.title}>Booking Confirmed!</Text>
       <Text style={ss.sub}>Your tickets for {event.title} are now ready.</Text>
       
+      {bookingId && (
+        <View style={ss.codeCard}>
+          <Text style={ss.codeLabel}>CONFIRMATION CODE</Text>
+          <Text style={ss.codeValue}>{bookingId.toString().substring(0, 8).toUpperCase()}</Text>
+        </View>
+      )}
+
       <TouchableOpacity style={ss.btn} onPress={() => navigation.navigate('MyTickets')}>
         <Ticket size={20} color="#141416" weight="bold" />
         <Text style={ss.btnText}>View in My Tickets</Text>
@@ -33,7 +40,30 @@ const ss = StyleSheet.create({
   btn: { backgroundColor: '#ADF3FF', width: '100%', padding: 18, borderRadius: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 40 },
   btnText: { fontWeight: '900', color: '#141416', fontSize: 16 },
   homeBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 24 },
-  homeText: { color: '#ADF3FF', fontWeight: '700', fontSize: 14 }
+  homeText: { color: '#ADF3FF', fontWeight: '700', fontSize: 14 },
+  codeCard: { 
+    backgroundColor: '#1C1C1E', 
+    padding: 20, 
+    borderRadius: 20, 
+    width: '100%', 
+    marginTop: 25, 
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)'
+  },
+  codeLabel: { 
+    color: '#6B6B6B', 
+    fontSize: 10, 
+    fontWeight: '800', 
+    letterSpacing: 1, 
+    marginBottom: 8 
+  },
+  codeValue: { 
+    color: '#ADF3FF', 
+    fontSize: 24, 
+    fontWeight: '900', 
+    letterSpacing: 2 
+  }
 });
 
 export default SuccessScreen;
