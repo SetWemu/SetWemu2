@@ -19,6 +19,7 @@ import {
   SlidersHorizontal,
 } from 'phosphor-react-native';
 import eventService from '../../api/eventService';
+import { useAuth } from '../../context/AuthContext';
 
 const C = {
   bg: { primary: '#141416', card: '#1C1C1E', elevated: '#242428' },
@@ -33,12 +34,15 @@ const SearchResultsScreen = ({ route, navigation }) => {
   const [searchQuery, setSearchQuery] = useState(query);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   const fetchResults = async (q) => {
     try {
       setLoading(true);
       const data = await eventService.searchEvents(q);
-      setResults(data);
+      // Filter out self-hosted events
+      const otherEvents = data.filter(e => e.host_id !== user?.id);
+      setResults(otherEvents);
     } catch (error) {
       console.error('Search error:', error);
     } finally {

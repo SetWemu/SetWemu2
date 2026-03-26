@@ -137,7 +137,7 @@ const ManageEventsScreen = ({ navigation }) => {
         <Text style={styles.headerTitle}>Manage Events</Text>
         <TouchableOpacity
           style={styles.createBtn}
-          onPress={() => navigation.navigate('CreateEvent')}
+          onPress={() => navigation.navigate('Main', { screen: 'CreateTab' })}
         >
           <Plus size={20} color={COLORS.blue.brand} weight="bold" />
         </TouchableOpacity>
@@ -164,7 +164,7 @@ const ManageEventsScreen = ({ navigation }) => {
           <Text style={styles.emptySubText}>Start by creating your first event!</Text>
           <TouchableOpacity 
             style={styles.createFirstBtn}
-            onPress={() => navigation.navigate('CreateEvent')}
+            onPress={() => navigation.navigate('Main', { screen: 'CreateTab' })}
           >
             <Text style={styles.createFirstText}>Create Event</Text>
           </TouchableOpacity>

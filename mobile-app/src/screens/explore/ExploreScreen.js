@@ -15,11 +15,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   MagnifyingGlass,
-  MapPin,
   CalendarBlank,
+  MapPin,
   Fire,
   HandSwipeRight,
 } from 'phosphor-react-native';
+import { useAuth } from '../../context/AuthContext';
 
 const C = {
   bg: { primary: '#141416', card: '#1C1C1E', elevated: '#242428' },
@@ -43,6 +44,7 @@ const ExploreScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const { user } = useAuth();
   
   // FIX: Added missing state definitions
   const [realEvents, setRealEvents] = useState({ today: [], weekend: [], trending: [] });
@@ -82,10 +84,13 @@ const ExploreScreen = ({ navigation }) => {
 
         const allEvents = Array.isArray(data) ? data : [];
         
-        // Filter events
-        const todayEvents = allEvents.filter(e => e.date === todayStr);
-        const weekendEvents = allEvents.filter(e => e.date >= friStr && e.date <= sunStr);
-        const upcomingEvents = allEvents.filter(e => e.date >= todayStr);
+        // Filter out self-hosted events
+        const otherEvents = allEvents.filter(e => e.host_id !== user?.id);
+
+        // Map categories to states
+        const todayEvents = otherEvents.filter(e => e.date === todayStr);
+        const weekendEvents = otherEvents.filter(e => e.date >= friStr && e.date <= sunStr);
+        const upcomingEvents = otherEvents.filter(e => e.date >= todayStr);
 
         setRealEvents({
           today: todayEvents,

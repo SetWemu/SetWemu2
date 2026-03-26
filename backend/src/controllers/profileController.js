@@ -12,15 +12,15 @@ export const getProfile = async (req, res) => {
 };
 
 export const updateProfile = async (req, res) => {
-  const {username, bio} = req.body;
+  const { username, bio } = req.body;
 
   if (!username || username.length < 3) {
     return res.status(400).json({ error: "Username must be at least 3 characters" });
-    }
+  }
 
   const { data, error } = await supabase
     .from('profiles')
-    .update({ username, bio})
+    .update({ username, bio })
     .eq('id', req.params.id)
     .select();
 

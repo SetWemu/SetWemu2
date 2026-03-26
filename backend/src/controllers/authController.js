@@ -59,7 +59,7 @@ export const login = async (req, res) => {
             user: {
                 id: data.user.id,
                 email: data.user.email,
-                full_name: data.user.full_name
+                full_name: data.user.user_metadata?.full_name || 'User'
             },
             token: data.session.access_token,
             session: data.session
