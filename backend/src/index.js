@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config({ debug: true });
+
 import express from 'express';
 import cors from 'cors';
 import { supabase } from './config/db.js';
@@ -61,6 +64,6 @@ app.get('/test-db', async (req, res) => {
 // Using '0.0.0.0' allows connections from your Android Emulator/Physical device
 app.listen(port, '0.0.0.0', () => {
   console.log(`\n🚀 SetWemu Backend Running`);
-  console.log(`Local:           http://localhost:${port}`);
-  console.log(`Network/Mobile:  http://YOUR_PC_IP:${port}`); 
+  console.log(`Local/ USB debug:    http://localhost:${port}`);
+  console.log(`Emulator:            http://10.0.2.2:${port}`); 
 });

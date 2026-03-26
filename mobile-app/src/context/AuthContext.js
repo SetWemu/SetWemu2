@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { STORAGE_KEYS } from '../constants/storage';
 
 const AuthContext = createContext({});
 
@@ -11,7 +12,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const loadUserFromDisk = async () => {
       try {
-        const savedUser = await AsyncStorage.getItem('user_data');
+        const savedUser = await AsyncStorage.getItem(STORAGE_KEYS.USER_DATA);
         if (savedUser) {
           setUser(JSON.parse(savedUser));
         }
@@ -27,13 +28,18 @@ export const AuthProvider = ({ children }) => {
   // 2. Helper: Save to RAM AND Disk
   const login = async (userData) => {
     setUser(userData);
-    await AsyncStorage.setItem('user_data', JSON.stringify(userData));
+    await AsyncStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(userData));
   };
 
   // 3. Helper: Clear RAM AND Disk
   const logout = async () => {
     setUser(null);
-    await AsyncStorage.removeItem('user_data');
+    // Remove all session data
+    await Promise.all([
+      AsyncStorage.removeItem(STORAGE_KEYS.USER_DATA),
+      AsyncStorage.removeItem(STORAGE_KEYS.USER_TOKEN),
+      AsyncStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN),
+    ]);
   };
 
   return (

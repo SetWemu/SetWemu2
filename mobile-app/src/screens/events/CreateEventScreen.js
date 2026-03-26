@@ -11,6 +11,7 @@ import {
   StatusBar,
   Switch,
   Alert,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -32,6 +33,9 @@ import {
   Eye,
 } from 'phosphor-react-native';
 import UpgradeModal from './UpgradeModal';
+import eventService from '../../api/eventService';
+import { CaretDown } from 'phosphor-react-native';
+import { useAuth } from '../../context/AuthContext';
 
 const C = {
   bg: { primary: '#141416', card: '#1C1C1E', elevated: '#242428' },
@@ -55,6 +59,16 @@ const LIMITS = {
   },
 };
 
+const Section = ({ title, children, isPremium }) => (
+  <View style={s.section}>
+    <View style={s.sectionHeader}>
+      <Text style={s.sectionTitle}>{title}</Text>
+      {isPremium && <Crown size={16} color={C.gold} weight="fill" />}
+    </View>
+    {children}
+  </View>
+);
+
 const CreateEventScreen = ({ navigation }) => {
   const [userType, setUserType] = useState('personal'); // TODO: Get from auth context
 
@@ -67,21 +81,37 @@ const CreateEventScreen = ({ navigation }) => {
   const [mapsLink, setMapsLink] = useState('');
   const [tags, setTags] = useState('');
   const [heroImage, setHeroImage] = useState(null);
-  const [galleryImages, setGalleryImages] = useState([]);
   const [tickets, setTickets] = useState([
-    { id: '1', type: 'General Admission', price: '', quantity: '' },
+    { id: '1', type: 'General Admission', price: '0', quantity: '' },
   ]);
-  const [faqs, setFaqs] = useState([{ id: '1', question: '', answer: '' }]);
-  const [refundPolicy, setRefundPolicy] = useState(
-    'Full refund up to 24 hours before event',
-  );
+  const [categories, setCategories] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const { user } = useAuth();
 
   // PICKERS
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(new Date());
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+
+  // FETCH CATEGORIES
+  React.useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const data = await eventService.getCategories();
+        setCategories(data);
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+    fetchCats();
+  }, []);
 
   // PREMIUM FEATURES
   const [customBrandColor, setCustomBrandColor] = useState('#ADF3FF');
@@ -102,7 +132,6 @@ const CreateEventScreen = ({ navigation }) => {
     Alert.alert('Image Picker', `Pick ${type} image - to be implemented`);
   };
 
-  // TICKET MANAGEMENT
   const addTicket = () => {
     if (tickets.length >= LIMITS[userType].ticketTypes) {
       showUpgradeModal();
@@ -110,13 +139,13 @@ const CreateEventScreen = ({ navigation }) => {
     }
     setTickets([
       ...tickets,
-      { id: Date.now().toString(), type: '', price: '', quantity: '' },
+      { id: Date.now().toString(), type: '', price: '0', quantity: '' },
     ]);
   };
 
   const removeTicket = id => {
     if (tickets.length <= 1) {
-      Alert.alert('Error', 'At least one ticket type required');
+      Alert.alert('Action Restricted', 'At least one ticket type is required.');
       return;
     }
     setTickets(tickets.filter(t => t.id !== id));
@@ -133,56 +162,110 @@ const CreateEventScreen = ({ navigation }) => {
     setTickets(tickets.map(t => (t.id === id ? { ...t, [field]: value } : t)));
   };
 
-  // GALLERY MANAGEMENT
-  const addGalleryImage = () => {
-    if (galleryImages.length >= LIMITS[userType].galleryImages) {
-      showUpgradeModal();
-      return;
-    }
-    pickImage('gallery');
+  const resetForm = () => {
+    setTitle('');
+    setDescription('');
+    setDate('');
+    setTime('');
+    setLocation('');
+    setMapsLink('');
+    setTags('');
+    setHeroImage(null);
+    setTickets([{ id: '1', type: 'General Admission', price: '0', quantity: '' }]);
+    setSelectedCategoryId(null);
+    setAgreedToTerms(false);
+    setEarlyBirdPrice('');
+    setPromoCode('');
+    setEnableAnalytics(false);
+    setSelectedDate(new Date());
+    setSelectedTime(new Date());
   };
 
-  // FAQ MANAGEMENT
-  const addFaq = () => {
-    setFaqs([...faqs, { id: Date.now().toString(), question: '', answer: '' }]);
-  };
-
-  const removeFaq = id => {
-    setFaqs(faqs.filter(f => f.id !== id));
-  };
-
-  const updateFaq = (id, field, value) => {
-    setFaqs(faqs.map(f => (f.id === id ? { ...f, [field]: value } : f)));
-  };
-
-  // PUBLISH
-  const handlePublish = () => {
-    if (!agreedToTerms) {
-      Alert.alert('Terms Required', 'Please agree to Terms & Conditions');
-      return;
-    }
+  const handlePublish = async () => {
+    // Check mandatory fields
     if (!title.trim()) {
-      Alert.alert('Missing Info', 'Please enter an event title');
+      Alert.alert('Missing Info', 'Please enter an event title.');
+      return;
+    }
+    if (!date) {
+      Alert.alert('Missing Info', 'Please select an event date.');
+      return;
+    }
+    if (!time) {
+      Alert.alert('Missing Info', 'Please select an event time.');
+      return;
+    }
+    if (!location.trim()) {
+      Alert.alert('Missing Info', 'Please enter an event location.');
+      return;
+    }
+    if (!selectedCategoryId) {
+      Alert.alert('Missing Info', 'Please select an event category.');
       return;
     }
 
-    // TODO: Upload to Supabase
-    navigation.navigate('EventPublishSuccess', {
-      eventId: 'new-event-' + Date.now(),
-      eventTitle: title,
-    });
+    // Validate Tiers
+    const invalidTier = tickets.find(t => !t.type || !t.quantity || parseInt(t.quantity) <= 0);
+    if (invalidTier) {
+      Alert.alert('Ticket Info Missing', 'Each ticket type must have a name and a capacity of more than 0.');
+      return;
+    }
+
+    if (!agreedToTerms) {
+      Alert.alert('Terms Required', 'Please agree to Terms & Conditions.');
+      return;
+    }
+
+    if (!user?.id) {
+      Alert.alert('Error', 'User session not found. Please log in again.');
+      return;
+    }
+
+    setIsPublishing(true);
+
+    try {
+      // Map tickets to backend format { name, price, capacity }
+      const ticketTiers = tickets.map(t => ({
+        name: t.type || 'General Admission',
+        price: parseFloat(t.price) || 0,
+        capacity: parseInt(t.quantity) || 100,
+      }));
+
+      const eventPayload = {
+        title,
+        description,
+        location,
+        google_maps_url: mapsLink,
+        date: selectedDate.toISOString().split('T')[0], // YYYY-MM-DD
+        start_time: `${selectedTime.getHours().toString().padStart(2, '0')}:${selectedTime.getMinutes().toString().padStart(2, '0')}:00`, // HH:mm:ss
+        image_url: heroImage,
+        category_id: selectedCategoryId,
+        host_id: user.id,
+        ticket_tiers: ticketTiers,
+      };
+
+      const result = await eventService.createEvent(eventPayload);
+
+      if (result) {
+        const publishedEventId = result.event.id;
+        const publishedTitle = title;
+        
+        // Reset form before navigating to clear for next use
+        resetForm();
+
+        navigation.navigate('EventPublishSuccess', {
+          eventId: publishedEventId,
+          eventTitle: publishedTitle,
+        });
+      }
+    } catch (error) {
+      console.error('Publish Error:', error);
+      Alert.alert('Publication Failed', error.response?.data?.error || 'Something went wrong while creating your event.');
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
-  // COMPONENTS
-  const Section = ({ title, children, isPremium }) => (
-    <View style={s.section}>
-      <View style={s.sectionHeader}>
-        <Text style={s.sectionTitle}>{title}</Text>
-        {isPremium && <Crown size={16} color={C.gold} weight="fill" />}
-      </View>
-      {children}
-    </View>
-  );
 
   return (
     <SafeAreaView style={s.container} edges={['top']}>
@@ -206,11 +289,9 @@ const CreateEventScreen = ({ navigation }) => {
                 location,
                 tags,
                 heroImage,
-                galleryImages,
                 tickets,
-                faqs,
                 mapsLink,
-                refundPolicy,
+                selectedCategoryId,
               },
             })
           }
@@ -243,11 +324,13 @@ const CreateEventScreen = ({ navigation }) => {
         </Section>
 
         {/* BASIC DETAILS */}
-        <Section title="Basic Information">
+        <Section title={
+          <Text style={s.sectionTitle}>Basic Information <Text style={s.asterisk}>*</Text></Text>
+        }>
           <View style={s.inputWrap}>
             <TextInput
               style={s.input}
-              placeholder="Event Title"
+              placeholder="Event Title *"
               placeholderTextColor={C.text.tertiary}
               value={title}
               onChangeText={setTitle}
@@ -267,14 +350,16 @@ const CreateEventScreen = ({ navigation }) => {
         </Section>
 
         {/* DATE & TIME */}
-        <Section title="Date & Time">
+        <Section title={
+          <Text style={s.sectionTitle}>Date & Time <Text style={s.asterisk}>*</Text></Text>
+        }>
           <TouchableOpacity
             style={s.inputWrap}
             onPress={() => setShowDatePicker(true)}
           >
             <CalendarBlank size={18} color={C.blue.light} />
             <Text style={[s.input, !date && { color: C.text.tertiary }]}>
-              {date || 'Select Date'}
+              {date || 'Select Date *'}
             </Text>
           </TouchableOpacity>
 
@@ -299,7 +384,7 @@ const CreateEventScreen = ({ navigation }) => {
           >
             <Clock size={18} color={C.blue.light} />
             <Text style={[s.input, !time && { color: C.text.tertiary }]}>
-              {time || 'Select Time'}
+              {time || 'Select Time *'}
             </Text>
           </TouchableOpacity>
 
@@ -320,12 +405,14 @@ const CreateEventScreen = ({ navigation }) => {
         </Section>
 
         {/* LOCATION */}
-        <Section title="Location">
+        <Section title={
+          <Text style={s.sectionTitle}>Location <Text style={s.asterisk}>*</Text></Text>
+        }>
           <View style={s.inputWrap}>
             <MapPin size={18} color={C.blue.light} weight="fill" />
             <TextInput
               style={s.input}
-              placeholder="Event Location Name"
+              placeholder="Event Location Name *"
               placeholderTextColor={C.text.tertiary}
               value={location}
               onChangeText={setLocation}
@@ -347,13 +434,38 @@ const CreateEventScreen = ({ navigation }) => {
           </Text>
         </Section>
 
+        {/* CATEGORY */}
+        <Section title={
+          <Text style={s.sectionTitle}>Event Category <Text style={s.asterisk}>*</Text></Text>
+        }>
+          <TouchableOpacity
+            style={s.inputWrap}
+            onPress={() => setShowCategoryPicker(true)}
+          >
+            <Tag size={18} color={C.blue.light} weight="bold" />
+            <Text style={[s.input, !selectedCategoryId && { color: C.text.tertiary }]}>
+              {selectedCategoryId
+                ? categories.find(c => c.id === selectedCategoryId)?.name
+                : 'Select a Category *'}
+            </Text>
+            <CaretDown size={18} color={C.text.tertiary} />
+          </TouchableOpacity>
+        </Section>
+
         {/* TICKETS */}
-        <Section title="Tickets & Pricing">
+        <Section title={
+          <Text style={s.sectionTitle}>Tickets & Pricing <Text style={s.asterisk}>*</Text></Text>
+        }>
           <Text style={s.limitText}>
             {userType === 'personal'
               ? `${tickets.length}/${LIMITS.personal.ticketTypes} ticket types • Max ${LIMITS.personal.maxTicketsPerType} per type`
               : 'Unlimited ticket types'}
           </Text>
+
+          <View style={s.freeInfoBox}>
+            <Question size={14} color={C.blue.light} weight="bold" />
+            <Text style={s.freeInfoText}>Setting price to 0 make the event free for attendees.</Text>
+          </View>
 
           {tickets.map((ticket, index) => (
             <View key={ticket.id} style={s.ticketCard}>
@@ -370,7 +482,7 @@ const CreateEventScreen = ({ navigation }) => {
               <View style={s.inputWrap}>
                 <TextInput
                   style={s.input}
-                  placeholder="Ticket Type (e.g., VIP, General)"
+                  placeholder="Ticket Type * (e.g., VIP, General)"
                   placeholderTextColor={C.text.tertiary}
                   value={ticket.type}
                   onChangeText={val => updateTicket(ticket.id, 'type', val)}
@@ -393,7 +505,7 @@ const CreateEventScreen = ({ navigation }) => {
                   <Users size={18} color={C.blue.light} />
                   <TextInput
                     style={s.input}
-                    placeholder={`Max ${LIMITS[userType].maxTicketsPerType}`}
+                    placeholder={`Max * (L: ${LIMITS[userType].maxTicketsPerType})`}
                     placeholderTextColor={C.text.tertiary}
                     keyboardType="numeric"
                     value={ticket.quantity}
@@ -418,7 +530,7 @@ const CreateEventScreen = ({ navigation }) => {
             <Tag size={18} color={C.blue.light} weight="bold" />
             <TextInput
               style={s.input}
-              placeholder="e.g., Music, Outdoor, Festival (comma separated)"
+              placeholder="e.g. Music, Outdoor (comma sep)"
               placeholderTextColor={C.text.tertiary}
               value={tags}
               onChangeText={setTags}
@@ -426,93 +538,6 @@ const CreateEventScreen = ({ navigation }) => {
           </View>
         </Section>
 
-        {/* GALLERY */}
-        <Section title="Event Gallery">
-          <Text style={s.limitText}>
-            {userType === 'personal'
-              ? `${galleryImages.length}/${LIMITS.personal.galleryImages} image`
-              : `${galleryImages.length}/${LIMITS.business.galleryImages} images`}
-          </Text>
-
-          <TouchableOpacity style={s.galleryButton} onPress={addGalleryImage}>
-            <Images size={20} color={C.blue.light} weight="bold" />
-            <Text style={s.galleryButtonText}>Add Gallery Images</Text>
-            <Text style={s.galleryButtonSub}>Showcase your event</Text>
-          </TouchableOpacity>
-        </Section>
-
-        {/* FAQ */}
-        <Section title="Frequently Asked Questions">
-          {faqs.map((faq, index) => (
-            <View key={faq.id} style={s.faqCard}>
-              <View style={s.faqHeader}>
-                <Question size={18} color={C.blue.light} weight="bold" />
-                <Text style={s.faqTitle}>FAQ {index + 1}</Text>
-                {faqs.length > 1 && (
-                  <TouchableOpacity onPress={() => removeFaq(faq.id)}>
-                    <Trash size={18} color="#FF453A" weight="bold" />
-                  </TouchableOpacity>
-                )}
-              </View>
-
-              <View style={s.inputWrap}>
-                <TextInput
-                  style={s.input}
-                  placeholder="Question"
-                  placeholderTextColor={C.text.tertiary}
-                  value={faq.question}
-                  onChangeText={val => updateFaq(faq.id, 'question', val)}
-                />
-              </View>
-
-              <View style={[s.inputWrap, { height: 80, marginTop: 8 }]}>
-                <TextInput
-                  style={[
-                    s.input,
-                    { height: '100%', textAlignVertical: 'top' },
-                  ]}
-                  placeholder="Answer"
-                  placeholderTextColor={C.text.tertiary}
-                  value={faq.answer}
-                  onChangeText={val => updateFaq(faq.id, 'answer', val)}
-                  multiline
-                />
-              </View>
-            </View>
-          ))}
-
-          <TouchableOpacity style={s.addButton} onPress={addFaq}>
-            <Plus size={18} color={C.blue.light} weight="bold" />
-            <Text style={s.addButtonText}>Add Another FAQ</Text>
-          </TouchableOpacity>
-        </Section>
-
-        {/* REFUND POLICY */}
-        <Section title="Refund Policy">
-          <View style={[s.inputWrap, { height: 100 }]}>
-            <TextInput
-              style={[s.input, { height: '100%', textAlignVertical: 'top' }]}
-              placeholder="Enter your refund policy..."
-              placeholderTextColor={C.text.tertiary}
-              value={refundPolicy}
-              onChangeText={
-                userType === 'business'
-                  ? setRefundPolicy
-                  : () => showUpgradeModal()
-              }
-              multiline
-              editable={userType === 'business'}
-            />
-          </View>
-          {userType === 'personal' && (
-            <TouchableOpacity onPress={showUpgradeModal}>
-              <Text style={[s.helperText, { color: C.gold }]}>
-                <Crown size={12} color={C.gold} weight="fill" /> Upgrade to
-                customize refund policy
-              </Text>
-            </TouchableOpacity>
-          )}
-        </Section>
 
         {/* PREMIUM: EARLY BIRD PRICING */}
         <Section title="Early Bird Pricing" isPremium>
@@ -633,7 +658,9 @@ const CreateEventScreen = ({ navigation }) => {
         </Section>
 
         {/* TERMS */}
-        <Section title="Legal">
+        <Section title={
+          <Text style={s.sectionTitle}>Legal <Text style={s.asterisk}>*</Text></Text>
+        }>
           <TouchableOpacity
             style={s.checkboxRow}
             onPress={() => setAgreedToTerms(!agreedToTerms)}
@@ -653,11 +680,16 @@ const CreateEventScreen = ({ navigation }) => {
       {/* BOTTOM BAR */}
       <View style={s.bottomBar}>
         <TouchableOpacity
-          style={[s.publishButton, !agreedToTerms && s.publishButtonDisabled]}
+          style={[
+            s.publishButton,
+            (!agreedToTerms || isPublishing) && s.publishButtonDisabled,
+          ]}
           onPress={handlePublish}
-          disabled={!agreedToTerms}
+          disabled={!agreedToTerms || isPublishing}
         >
-          <Text style={s.publishButtonText}>Publish Event</Text>
+          <Text style={s.publishButtonText}>
+            {isPublishing ? 'Publishing...' : 'Publish Event'}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -665,6 +697,52 @@ const CreateEventScreen = ({ navigation }) => {
         visible={showUpgrade}
         onClose={() => setShowUpgrade(false)}
       />
+
+      <Modal
+        visible={showCategoryPicker}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowCategoryPicker(false)}
+      >
+        <View style={s.modalOverlay}>
+          <View style={s.categoryModal}>
+            <View style={s.modalHeader}>
+              <Text style={s.modalTitle}>Select Category</Text>
+              <TouchableOpacity onPress={() => setShowCategoryPicker(false)}>
+                <Text style={s.closeText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView>
+              {isLoadingCategories ? (
+                <Text style={s.loadingText}>Loading categories...</Text>
+              ) : (
+                categories.map(cat => (
+                  <TouchableOpacity
+                    key={cat.id}
+                    style={[
+                      s.categoryItem,
+                      selectedCategoryId === cat.id && s.categoryItemSelected,
+                    ]}
+                    onPress={() => {
+                      setSelectedCategoryId(cat.id);
+                      setShowCategoryPicker(false);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        s.categoryItemText,
+                        selectedCategoryId === cat.id && s.categoryItemTextSelected,
+                      ]}
+                    >
+                      {cat.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -716,6 +794,26 @@ const s = StyleSheet.create({
     color: C.text.primary,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
+  },
+  asterisk: {
+    color: '#FF453A',
+    fontWeight: 'bold',
+  },
+  freeInfoBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(173, 243, 255, 0.05)',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(173, 243, 255, 0.1)',
+  },
+  freeInfoText: {
+    fontSize: 12,
+    color: C.blue.light,
+    fontWeight: '600',
   },
   limitText: {
     fontSize: 11,
@@ -903,6 +1001,43 @@ const s = StyleSheet.create({
   },
   publishButtonDisabled: { opacity: 0.4 },
   publishButtonText: { fontSize: 16, fontWeight: '900', color: '#141416' },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end',
+  },
+  categoryModal: {
+    backgroundColor: C.bg.elevated,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '80%',
+    paddingBottom: 40,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: C.border.subtle,
+  },
+  modalTitle: { fontSize: 18, fontWeight: '800', color: C.text.primary },
+  closeText: { fontSize: 14, fontWeight: '700', color: C.blue.light },
+  categoryItem: {
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: C.border.subtle,
+  },
+  categoryItemSelected: { backgroundColor: 'rgba(173,243,255,0.05)' },
+  categoryItemText: { fontSize: 15, fontWeight: '600', color: C.text.secondary },
+  categoryItemTextSelected: { color: C.blue.light, fontWeight: '700' },
+  loadingText: {
+    padding: 40,
+    textAlign: 'center',
+    color: C.text.tertiary,
+    fontSize: 14,
+  },
 });
 
 export default CreateEventScreen;

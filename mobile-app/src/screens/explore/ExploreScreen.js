@@ -1,4 +1,4 @@
-import { API_URL } from '../../config/api';
+import apiClient from '../../api/apiClient';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -28,8 +28,6 @@ const C = {
   border: { subtle: 'rgba(255,255,255,0.06)', light: 'rgba(255,255,255,0.10)' },
 };
 
-
-
 const SEARCH_SUGGESTIONS = [
   'Tech Conference',
   'Jazz Night',
@@ -46,35 +44,63 @@ const ExploreScreen = ({ navigation }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   
-  // ADD THESE TWO LINES BACK IF THEY ARE MISSING:
-  const [realEvents, setRealEvents] = useState({ today: [], weekend: [], week: [], trending: [] });
+  // FIX: Added missing state definitions
+  const [realEvents, setRealEvents] = useState({ today: [], weekend: [], trending: [] });
   const [loading, setLoading] = useState(true);
-  // FETCH FROM BACKEND
+
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        // Logic check: Ensure your server is running!
-        const response = await fetch(`${API_URL}/events`);
-        const data = await response.json();
-        console.log("API RESPONSE", data)
-        // Organize the data into the categories the UI expects
+        
+        // Using apiClient to ensure the JWT interceptor is used
+        const response = await apiClient.get('/events');
+        const data = response.data; 
+  
+        console.log("API RESPONSE", data);
+  
+        // Organize data for the UI categories
+        const todayStr = new Date().toISOString().split('T')[0];
+        
+        // Weekend Range Logic
+        const getWeekendRange = () => {
+          const now = new Date();
+          const day = now.getDay(); // 0-Sun, 1-Mon, ..., 6-Sat
+          const friday = new Date(now);
+          if (day === 0) friday.setDate(now.getDate() - 2); // Sun -> last Fri
+          else if (day <= 4) friday.setDate(now.getDate() + (5 - day)); // Mon-Thu -> next Fri
+          else if (day === 6) friday.setDate(now.getDate() - 1); // Sat -> yesterday Fri
+          // If Fri, friday is now
+          
+          const sunday = new Date(friday);
+          sunday.setDate(friday.getDate() + 2);
+          
+          return [friday.toISOString().split('T')[0], sunday.toISOString().split('T')[0]];
+        };
+
+        const [friStr, sunStr] = getWeekendRange();
+
+        const allEvents = Array.isArray(data) ? data : [];
+        
+        // Filter events
+        const todayEvents = allEvents.filter(e => e.date === todayStr);
+        const weekendEvents = allEvents.filter(e => e.date >= friStr && e.date <= sunStr);
+        const upcomingEvents = allEvents.filter(e => e.date >= todayStr);
+
         setRealEvents({
-          today: Array.isArray(data) ? data.slice(0, 3) : [],
-          weekend: Array.isArray(data) ? data.slice(3, 6) : [],
-          week: Array.isArray(data) ? data.slice(6, 9) : [],
-          trending: Array.isArray(data) ? data : [],
+          today: todayEvents,
+          weekend: weekendEvents,
+          trending: upcomingEvents, // All upcoming events for trending
         });
       } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching events:", error.response?.data || error.message);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchEvents();
   }, []);
-
 
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -89,14 +115,7 @@ const ExploreScreen = ({ navigation }) => {
     }
   }, [searchQuery]);
 
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#141416' }}>
-        <ActivityIndicator size="large" color="#ADF3FF" />
-      </View>
-    );
-  }
-
+  // Handle Search logic
   const handleSearch = () => {
     if (searchQuery.trim()) {
       navigation.navigate('SearchResults', { query: searchQuery });
@@ -110,6 +129,7 @@ const ExploreScreen = ({ navigation }) => {
     setShowSuggestions(false);
   };
 
+  // Helper Component: Event Card
   const EventCard = ({ event }) => (
     <TouchableOpacity
       style={s.eventCard}
@@ -142,6 +162,7 @@ const ExploreScreen = ({ navigation }) => {
     </TouchableOpacity>
   );
 
+  // Helper Component: Section List
   const CategorySection = ({ title, data, icon: Icon }) => (
     <View style={s.section}>
       <View style={s.sectionHeader}>
@@ -159,6 +180,15 @@ const ExploreScreen = ({ navigation }) => {
     </View>
   );
 
+  // Loading indicator must come after helper components are defined if used inside them, 
+  // but before the main return()
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#141416' }}>
+        <ActivityIndicator size="large" color="#ADF3FF" />
+      </View>
+    );
+  }
   return (
     <SafeAreaView style={s.container} edges={['top']}>
       <StatusBar barStyle="light-content" />
@@ -175,7 +205,7 @@ const ExploreScreen = ({ navigation }) => {
           <MagnifyingGlass size={20} color={C.text.tertiary} weight="bold" />
           <TextInput
             style={s.searchInput}
-            placeholder="Search events, artists, venues..."
+            placeholder="Search by event name"
             placeholderTextColor={C.text.tertiary}
             value={searchQuery}
             onChangeText={setSearchQuery}

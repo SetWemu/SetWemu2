@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -6,9 +7,12 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
-  SafeAreaView,
+  ActivityIndicator,
+  RefreshControl,
+  Alert,
 } from 'react-native';
-import { ArrowLeft, CalendarBlank, Users, Plus } from 'phosphor-react-native';
+import { ArrowLeft, CalendarBlank, Users, Plus, Warning } from 'phosphor-react-native';
+import eventService from '../../api/eventService';
 
 const COLORS = {
   bg: { primary: '#141416', card: '#1C1C1E', elevated: '#242428' },
@@ -25,69 +29,74 @@ const COLORS = {
 };
 
 const ManageEventsScreen = ({ navigation }) => {
-  const [activeTab, setActiveTab] = useState('ongoing');
+  const [events, setEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState(null);
 
-  const events = {
-    ongoing: [
-      {
-        id: '1',
-        title: 'Tech Summit 2025',
-        date: 'Mar 25, 2025',
-        image:
-          'https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?w=400&h=400&fit=crop',
-        ticketsSold: 342,
-        totalTickets: 500,
-        revenue: 'LKR 171,000',
-        status: 'ongoing',
-      },
-      {
-        id: '2',
-        title: 'Music Festival',
-        date: 'Mar 28, 2025',
-        image:
-          'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400&h=400&fit=crop',
-        ticketsSold: 890,
-        totalTickets: 1000,
-        revenue: 'LKR 445,000',
-        status: 'ongoing',
-      },
-    ],
-    past: [
-      {
-        id: '3',
-        title: 'Food Festival 2024',
-        date: 'Dec 15, 2024',
-        image:
-          'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=400&fit=crop',
-        ticketsSold: 450,
-        totalTickets: 500,
-        revenue: 'LKR 225,000',
-        status: 'completed',
-      },
-    ],
+  const fetchEvents = useCallback(async (showRefreshing = false) => {
+    try {
+      if (showRefreshing) setIsRefreshing(true);
+      else setIsLoading(true);
+      
+      const data = await eventService.getMyEvents();
+      setEvents(data);
+      setError(null);
+    } catch (err) {
+      console.error('Fetch Events Error:', err);
+      setError('Failed to load your events. Please try again.');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
+
+  const onRefresh = () => {
+    fetchEvents(true);
   };
 
   const renderEvent = ({ item }) => {
-    const percentageSold = Math.round(
-      (item.ticketsSold / item.totalTickets) * 100,
-    );
+    // Calculate total sold count from tiers if not provided
+    const totalSold = item.ticket_tiers?.reduce((sum, tier) => sum + (tier.sold_count || 0), 0) || 0;
+    const totalCapacity = item.total_capacity || 0;
+    
+    const percentageSold = totalCapacity > 0 
+      ? Math.round((totalSold / totalCapacity) * 100) 
+      : 0;
+
+    // Format revenue
+    const revenue = item.total_revenue 
+      ? `LKR ${item.total_revenue.toLocaleString()}` 
+      : 'LKR 0';
+
+    // Status: backend 'active' or 'completed'
+    const status = item.status === 'completed' ? 'completed' : 'ongoing';
 
     return (
       <TouchableOpacity
         style={styles.eventCard}
-        onPress={() => navigation.navigate('EventAnalytics', { event: item })}
+        onPress={() => navigation.navigate('EventAnalytics', { eventId: item.id })}
       >
-        <Image source={{ uri: item.image }} style={styles.eventImage} />
+        <Image 
+          source={{ uri: item.image || item.image_url || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400&h=400&fit=crop' }} 
+          style={styles.eventImage} 
+        />
 
         <View style={styles.eventInfo}>
-          <Text style={styles.eventTitle}>{item.title}</Text>
+          <Text style={styles.eventTitle} numberOfLines={1}>{item.title}</Text>
           <View style={styles.eventMeta}>
             <CalendarBlank
               size={14}
               color={COLORS.text.tertiary}
               weight="bold"
             />
-            <Text style={styles.eventDate}>{item.date}</Text>
+            <Text style={styles.eventDate}>
+              {new Date(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+            </Text>
           </View>
 
           {/* Stats */}
@@ -95,10 +104,10 @@ const ManageEventsScreen = ({ navigation }) => {
             <View style={styles.statItem}>
               <Users size={16} color={COLORS.blue.brand} weight="bold" />
               <Text style={styles.statText}>
-                {item.ticketsSold}/{item.totalTickets}
+                {totalSold}/{totalCapacity}
               </Text>
             </View>
-            <Text style={styles.revenue}>{item.revenue}</Text>
+            <Text style={styles.revenue}>{revenue}</Text>
           </View>
 
           {/* Progress Bar */}
@@ -109,12 +118,7 @@ const ManageEventsScreen = ({ navigation }) => {
           </View>
           <Text style={styles.percentageText}>{percentageSold}% sold</Text>
 
-          {/* Status Badge */}
-          {item.status === 'ongoing' && (
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>ACTIVE</Text>
-            </View>
-          )}
+
         </View>
       </TouchableOpacity>
     );
@@ -139,44 +143,49 @@ const ManageEventsScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Tabs */}
-      <View style={styles.tabs}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'ongoing' && styles.activeTab]}
-          onPress={() => setActiveTab('ongoing')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'ongoing' && styles.activeTabText,
-            ]}
-          >
-            Ongoing
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'past' && styles.activeTab]}
-          onPress={() => setActiveTab('past')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'past' && styles.activeTabText,
-            ]}
-          >
-            Past Events
-          </Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Event List */}
-      <FlatList
-        data={events[activeTab]}
-        renderItem={renderEvent}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-      />
+      {isLoading ? (
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color={COLORS.blue.brand} />
+          <Text style={styles.loadingText}>Fetching your events...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.centerContainer}>
+          <Warning size={48} color={COLORS.warning} weight="duotone" />
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryBtn} onPress={() => fetchEvents()}>
+            <Text style={styles.retryText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      ) : events.length === 0 ? (
+        <View style={styles.centerContainer}>
+          <CalendarBlank size={48} color={COLORS.text.tertiary} weight="light" />
+          <Text style={styles.emptyText}>No events found</Text>
+          <Text style={styles.emptySubText}>Start by creating your first event!</Text>
+          <TouchableOpacity 
+            style={styles.createFirstBtn}
+            onPress={() => navigation.navigate('CreateEvent')}
+          >
+            <Text style={styles.createFirstText}>Create Event</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <FlatList
+          data={events}
+          renderItem={renderEvent}
+          keyExtractor={item => item.id.toString()}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={onRefresh}
+              tintColor={COLORS.blue.brand}
+              colors={[COLORS.blue.brand]}
+            />
+          }
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -213,31 +222,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border.light,
   },
-  tabs: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    gap: 12,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderRadius: 12,
-    backgroundColor: COLORS.bg.card,
-    borderWidth: 1,
-    borderColor: COLORS.border.subtle,
-  },
-  activeTab: {
-    backgroundColor: COLORS.blue.brand + '20',
-    borderColor: COLORS.blue.brand,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.text.secondary,
-  },
-  activeTabText: { color: COLORS.blue.brand },
+
   list: { padding: 20 },
   eventCard: {
     flexDirection: 'row',
@@ -309,19 +294,62 @@ const styles = StyleSheet.create({
     color: COLORS.text.tertiary,
     fontWeight: '600',
   },
-  statusBadge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: COLORS.success,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+
+  centerContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 30,
   },
-  statusText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#FFF',
+  loadingText: {
+    marginTop: 12,
+    color: COLORS.text.secondary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  errorText: {
+    marginTop: 12,
+    color: COLORS.text.primary,
+    fontSize: 15,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  retryBtn: {
+    marginTop: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: COLORS.bg.card,
+    borderWidth: 1,
+    borderColor: COLORS.border.light,
+  },
+  retryText: {
+    color: COLORS.blue.brand,
+    fontWeight: '700',
+  },
+  emptyText: {
+    marginTop: 16,
+    color: COLORS.text.primary,
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  emptySubText: {
+    marginTop: 8,
+    color: COLORS.text.tertiary,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  createFirstBtn: {
+    marginTop: 24,
+    backgroundColor: COLORS.blue.brand,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  createFirstText: {
+    color: COLORS.text.inverse,
+    fontWeight: '800',
+    fontSize: 14,
   },
 });
 
