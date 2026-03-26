@@ -10,6 +10,7 @@ import {
   Dimensions,
   Pressable,
   StatusBar,
+  Alert,
 } from 'react-native';
 import {
   GridFour,
@@ -24,6 +25,7 @@ import {
   CaretRight,
 } from 'phosphor-react-native';
 import { useAuth } from '../../context/AuthContext';
+import apiClient from '../../api/apiClient';
 
 const { width } = Dimensions.get('window');
 
@@ -51,14 +53,37 @@ const COLORS = {
 const ProfileScreen = ({ navigation, route }) => {
   const [activeTab, setActiveTab] = useState('posts');
   const [isBusiness, setIsBusiness] = useState(false);
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   const [userData, setUserData] = useState({
-    name: 'Diara',
+    name: user?.full_name || user?.name || 'User',
     avatar:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-    stats: { events: 3, following: 3, followers: 3 },
+    stats: { following: 0, followers: 0 },
   });
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  const fetchProfile = async () => {
+    try {
+      if (!user?.id) return;
+      const response = await apiClient.get(`/profile/${user.id}`);
+      if (response.data) {
+        setUserData(prev => ({
+          ...prev,
+          name: response.data.full_name || response.data.fullName || response.data.username || user?.full_name || 'User',
+          avatar: response.data.avatar_url || prev.avatar,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, [user?.id]);
 
   const posts = [
     {
@@ -120,7 +145,7 @@ const ProfileScreen = ({ navigation, route }) => {
               style={styles.secondaryBtn}
               onPress={() =>
                 navigation.navigate('EditProfile', {
-                  currentName: userData.name,
+                  currentName: user?.full_name || userData.name,
                   currentUsername: userData.handle,
                   currentImage: userData.avatar,
                   currentStats: userData.stats,
@@ -129,34 +154,27 @@ const ProfileScreen = ({ navigation, route }) => {
             >
               <Text style={styles.secondaryBtnText}>Edit Profile</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.primaryBtn}
-              onPress={() => navigation.navigate('CreatePost')}
-            >
-              <Text style={styles.primaryBtnText}>+ Create</Text>
-            </TouchableOpacity>
           </View>
         </View>
 
         {/* Stats Section */}
         <View style={styles.statsBar}>
           {[
-            { label: 'EVENTS', val: userData.stats.events, press: null },
             {
               label: 'FOLLOWING',
-              val: userData.stats.following,
-              press: 'Following',
+              val: '-',
+              press: () => Alert.alert('Coming Soon', 'Social features like following will be introduced soon!'),
             },
             {
               label: 'FOLLOWERS',
-              val: userData.stats.followers,
-              press: 'Followers',
+              val: '-',
+              press: () => Alert.alert('Coming Soon', 'Social features like followers will be introduced soon!'),
             },
           ].map((item, i) => (
             <TouchableOpacity
               key={i}
               style={styles.statItem}
-              onPress={() => item.press && navigation.navigate(item.press)}
+              onPress={() => item.press && (typeof item.press === 'function' ? item.press() : navigation.navigate(item.press))}
             >
               <Text style={styles.statNumber}>{item.val}</Text>
               <Text style={styles.statLabel}>{item.label}</Text>

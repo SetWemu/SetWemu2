@@ -1,10 +1,12 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
-  StyleSheet, RefreshControl, StatusBar, Image,
+  StyleSheet, RefreshControl, StatusBar, Image, ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CalendarBlank, Ticket, QrCode, MapPin } from 'phosphor-react-native';
+import { useAuth } from '../../context/AuthContext';
+import apiClient from '../../api/apiClient';
 
 const C = {
   bg:       { primary: '#141416', card: '#1C1C1E', elevated: '#242428' },
@@ -16,132 +18,68 @@ const C = {
   warning:  '#FFD60A',
 };
 
-// Swap out for real Supabase query when backend is ready:
-// const { data } = await supabase
-//   .from('bookings')
-//   .select(`*, event:events(id,title,date,time,location,status), ticket:tickets(type,price)`)
-//   .eq('user_id', user.id)
-//   .order('created_at', { ascending: false })
-const MOCK_BOOKINGS = [
-  {
-    id: 'b1', event_id: 'e1', ticket_id: 't1',
-    quantity: 2, total_price: 3000, status: 'active',
-    qr_code: 'QR_B1', purchase_date: '2026-02-01T10:00:00Z',
-    event: {
-      id: 'e1', title: 'Colombo Food & Music Festival',
-      date: '2026-03-15T10:00:00Z', time: '10:00 AM - 8:00 PM',
-      location: 'Galle Face Green, Colombo', status: 'upcoming',
-      full_address: 'Galle Face Green, Colombo 03',
-      refund_policy: 'Full refund up to 48 hours before the event',
-      image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80',
-    },
-    ticket: { type: 'General', price: 1500 },
-  },
-  {
-    id: 'b2', event_id: 'e2', ticket_id: 't2',
-    quantity: 1, total_price: 5000, status: 'active',
-    qr_code: 'QR_B2', purchase_date: '2026-02-05T14:30:00Z',
-    event: {
-      id: 'e2', title: 'TechTalk Sri Lanka 2026',
-      date: '2026-04-20T09:00:00Z', time: '9:00 AM - 6:00 PM',
-      location: 'BMICH, Colombo 7', status: 'upcoming',
-      full_address: 'Bauddhaloka Mawatha, Colombo 07',
-      refund_policy: 'No refunds after purchase',
-      image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&q=80',
-    },
-    ticket: { type: 'VIP', price: 5000 },
-  },
-  {
-    id: 'b3', event_id: 'e3', ticket_id: 't3',
-    quantity: 3, total_price: 2250, status: 'used',
-    qr_code: 'QR_B3', purchase_date: '2025-11-10T09:00:00Z',
-    event: {
-      id: 'e3', title: 'Sunset Beach Party',
-      date: '2025-12-31T18:00:00Z', time: '6:00 PM - 2:00 AM',
-      location: 'Mount Lavinia Beach', status: 'past',
-      full_address: 'Mount Lavinia Beach, Colombo',
-      refund_policy: 'No refunds',
-      image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400&q=80',
-    },
-    ticket: { type: 'General', price: 750 },
-  },
-  {
-    id: 'b4', event_id: 'e4', ticket_id: 't4',
-    quantity: 2, total_price: 4000, status: 'cancelled',
-    qr_code: 'QR_B4', purchase_date: '2025-10-01T11:00:00Z',
-    event: {
-      id: 'e4', title: 'Jazz Night at Barefoot',
-      date: '2025-11-15T19:00:00Z', time: '7:00 PM - 11:00 PM',
-      location: 'Barefoot Gallery, Colombo 3', status: 'past',
-      full_address: '704 Galle Rd, Colombo 03',
-      refund_policy: 'Full refund up to 7 days before event',
-      image: 'https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=400&q=80',
-    },
-    ticket: { type: 'VIP', price: 2000 },
-  },
-];
-
-const isPast = (b) => {
-  const passed = new Date(b.event.date) < new Date();
-  return passed || b.status === 'used' || b.status === 'cancelled';
+const formatDate = (d) => {
+  if (!d) return 'N/A';
+  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const date = new Date(d);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
 };
-
-const formatDate = (d) =>
-  new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
 const STATUS = {
   active:    { label: 'Active',    ...{ bg: 'rgba(48,209,88,0.15)',   color: '#30D158' } },
   used:      { label: 'Used',      ...{ bg: 'rgba(171,171,171,0.15)', color: '#ABABAB' } },
-  cancelled: { label: 'Cancelled', ...{ bg: 'rgba(255,69,58,0.15)',   color: '#FF453A' } },
 };
 
-const TicketCard = ({ booking, onPress }) => {
-  const s = STATUS[booking.status] || STATUS.used;
-  const past = isPast(booking);
+const TicketCard = ({ group, onPress }) => {
+  // Determine status: "Used" if any ticket is used, otherwise "Active" if event is in the future
+  const isAnyUsed = group.tickets.some(t => t.is_used);
+  const eventDate = new Date(group.event.date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const isPast = eventDate < today;
+  const statusKey = (isAnyUsed || isPast) ? 'used' : 'active';
+  const s = STATUS[statusKey];
 
   return (
     <TouchableOpacity
-      style={[styles.card, past && styles.cardPast]}
-      onPress={() => onPress(booking)}
+      style={[styles.card, isPast && styles.cardPast]}
+      onPress={() => onPress(group)}
       activeOpacity={0.8}
     >
-      {/* Left: event image */}
       <View style={styles.imgWrap}>
-        <Image source={{ uri: booking.event.image }} style={styles.img} resizeMode="cover" />
-        {past && <View style={styles.imgDim} />}
-        {/* Ticket type pill over image */}
+        <Image source={{ uri: group.event.image }} style={styles.img} resizeMode="cover" />
+        {isPast && <View style={styles.imgDim} />}
         <View style={styles.typePill}>
-          <Text style={styles.typePillText}>{booking.ticket.type}</Text>
+          <Text style={styles.typePillText}>{group.tier.name.toUpperCase()}</Text>
         </View>
       </View>
 
-      {/* Right: details */}
       <View style={styles.content}>
-        {/* Title row */}
         <View style={styles.titleRow}>
-          <Text style={styles.title} numberOfLines={1}>{booking.event.title}</Text>
+          <Text style={styles.title} numberOfLines={1}>{group.event.title}</Text>
           <View style={[styles.statusBadge, { backgroundColor: s.bg }]}>
             <Text style={[styles.statusText, { color: s.color }]}>{s.label}</Text>
           </View>
         </View>
 
-        {/* Date */}
         <View style={styles.metaRow}>
           <CalendarBlank size={11} color={C.text.tertiary} weight="regular" />
-          <Text style={styles.metaText}>{formatDate(booking.event.date)}</Text>
+          <Text style={styles.metaText}>{formatDate(group.event.date)}</Text>
         </View>
 
-        {/* Location */}
         <View style={styles.metaRow}>
           <MapPin size={11} color={C.text.tertiary} weight="regular" />
-          <Text style={styles.metaText} numberOfLines={1}>{booking.event.location}</Text>
+          <Text style={styles.metaText} numberOfLines={1}>{group.event.location}</Text>
         </View>
 
-        {/* Footer: qty × price + QR thumb */}
         <View style={styles.footer}>
-          <Text style={styles.price}>LKR {booking.total_price.toLocaleString()}</Text>
+          <Text style={styles.price}>LKR {group.tier.price.toLocaleString()}</Text>
           <View style={styles.rightFooter}>
-            <Text style={styles.qty}>×{booking.quantity}</Text>
+            <Text style={styles.qty}>×{group.quantity}</Text>
             <View style={styles.qrThumb}>
               <QrCode size={16} color={C.teal.brand} weight="regular" />
             </View>
@@ -163,40 +101,103 @@ const EmptyState = ({ isActive }) => (
         ? "You haven't booked any upcoming events yet."
         : "Events you've attended will appear here."}
     </Text>
-    {isActive && (
-      <TouchableOpacity style={styles.emptyBtn} activeOpacity={0.8}>
-        <Text style={styles.emptyBtnText}>Explore Events</Text>
-      </TouchableOpacity>
-    )}
   </View>
 );
 
 const MyTicketsScreen = ({ navigation }) => {
+  const { user } = useAuth();
   const [tab, setTab] = useState('active');
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [bookings, setBookings] = useState(MOCK_BOOKINGS);
+  const [ticketGroups, setTicketGroups] = useState({ active: [], past: [] });
 
-  const active = bookings.filter((b) => !isPast(b));
-  const past   = bookings.filter((b) => isPast(b));
-  const list   = tab === 'active' ? active : past;
+  const fetchBookings = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await apiClient.get(`/bookings/user/${user.id}`);
+      processBookings(response.data);
+    } catch (error) {
+      console.error("Error fetching bookings:", error.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const processBookings = (bookings) => {
+    const groups = {};
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (!bookings || !Array.isArray(bookings)) return;
+
+    bookings.forEach(booking => {
+      if (!booking.tickets) return;
+      booking.tickets.forEach(ticket => {
+        const tier = ticket.ticket_tiers;
+        // Supabase sometimes returns joins as an array or an object
+        let event = tier?.events;
+        if (Array.isArray(event)) event = event[0];
+        
+        if (!tier || !event) return;
+        
+        const key = `${event.id}_${tier.id}`;
+
+        if (!groups[key]) {
+          groups[key] = {
+            id: key,
+            event: event,
+            tier: tier,
+            quantity: 0,
+            tickets: []
+          };
+        }
+        groups[key].quantity += 1;
+        groups[key].tickets.push({
+          id: ticket.id,
+          qr_code_key: ticket.qr_code_key,
+          is_used: ticket.is_used
+        });
+      });
+    });
+
+    const flattened = Object.values(groups);
+    const active = flattened.filter(g => new Date(g.event.date) >= today);
+    const past = flattened.filter(g => new Date(g.event.date) < today);
+
+    setTicketGroups({ active, past });
+  };
+
+  useEffect(() => {
+    fetchBookings();
+  }, []);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    // TODO: replace with Supabase fetch
-    setTimeout(() => setRefreshing(false), 1200);
+    fetchBookings();
   }, []);
+
+  const list = tab === 'active' ? ticketGroups.active : ticketGroups.past;
+
+  if (loading) {
+    return (
+      <View style={[styles.safe, styles.center]}>
+        <ActivityIndicator size="large" color={C.teal.light} />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor={C.bg.primary} />
 
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Tickets</Text>
-        <Text style={styles.headerSub}>{active.length} active · {past.length} past</Text>
+        <Text style={styles.headerSub}>
+          {ticketGroups.active.length} active · {ticketGroups.past.length} past
+        </Text>
       </View>
 
-      {/* Tab bar */}
       <View style={styles.tabs}>
         {['active', 'past'].map((t) => (
           <TouchableOpacity
@@ -208,11 +209,10 @@ const MyTicketsScreen = ({ navigation }) => {
             <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>
               {t.charAt(0).toUpperCase() + t.slice(1)}
             </Text>
-            {/* Count badge */}
-            {(t === 'active' ? active : past).length > 0 && (
+            {(t === 'active' ? ticketGroups.active : ticketGroups.past).length > 0 && (
               <View style={[styles.tabBadge, tab === t && styles.tabBadgeActive]}>
                 <Text style={[styles.tabBadgeText, tab === t && styles.tabBadgeTextActive]}>
-                  {(t === 'active' ? active : past).length}
+                  {(t === 'active' ? ticketGroups.active : ticketGroups.past).length}
                 </Text>
               </View>
             )}
@@ -220,7 +220,6 @@ const MyTicketsScreen = ({ navigation }) => {
         ))}
       </View>
 
-      {/* List */}
       <FlatList
         data={list}
         keyExtractor={(item) => item.id}
@@ -237,7 +236,7 @@ const MyTicketsScreen = ({ navigation }) => {
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         ListEmptyComponent={<EmptyState isActive={tab === 'active'} />}
         renderItem={({ item }) => (
-          <TicketCard booking={item} onPress={(b) => navigation.navigate('TicketDetail', { booking: b })} />
+          <TicketCard group={item} onPress={(g) => navigation.navigate('TicketDetail', { group: g })} />
         )}
       />
     </SafeAreaView>
@@ -246,6 +245,7 @@ const MyTicketsScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg.primary },
+  center: { justifyContent: 'center', alignItems: 'center' },
 
   header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 10 },
   headerTitle: { fontSize: 26, fontWeight: '800', color: C.text.primary, letterSpacing: -0.5 },
@@ -288,12 +288,12 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: C.border.subtle,
-    height: 96,            // ← fixed compact height
+    height: 100,
   },
   cardPast: { opacity: 0.6 },
 
-  imgWrap: { width: 88, position: 'relative' },
-  img:     { width: 88, height: '100%' },
+  imgWrap: { width: 90, position: 'relative' },
+  img:     { width: 90, height: '100%' },
   imgDim:  { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)' },
   typePill: {
     position: 'absolute', bottom: 6, left: 6,
@@ -301,26 +301,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6, paddingVertical: 2,
     borderRadius: 6,
   },
-  typePillText: { fontSize: 9, fontWeight: '700', color: C.teal.light, letterSpacing: 0.5 },
+  typePillText: { fontSize: 9, fontWeight: '800', color: C.teal.light, letterSpacing: 0.5 },
 
-  content: { flex: 1, paddingHorizontal: 11, paddingVertical: 10, justifyContent: 'space-between' },
+  content: { flex: 1, paddingHorizontal: 12, paddingVertical: 10, justifyContent: 'space-between' },
 
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   title: {
-    flex: 1, fontSize: 13, fontWeight: '700',
-    color: C.text.primary, lineHeight: 17,
+    flex: 1, fontSize: 14, fontWeight: '700',
+    color: C.text.primary, lineHeight: 18,
   },
   statusBadge: { borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2, flexShrink: 0 },
   statusText:  { fontSize: 9, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
 
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  metaIcon: { fontSize: 10 },
   metaText: { fontSize: 11, color: C.text.secondary, flex: 1 },
 
   footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   price:  { fontSize: 13, fontWeight: '800', color: C.teal.light },
   rightFooter: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  qty: { fontSize: 11, color: C.text.tertiary, fontWeight: '600' },
+  qty: { fontSize: 12, color: C.text.tertiary, fontWeight: '800' },
   qrThumb: {
     width: 28, height: 28,
     backgroundColor: C.bg.elevated,
@@ -328,7 +327,6 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: C.border.teal,
   },
-  qrThumbText: { fontSize: 14, color: C.teal.brand },
 
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40, paddingVertical: 60 },
   emptyIconWrap: {
@@ -341,8 +339,6 @@ const styles = StyleSheet.create({
   emptyIconText: { fontSize: 36 },
   emptyTitle: { fontSize: 18, fontWeight: '700', color: C.text.primary, marginBottom: 8, textAlign: 'center' },
   emptySub:   { fontSize: 13, color: C.text.secondary, textAlign: 'center', lineHeight: 19, marginBottom: 24 },
-  emptyBtn:   { backgroundColor: C.teal.brand, paddingVertical: 13, paddingHorizontal: 28, borderRadius: 12 },
-  emptyBtnText: { color: '#141416', fontSize: 14, fontWeight: '800' },
 });
 
 export default MyTicketsScreen;

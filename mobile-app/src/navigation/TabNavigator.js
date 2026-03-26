@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { House, MagnifyingGlass, MapTrifold, User, Plus } from 'phosphor-react-native';
+import { House, MagnifyingGlass, MapTrifold, User, Plus, Article } from 'phosphor-react-native';
+import { Alert } from 'react-native';
 
 import HomeStack        from './HomeStack';
 import ExploreStack     from './ExploreStack';
@@ -57,15 +58,6 @@ const TabNavigator = () => (
     }}
   >
     <Tab.Screen
-      name="HomeTab" component={HomeStack}
-      options={{
-        tabBarLabel: 'Home',
-        tabBarIcon: ({ focused, color }) => (
-          <House size={22} color={color} weight={focused ? 'fill' : 'regular'} />
-        ),
-      }}
-    />
-    <Tab.Screen
       name="ExploreTab" component={ExploreStack}
       options={{
         tabBarLabel: 'Explore',
@@ -75,7 +67,24 @@ const TabNavigator = () => (
       }}
     />
     <Tab.Screen
+      name="HomeTab" component={HomeStack}
+      options={{
+        tabBarLabel: 'Feed',
+        tabBarIcon: ({ focused, color }) => (
+          <Article size={22} color={color} weight={focused ? 'fill' : 'regular'} />
+        ),
+      }}
+    />
+    <Tab.Screen
       name="CreateTab" component={CreateEventStack}
+      listeners={({ navigation }) => ({
+        tabPress: (e) => {
+          // Prevent default navigation
+          e.preventDefault();
+          // Reset the stack to the initial screen
+          navigation.navigate('CreateTab', { screen: 'CreateEvent' });
+        },
+      })}
       options={{
         tabBarLabel: '',
         tabBarIcon: ({ focused }) => <CreateIcon focused={focused} />,

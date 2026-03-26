@@ -79,7 +79,7 @@ const ManageEventsScreen = ({ navigation }) => {
     return (
       <TouchableOpacity
         style={styles.eventCard}
-        onPress={() => navigation.navigate('EventAnalytics', { eventId: item.id })}
+        onPress={() => Alert.alert('Coming Soon', 'Advanced event analytics and insights will be available soon in a future update! 📊✨')}
       >
         <Image 
           source={{ uri: item.image || item.image_url || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400&h=400&fit=crop' }} 
@@ -137,7 +137,7 @@ const ManageEventsScreen = ({ navigation }) => {
         <Text style={styles.headerTitle}>Manage Events</Text>
         <TouchableOpacity
           style={styles.createBtn}
-          onPress={() => navigation.navigate('CreateEvent')}
+          onPress={() => navigation.navigate('Main', { screen: 'CreateTab' })}
         >
           <Plus size={20} color={COLORS.blue.brand} weight="bold" />
         </TouchableOpacity>
@@ -164,7 +164,7 @@ const ManageEventsScreen = ({ navigation }) => {
           <Text style={styles.emptySubText}>Start by creating your first event!</Text>
           <TouchableOpacity 
             style={styles.createFirstBtn}
-            onPress={() => navigation.navigate('CreateEvent')}
+            onPress={() => navigation.navigate('Main', { screen: 'CreateTab' })}
           >
             <Text style={styles.createFirstText}>Create Event</Text>
           </TouchableOpacity>

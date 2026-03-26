@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TextInput, TouchableOpacity,
   Image, StyleSheet, Alert, ActivityIndicator, StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { EnvelopeSimple, Phone, Tag, CheckCircle, ArrowLeft } from 'phosphor-react-native';
+import { EnvelopeSimple, Phone, Tag, CheckCircle, ArrowLeft, User } from 'phosphor-react-native';
+import { useAuth } from '../../context/AuthContext';
 
 const C = {
   bg:       { primary: '#141416', card: '#1C1C1E', elevated: '#242428' },
@@ -14,41 +15,25 @@ const C = {
   success:  '#30D158',
 };
 
+const Section = ({ title, children, noBorder }) => (
+  <View style={s.section}>
+    <Text style={s.sectionTitle}>{title}</Text>
+    {children}
+  </View>
+);
+
 const CheckoutScreen = ({ route, navigation }) => {
   const { event, ticket, quantity } = route.params;
+  const { user } = useAuth();
   
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [promoCode, setPromoCode] = useState('');
-  const [discount, setDiscount] = useState(0);
+  const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState(user?.phone || '');
   const [agreed, setAgreed] = useState({ terms: false, refund: false });
-  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
   // Dynamic Pricing Logic
   const subtotal = ticket.price * quantity;
   const serviceFee = subtotal * 0.05;
-  const finalTotal = subtotal + serviceFee - discount;
-
-  const handleApplyPromo = () => {
-    if (!promoCode.trim()) return;
-    setIsApplyingPromo(true);
-    setTimeout(() => {
-      if (promoCode.toUpperCase() === 'SETWEMU10') {
-        setDiscount(subtotal * 0.1);
-        Alert.alert('Success', '10% discount applied!');
-      } else {
-        Alert.alert('Invalid', 'Code not found.');
-      }
-      setIsApplyingPromo(false);
-    }, 800);
-  };
-
-  const Section = ({ title, children, noBorder }) => (
-    <View style={[s.section, noBorder && { borderBottomWidth: 0 }]}>
-      <Text style={s.sectionTitle}>{title}</Text>
-      {children}
-    </View>
-  );
+  const finalTotal = subtotal + serviceFee;
 
   return (
     <SafeAreaView style={s.container}>
@@ -75,36 +60,37 @@ const CheckoutScreen = ({ route, navigation }) => {
 
         <Section title="Contact Information">
           <View style={s.inputGroup}>
-            <View style={s.inputWrap}>
-              <EnvelopeSimple size={18} color={C.blue.light} />
-              <TextInput style={s.input} placeholder="Email for tickets" placeholderTextColor={C.text.tertiary} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+            <View style={[s.inputWrap, s.readOnlyInput]}>
+              <User size={18} color={C.text.tertiary} />
+              <View style={{ flex: 1 }}>
+                <Text style={s.labelSmall}>Delivery Email</Text>
+                <Text style={s.readOnlyText}>{email}</Text>
+              </View>
+              <CheckCircle size={18} color={C.success} weight="fill" />
             </View>
+
             <View style={s.inputWrap}>
               <Phone size={18} color={C.blue.light} />
-              <TextInput style={s.input} placeholder="Phone number" placeholderTextColor={C.text.tertiary} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+              <TextInput 
+                style={s.input} 
+                placeholder="Phone number" 
+                placeholderTextColor={C.text.tertiary} 
+                value={phone} 
+                onChangeText={setPhone} 
+                keyboardType="phone-pad" 
+              />
             </View>
           </View>
         </Section>
 
-        <Section title="Promo Code">
-          <View style={s.promoRow}>
-            <View style={s.promoInputWrap}>
-              <Tag size={18} color={C.text.tertiary} />
-              <TextInput style={s.promoInput} placeholder="Enter code" placeholderTextColor={C.text.tertiary} value={promoCode} onChangeText={setPromoCode} autoCapitalize="characters" />
-            </View>
-            <TouchableOpacity style={[s.applyBtn, discount > 0 && { backgroundColor: C.success }]} onPress={handleApplyPromo}>
-              {isApplyingPromo ? <ActivityIndicator size="small" color="#141416" /> : <Text style={s.applyBtnText}>{discount > 0 ? 'Applied' : 'Apply'}</Text>}
-            </TouchableOpacity>
-          </View>
-        </Section>
 
         <Section title="Payment Details" noBorder>
+          <View style={s.demoBadge}>
+            <Text style={s.demoBadgeText}>DEMO MODE ENABLED</Text>
+          </View>
           <View style={s.priceCard}>
             <View style={s.priceRow}><Text style={s.priceLabel}>Subtotal</Text><Text style={s.priceVal}>LKR {subtotal.toLocaleString()}</Text></View>
             <View style={s.priceRow}><Text style={s.priceLabel}>Service Fee (5%)</Text><Text style={s.priceVal}>LKR {serviceFee.toFixed(2)}</Text></View>
-            {discount > 0 && (
-              <View style={s.priceRow}><Text style={[s.priceLabel, { color: C.success }]}>Discount</Text><Text style={[s.priceVal, { color: C.success }]}>- LKR {discount.toFixed(2)}</Text></View>
-            )}
             <View style={s.dashDivider} />
             <View style={s.priceRow}><Text style={s.totalLabel}>Total Amount</Text><Text style={s.totalVal}>LKR {finalTotal.toLocaleString()}</Text></View>
           </View>
@@ -150,6 +136,14 @@ const s = StyleSheet.create({
   inputGroup: { gap: 12 },
   inputWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.bg.card, borderRadius: 12, paddingHorizontal: 15, height: 54, borderWidth: 1, borderColor: C.border.light, gap: 12 },
   input: { flex: 1, color: C.text.primary, fontSize: 15, fontWeight: '600' },
+  readOnlyInput: { 
+    backgroundColor: 'transparent', 
+    borderColor: 'transparent', 
+    paddingHorizontal: 0,
+    marginBottom: 20
+  },
+  readOnlyText: { color: C.text.primary, fontSize: 15, fontWeight: '700' },
+  labelSmall: { color: C.text.tertiary, fontSize: 10, fontWeight: '800', textTransform: 'uppercase', marginBottom: 2 },
   promoRow: { flexDirection: 'row', gap: 10 },
   promoInputWrap: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: C.bg.elevated, borderRadius: 12, paddingHorizontal: 15, height: 50, gap: 10 },
   promoInput: { flex: 1, color: C.text.primary, fontWeight: '700', fontSize: 14 },
@@ -170,7 +164,23 @@ const s = StyleSheet.create({
   footerLabel: { fontSize: 11, color: C.text.tertiary, fontWeight: '700', textTransform: 'uppercase' },
   footerPrice: { fontSize: 22, fontWeight: '900', color: C.blue.light },
   payBtn: { backgroundColor: C.blue.light, paddingHorizontal: 30, paddingVertical: 15, borderRadius: 16 },
-  payBtnText: { color: '#141416', fontWeight: '900', fontSize: 16 }
+  payBtnText: { color: '#141416', fontWeight: '900', fontSize: 16 },
+  demoBadge: { 
+    backgroundColor: 'rgba(173,243,255,0.1)', 
+    paddingVertical: 6, 
+    paddingHorizontal: 12, 
+    borderRadius: 8, 
+    alignSelf: 'flex-start', 
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(173,243,255,0.2)'
+  },
+  demoBadgeText: { 
+    color: C.blue.light, 
+    fontSize: 10, 
+    fontWeight: '800', 
+    letterSpacing: 1 
+  }
 });
 
 export default CheckoutScreen;

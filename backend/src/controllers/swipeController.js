@@ -91,8 +91,10 @@ export const getRecommendations = async (req, res) => {
     // Convert swiped event IDs into a Set for O(1) lookup speed
     const swipedIds = new Set(swipesRes.data?.map(s => s.event_id) || []);
 
-    // 2. Filter: Only show events the user hasn't interacted with yet
-    const availableEvents = eventsRes.data.filter(event => !swipedIds.has(event.id));
+    // 2. Filter: Only show events the user hasn't interacted with yet, AND isn't the host of
+    const availableEvents = eventsRes.data.filter(event => 
+      !swipedIds.has(event.id) && event.host_id !== userId
+    );
 
     // 3. Sort by interest weight + Random Discovery Factor
     const rankedEvents = availableEvents.sort((a, b) => {
