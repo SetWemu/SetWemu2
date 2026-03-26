@@ -70,3 +70,33 @@ export const login = async (req, res) => {
         res.status(500).json({ error: 'Server error during login' });
     }
 };
+
+/**
+ * Refreshes an expired session using a refresh token
+ */
+export const refresh = async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+        return res.status(400).json({ error: 'Refresh token is required' });
+    }
+
+    try {
+        const { data, error } = await supabase.auth.refreshSession({
+            refresh_token: refreshToken
+        });
+
+        if (error) {
+            return res.status(401).json({ error: 'Invalid or expired refresh token' });
+        }
+
+        res.status(200).json({
+            message: 'Session refreshed',
+            token: data.session.access_token,
+            session: data.session
+        });
+    } catch (err) {
+        console.error('Refresh error:', err.message);
+        res.status(500).json({ error: 'Server error during token refresh' });
+    }
+};

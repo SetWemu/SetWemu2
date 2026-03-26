@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { EnvelopeSimple, Lock, Eye, EyeSlash } from 'phosphor-react-native';
 import apiClient from '../../api/apiClient';
+import { STORAGE_KEYS } from '../../constants/storage';
 
 const C = {
   bg: { primary: '#141416', card: '#1C1C1E', elevated: '#242428' },
@@ -54,8 +55,11 @@ const LoginScreen = ({ navigation }: any) => {
           throw new Error("No access token received");
         }
   
-        // Save token for the apiClient interceptor
-        await AsyncStorage.setItem('userToken', jwt);
+        // Save tokens for the apiClient interceptor
+        await Promise.all([
+          AsyncStorage.setItem(STORAGE_KEYS.USER_TOKEN, jwt),
+          AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, session?.refresh_token || ''),
+        ]);
         
         // Save user to context (which also saves to disk)
         await login(user); 

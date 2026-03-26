@@ -3,12 +3,13 @@ import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, StatusBar, Image,
-  Dimensions, ActivityIndicator,
+  Dimensions, ActivityIndicator, Linking, Alert
 } from 'react-native';
 import {
   ArrowLeft as ArrowLeftIcon, Heart as HeartIcon, 
   Star as StarIcon, CalendarBlank as CalendarBlankIcon,
   MapPin as MapPinIcon, Plus as PlusIcon, Minus as MinusIcon,
+  Clock as ClockIcon,
 } from 'phosphor-react-native';
 import { API_URL } from '../../config/api';
 
@@ -29,6 +30,18 @@ const C = {
 
 // --- HELPERS ---
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Date TBD';
+const fmtTime = (t) => {
+  if (!t) return 'Time TBD';
+  // If format is HH:mm:ss, convert to more readable HH:mm AM/PM
+  try {
+    const [h, m] = t.split(':');
+    const date = new Date();
+    date.setHours(parseInt(h), parseInt(m));
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  } catch (e) {
+    return t;
+  }
+};
 
 const InfoRow = ({ IconComp, label, value }) => (
   <View style={ir.row}>
@@ -226,7 +239,26 @@ const EventDetailScreen = ({ route, navigation }) => {
 
           <View style={s.divider} />
           <InfoRow IconComp={CalendarBlankIcon} label="Date" value={fmtDate(event.date)} />
-          <InfoRow IconComp={MapPinIcon} label="Location" value={event.location} />
+          <InfoRow IconComp={ClockIcon} label="Time" value={fmtTime(event.start_time)} />
+          
+          <TouchableOpacity 
+            onPress={() => {
+              if (event.google_maps_url) {
+                Linking.openURL(event.google_maps_url).catch(err => {
+                  console.error("Couldn't load page", err);
+                  Alert.alert("Error", "Could not open Google Maps link.");
+                });
+              }
+            }}
+            disabled={!event.google_maps_url}
+            activeOpacity={0.7}
+          >
+            <InfoRow 
+              IconComp={MapPinIcon} 
+              label="Location" 
+              value={event.location || 'Location TBD'} 
+            />
+          </TouchableOpacity>
           <View style={s.divider} />
 
           <Text style={s.sectionTitle}>About Event</Text>
