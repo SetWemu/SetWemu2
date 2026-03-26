@@ -15,42 +15,25 @@ const C = {
   success:  '#30D158',
 };
 
+const Section = ({ title, children, noBorder }) => (
+  <View style={s.section}>
+    <Text style={s.sectionTitle}>{title}</Text>
+    {children}
+  </View>
+);
+
 const CheckoutScreen = ({ route, navigation }) => {
   const { event, ticket, quantity } = route.params;
   const { user } = useAuth();
   
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phone || '');
-  const [promoCode, setPromoCode] = useState('');
-  const [discount, setDiscount] = useState(0);
   const [agreed, setAgreed] = useState({ terms: false, refund: false });
-  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
   // Dynamic Pricing Logic
   const subtotal = ticket.price * quantity;
   const serviceFee = subtotal * 0.05;
-  const finalTotal = subtotal + serviceFee - discount;
-
-  const handleApplyPromo = () => {
-    if (!promoCode.trim()) return;
-    setIsApplyingPromo(true);
-    setTimeout(() => {
-      if (promoCode.toUpperCase() === 'SETWEMU10') {
-        setDiscount(subtotal * 0.1);
-        Alert.alert('Success', '10% discount applied!');
-      } else {
-        Alert.alert('Invalid', 'Code not found.');
-      }
-      setIsApplyingPromo(false);
-    }, 800);
-  };
-
-  const Section = ({ title, children, noBorder }) => (
-    <View style={[s.section, noBorder && { borderBottomWidth: 0 }]}>
-      <Text style={s.sectionTitle}>{title}</Text>
-      {children}
-    </View>
-  );
+  const finalTotal = subtotal + serviceFee;
 
   return (
     <SafeAreaView style={s.container}>
@@ -100,17 +83,6 @@ const CheckoutScreen = ({ route, navigation }) => {
           </View>
         </Section>
 
-        <Section title="Promo Code">
-          <View style={s.promoRow}>
-            <View style={s.promoInputWrap}>
-              <Tag size={18} color={C.text.tertiary} />
-              <TextInput style={s.promoInput} placeholder="Enter code" placeholderTextColor={C.text.tertiary} value={promoCode} onChangeText={setPromoCode} autoCapitalize="characters" />
-            </View>
-            <TouchableOpacity style={[s.applyBtn, discount > 0 && { backgroundColor: C.success }]} onPress={handleApplyPromo}>
-              {isApplyingPromo ? <ActivityIndicator size="small" color="#141416" /> : <Text style={s.applyBtnText}>{discount > 0 ? 'Applied' : 'Apply'}</Text>}
-            </TouchableOpacity>
-          </View>
-        </Section>
 
         <Section title="Payment Details" noBorder>
           <View style={s.demoBadge}>
@@ -119,9 +91,6 @@ const CheckoutScreen = ({ route, navigation }) => {
           <View style={s.priceCard}>
             <View style={s.priceRow}><Text style={s.priceLabel}>Subtotal</Text><Text style={s.priceVal}>LKR {subtotal.toLocaleString()}</Text></View>
             <View style={s.priceRow}><Text style={s.priceLabel}>Service Fee (5%)</Text><Text style={s.priceVal}>LKR {serviceFee.toFixed(2)}</Text></View>
-            {discount > 0 && (
-              <View style={s.priceRow}><Text style={[s.priceLabel, { color: C.success }]}>Discount</Text><Text style={[s.priceVal, { color: C.success }]}>- LKR {discount.toFixed(2)}</Text></View>
-            )}
             <View style={s.dashDivider} />
             <View style={s.priceRow}><Text style={s.totalLabel}>Total Amount</Text><Text style={s.totalVal}>LKR {finalTotal.toLocaleString()}</Text></View>
           </View>

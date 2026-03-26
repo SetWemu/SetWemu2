@@ -5,7 +5,7 @@ export const createBooking = async (req, res) => {
   const { user_id, items, payment_method } = req.body; 
 
   try {
-    // 1. Fetch prices for all requested tiers to calculate total
+    // 1. Fetch prices for all requested tiers
     const tierIds = items.map(item => item.tier_id);
     const { data: tiers, error: tierError } = await supabase
       .from('ticket_tiers')
@@ -67,6 +67,7 @@ export const createBooking = async (req, res) => {
 
 export const getUserBookings = async (req, res) => {
     const { userId } = req.params;
+    console.log(`[DEBUG] Attempting to fetch bookings for userId: ${userId}`);
   
     const { data, error } = await supabase
       .from('bookings')
@@ -80,14 +81,26 @@ export const getUserBookings = async (req, res) => {
           qr_code_key,
           is_used,
           ticket_tiers (
+            id,
             name,
             price,
-            events (title, date, location, image_url)
+            events (
+              id,
+              title,
+              date,
+              location,
+              image
+            )
           )
         )
       `)
       .eq('user_id', userId);
   
-    if (error) return res.status(400).json({ error: error.message });
+    if (error) {
+       console.error("[CRITICAL SUPABASE ERROR]:", JSON.stringify(error, null, 2));
+       return res.status(400).json({ error: error.message });
+    }
+    
+    console.log(`[DEBUG] Successfully fetched ${data?.length} bookings.`);
     res.json(data);
-  };  
+};

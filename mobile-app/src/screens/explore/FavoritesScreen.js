@@ -163,7 +163,7 @@ const FavoritesScreen = ({ navigation }) => {
           <Text style={s.emptySubtitle}>Events you like will appear here</Text>
           <TouchableOpacity 
             style={s.emptyButton}
-            onPress={() => navigation.navigate('MainTabs', { screen: 'Explore' })}
+            onPress={() => navigation.navigate('Main', { screen: 'ExploreTab' })}
           >
             <Text style={s.emptyButtonText}>Explore Events</Text>
           </TouchableOpacity>

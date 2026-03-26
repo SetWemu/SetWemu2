@@ -59,7 +59,7 @@ const ProfileScreen = ({ navigation, route }) => {
     name: user?.full_name || user?.name || 'User',
     avatar:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-    stats: { events: 0, following: 0, followers: 0 },
+    stats: { following: 0, followers: 0 },
   });
   const [profileLoading, setProfileLoading] = useState(true);
 
@@ -160,7 +160,6 @@ const ProfileScreen = ({ navigation, route }) => {
         {/* Stats Section */}
         <View style={styles.statsBar}>
           {[
-            { label: 'EVENTS', val: userData.stats.events, press: null },
             {
               label: 'FOLLOWING',
               val: '-',

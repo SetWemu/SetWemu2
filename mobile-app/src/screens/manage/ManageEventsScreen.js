@@ -79,7 +79,7 @@ const ManageEventsScreen = ({ navigation }) => {
     return (
       <TouchableOpacity
         style={styles.eventCard}
-        onPress={() => navigation.navigate('EventAnalytics', { eventId: item.id })}
+        onPress={() => Alert.alert('Coming Soon', 'Advanced event analytics and insights will be available soon in a future update! 📊✨')}
       >
         <Image 
           source={{ uri: item.image || item.image_url || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400&h=400&fit=crop' }} 
