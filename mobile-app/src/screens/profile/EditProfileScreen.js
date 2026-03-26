@@ -40,13 +40,13 @@ const EditProfileScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [name, setName] = useState('');
-  const [username, setUsername] = useState('');
-  const [bio, setBio] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [location, setLocation] = useState('');
-  const [profileImage, setProfileImage] = useState(null);
+  const [name, setName] = useState(user?.full_name || '');
+  const [username, setUsername] = useState(user?.username || '');
+  const [bio, setBio] = useState(user?.bio || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [location, setLocation] = useState(user?.location || '');
+  const [profileImage, setProfileImage] = useState(user?.avatar_url || null);
 
   // Country Picker State
   const [showCountryPicker, setShowCountryPicker] = useState(false);
@@ -56,24 +56,26 @@ const EditProfileScreen = ({ navigation }) => {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      if (!user?.id) return;
       try {
+        console.log(`[EditProfile] Refreshing profile data for ${user.id}...`);
         const data = await profileService.getProfile(user.id);
-        setName(data.full_name || user.full_name || '');
-        setUsername(data.username || '');
-        setBio(data.bio || '');
-        setPhone(data.phone || '');
-        setEmail(user.email || '');
-        setLocation(data.location || '');
-        setProfileImage(data.avatar_url || null);
+        
+        // Update states only if they differ from what we have
+        if (data.full_name) setName(data.full_name);
+        if (data.username) setUsername(data.username);
+        if (data.bio) setBio(data.bio);
+        if (data.phone) setPhone(data.phone);
+        if (data.location) setLocation(data.location);
+        if (data.avatar_url) setProfileImage(data.avatar_url);
       } catch (error) {
-        console.error('Failed to fetch profile:', error);
-        Alert.alert('Error', 'Could not load profile details.');
+        console.error('Failed to load extra profile details:', error);
       } finally {
         setLoading(false);
       }
     };
     fetchProfile();
-  }, [user.id, user.full_name, user.email]);
+  }, []); // Only fetch once on mount to avoid the "revert" loop after saving
 
   const handleSave = async () => {
     if (!username.trim() || username.length < 3) {

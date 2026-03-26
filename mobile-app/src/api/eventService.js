@@ -75,6 +75,31 @@ const eventService = {
       console.error('Error in searchEvents:', error.response?.data || error.message);
       throw error;
     }
+  },
+
+  /**
+   * Upload an event cover image
+   * @param {string} userId 
+   * @param {Object} file { uri, name, type }
+   * @returns {Promise<string>} Public URL of the uploaded image
+   */
+  uploadEventImage: async (userId, file) => {
+    try {
+      // In a real app, this would perform a multipart upload to Supabase Storage
+      const formData = new FormData();
+      formData.append('file', {
+        uri: file.uri,
+        name: file.name || `event_${Date.now()}.jpg`,
+        type: file.type || 'image/jpeg',
+      });
+
+      // Simulation: Return the local URI for now
+      console.warn("Event image upload is a simulated success for demo purposes.");
+      return file.uri;
+    } catch (error) {
+      console.error('Error in uploadEventImage:', error.response?.data || error.message);
+      throw error;
+    }
   }
 };
 

@@ -15,8 +15,26 @@ export const signup = async (req, res) => {
 
         // ADD THIS: Log the error if auth fails
         if (authError) {
-            console.error('SUPABASE AUTH ERROR:', authError); // This is the key line
+            console.error('SUPABASE AUTH ERROR:', authError);
             return res.status(400).json({ error: authError.message });
+        }
+
+        // --- NEW: Create Profile Record ---
+        // This ensures every new account has an entry in the 'profiles' table immediately.
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .insert([{ 
+                id: data.user.id, 
+                email: email, // Recording the email in the profiles table
+                full_name: fullName || 'New User',
+                username: `user_${data.user.id.substring(0, 5)}`,
+                created_at: new Date()
+            }]);
+
+        if (profileError) {
+            console.error('Error creating profile for new user:', profileError.message);
+            // We don't necessarily block signup if profile creation fails, 
+            // as the self-heal in getProfile will catch it later.
         }
 
         res.status(201).json({ message: 'Success', user: data.user });
@@ -51,6 +69,17 @@ export const login = async (req, res) => {
 
         if (updateError) {
             console.error('Error updating last login:', updateError.message);
+            
+            // SELF-HEAL: If update failed because profile is missing, create it
+            if (updateError.code === 'PGRST116' || updateError.message.includes('0 rows')) {
+                console.log(`[Self-Heal] Profile missing for ${data.user.id} during login. Creating...`);
+                await supabase.from('profiles').insert([{
+                    id: data.user.id,
+                    email: data.user.email,
+                    full_name: data.user.user_metadata?.full_name || 'User',
+                    username: `user_${data.user.id.substring(0, 5)}`
+                }]);
+            }
         }
 
         // 3. Return success and user data

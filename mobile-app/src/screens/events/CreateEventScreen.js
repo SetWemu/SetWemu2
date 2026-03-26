@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { launchImageLibrary } from 'react-native-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   View,
@@ -129,7 +130,27 @@ const CreateEventScreen = ({ navigation }) => {
 
   // IMAGE PICKER
   const pickImage = type => {
-    Alert.alert('Image Picker', `Pick ${type} image - to be implemented`);
+    const options = {
+      mediaType: 'photo',
+      maxWidth: 1920,
+      maxHeight: 1080,
+      quality: 0.8,
+    };
+
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorCode) {
+        console.log('ImagePicker Error: ', response.errorMessage);
+      } else if (response.assets && response.assets.length > 0) {
+        const { uri } = response.assets[0];
+        if (type === 'hero') {
+          setHeroImage(uri);
+        } else if (type === 'logo') {
+          setBrandLogo(uri);
+        }
+      }
+    });
   };
 
   const addTicket = () => {
@@ -182,25 +203,9 @@ const CreateEventScreen = ({ navigation }) => {
   };
 
   const handlePublish = async () => {
-    // Check mandatory fields
-    if (!title.trim()) {
-      Alert.alert('Missing Info', 'Please enter an event title.');
-      return;
-    }
-    if (!date) {
-      Alert.alert('Missing Info', 'Please select an event date.');
-      return;
-    }
-    if (!time) {
-      Alert.alert('Missing Info', 'Please select an event time.');
-      return;
-    }
-    if (!location.trim()) {
-      Alert.alert('Missing Info', 'Please enter an event location.');
-      return;
-    }
-    if (!selectedCategoryId) {
-      Alert.alert('Missing Info', 'Please select an event category.');
+    // 1. Validation
+    if (!title.trim() || !date || !time || !location.trim() || !selectedCategoryId || !agreedToTerms) {
+      Alert.alert('Missing Info', 'Please fill in all required fields and agree to terms.');
       return;
     }
 
@@ -211,56 +216,71 @@ const CreateEventScreen = ({ navigation }) => {
       return;
     }
 
-    if (!agreedToTerms) {
-      Alert.alert('Terms Required', 'Please agree to Terms & Conditions.');
-      return;
-    }
-
     if (!user?.id) {
       Alert.alert('Error', 'User session not found. Please log in again.');
       return;
     }
 
     setIsPublishing(true);
-
     try {
-      // Map tickets to backend format { name, price, capacity }
-      const ticketTiers = tickets.map(t => ({
-        name: t.type || 'General Admission',
-        price: parseFloat(t.price) || 0,
-        capacity: parseInt(t.quantity) || 100,
-      }));
+      let finalHeroUrl = heroImage;
+      let finalLogoUrl = brandLogo;
 
-      const eventPayload = {
-        title,
-        description,
-        location,
-        google_maps_url: mapsLink,
+      // 2. Upload Hero Image if set and is local
+      if (heroImage && typeof heroImage === 'string' && !heroImage.startsWith('http')) {
+        console.log('[CreateEvent] Uploading hero image...');
+        finalHeroUrl = await eventService.uploadEventImage(user.id, {
+          uri: heroImage,
+          name: `hero_${Date.now()}.jpg`,
+          type: 'image/jpeg',
+        });
+      }
+
+      // 3. Upload Brand Logo if set and is local
+      if (brandLogo && typeof brandLogo === 'string' && !brandLogo.startsWith('http')) {
+        console.log('[CreateEvent] Uploading brand logo...');
+        finalLogoUrl = await eventService.uploadEventImage(user.id, {
+          uri: brandLogo,
+          name: `logo_${Date.now()}.jpg`,
+          type: 'image/jpeg',
+        });
+      }
+
+      // 4. Prepare Event Data
+      const eventData = {
+        title: title.trim(),
+        description: description.trim(),
+        location: location.trim(),
+        google_maps_url: mapsLink.trim(),
         date: selectedDate.toISOString().split('T')[0], // YYYY-MM-DD
         start_time: `${selectedTime.getHours().toString().padStart(2, '0')}:${selectedTime.getMinutes().toString().padStart(2, '0')}:00`, // HH:mm:ss
-        image_url: heroImage,
+        image_url: finalHeroUrl,
         category_id: selectedCategoryId,
         host_id: user.id,
-        ticket_tiers: ticketTiers,
+        ticket_tiers: tickets.map(t => ({
+          name: t.type || 'General Admission',
+          price: parseFloat(t.price) || 0,
+          capacity: parseInt(t.quantity) || 0,
+        })),
+        // Premium features
+        brand_color: userType === 'business' ? customBrandColor : null,
+        brand_logo: userType === 'business' ? finalLogoUrl : null,
+        early_bird_price: userType === 'business' ? earlyBirdPrice : null,
+        promo_code: userType === 'business' ? promoCode : null,
       };
 
-      const result = await eventService.createEvent(eventPayload);
+      console.log('[CreateEvent] Publishing event data:', eventData);
+      const result = await eventService.createEvent(eventData);
 
       if (result) {
-        const publishedEventId = result.event.id;
-        const publishedTitle = title;
-        
-        // Reset form before navigating to clear for next use
         resetForm();
-
         navigation.navigate('EventPublishSuccess', {
-          eventId: publishedEventId,
-          eventTitle: publishedTitle,
+          event: result.event
         });
       }
     } catch (error) {
-      console.error('Publish Error:', error);
-      Alert.alert('Publication Failed', error.response?.data?.error || 'Something went wrong while creating your event.');
+      console.error('[CreateEvent] Publish error:', error);
+      Alert.alert('Publishing Failed', error.message || 'Something went wrong.');
     } finally {
       setIsPublishing(false);
     }

@@ -16,7 +16,11 @@ export const getProfile = async (req, res) => {
       console.log(`[Self-Heal] Profile missing for ${id}. Initializing...`);
       const { data: newProfile, error: createError } = await supabase
         .from('profiles')
-        .insert([{ id, username: `user_${id.substring(0, 5)}` }])
+        .insert([{ 
+            id, 
+            username: `user_${id.substring(0, 5)}`,
+            email: 'user@example.com' // Ideal to pull from session, but using placeholder for now
+        }])
         .select()
         .single();
 

@@ -66,18 +66,20 @@ const ProfileScreen = ({ navigation, route }) => {
   const fetchProfile = async () => {
     try {
       if (!user?.id) return;
+      console.log(`[ProfileScreen] Refreshing profile for ${user.id}...`);
       const response = await apiClient.get(`/profiles/${user.id}`);
       if (response.data) {
+        // Sync our local state with the latest from the server
         setUserData(prev => ({
           ...prev,
-          name: response.data.full_name || response.data.username || user?.full_name || 'User',
-          avatar: response.data.avatar_url || prev.avatar,
-          handle: response.data.username || prev.handle,
-          bio: response.data.bio || prev.bio,
+          name: response.data.full_name || user?.full_name || 'User',
+          avatar: response.data.avatar_url || user?.avatar_url || prev.avatar,
+          handle: response.data.username || user?.username || 'username',
+          bio: response.data.bio || user?.bio || '',
         }));
       }
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error("[ProfileScreen] Background fetch error:", error);
     } finally {
       setProfileLoading(false);
     }
