@@ -66,12 +66,14 @@ const ProfileScreen = ({ navigation, route }) => {
   const fetchProfile = async () => {
     try {
       if (!user?.id) return;
-      const response = await apiClient.get(`/profile/${user.id}`);
+      const response = await apiClient.get(`/profiles/${user.id}`);
       if (response.data) {
         setUserData(prev => ({
           ...prev,
-          name: response.data.full_name || response.data.fullName || response.data.username || user?.full_name || 'User',
+          name: response.data.full_name || response.data.username || user?.full_name || 'User',
           avatar: response.data.avatar_url || prev.avatar,
+          handle: response.data.username || prev.handle,
+          bio: response.data.bio || prev.bio,
         }));
       }
     } catch (error) {
@@ -119,7 +121,10 @@ const ProfileScreen = ({ navigation, route }) => {
         {/* Profile Header */}
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
-            <Image source={{ uri: userData.avatar }} style={styles.avatar} />
+            <Image
+              source={{ uri: user?.avatar_url || userData.avatar }}
+              style={styles.avatar}
+            />
             {isBusiness && (
               <View style={styles.crownBadge}>
                 <Crown size={14} color={COLORS.bg.primary} weight="fill" />
@@ -127,7 +132,12 @@ const ProfileScreen = ({ navigation, route }) => {
             )}
           </View>
 
-          <Text style={styles.nameText}>{userData.name}</Text>
+          <Text style={styles.nameText}>{user?.full_name || userData.name}</Text>
+          <Text style={styles.handleText}>@{user?.username || userData.handle || 'username'}</Text>
+
+          {(user?.bio || userData.bio) ? (
+            <Text style={styles.bioText}>{user?.bio || userData.bio}</Text>
+          ) : null}
 
           {!isBusiness && (
             <TouchableOpacity
@@ -330,7 +340,15 @@ const styles = StyleSheet.create({
     color: COLORS.text.secondary,
     fontSize: 13,
     fontWeight: '600',
+    marginBottom: 8,
+  },
+  bioText: {
+    color: COLORS.text.primary,
+    fontSize: 14,
+    textAlign: 'center',
+    paddingHorizontal: 40,
     marginBottom: 15,
+    lineHeight: 20,
   },
 
   businessCTA: {
