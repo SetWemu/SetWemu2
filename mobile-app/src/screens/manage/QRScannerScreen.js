@@ -30,7 +30,6 @@ const QRScannerScreen = ({ navigation, route }) => {
 
   // Mock QR scan - replace with actual QR scanner library
   const handleScan = () => {
-    // Simulate scan result
     const mockAttendee = {
       name: 'Sarah Wilson',
       email: 'sarah.w@email.com',
