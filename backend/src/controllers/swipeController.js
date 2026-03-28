@@ -71,48 +71,66 @@ export const handleSwipe = async (req, res) => {
 
 /**
  * getRecommendations
- * Logic: Filters out swiped events and ranks the rest by user interests.
+ * Logic: Filters out swiped events and ranks the rest using a Multi-Factor Score.
  * Path: GET /api/swipe/recommendations/:userId
  */
 export const getRecommendations = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    // 1. Parallel fetch for performance
-    const [profileRes, swipesRes, eventsRes] = await Promise.all([
+    console.log(`[Swipe] Generating recommendations for ${userId}...`);
+
+    // 1. Parallel fetch: User's brain (interests) and interaction history
+    const [profileRes, swipesRes] = await Promise.all([
       supabase.from('profiles').select('interests').eq('id', userId).single(),
-      supabase.from('swipes').select('event_id').eq('user_id', userId),
-      supabase.from('events').select('*')
+      supabase.from('swipes').select('event_id').eq('user_id', userId)
     ]);
 
-    if (eventsRes.error) throw eventsRes.error;
-
     const interests = profileRes.data?.interests || {};
-    // Convert swiped event IDs into a Set for O(1) lookup speed
     const swipedIds = new Set(swipesRes.data?.map(s => s.event_id) || []);
 
-    // 2. Filter: Only show events the user hasn't interacted with yet, AND isn't the host of
-    const availableEvents = eventsRes.data.filter(event => 
-      !swipedIds.has(event.id) && event.host_id !== userId
-    );
+    // 2. Optimized Database Fetch: Only look at future events, excluding the user's own
+    // Limitation: Supabase doesn't allow 'NOT IN' with 1000s of IDs easily, 
+    // so we fetch a relevant batch and filter.
+    const { data: rawEvents, error: eventsError } = await supabase
+      .from('events')
+      .select('*')
+      .neq('host_id', userId)
+      .gte('date', new Date().toISOString().split('T')[0]) // Only future/current events
+      .order('created_at', { ascending: false })
+      .limit(200); // Only look at the latest 200 candidates
 
-    // 3. Sort by interest weight + Random Discovery Factor
-    const rankedEvents = availableEvents.sort((a, b) => {
-      const weightA = interests[`cat_${a.category_id}`] || 0;
-      const weightB = interests[`cat_${b.category_id}`] || 0;
+    if (eventsError) throw eventsError;
 
-      // Add a random offset (0.0 to 0.4) so the order isn't strictly repetitive
-      const scoreA = weightA + Math.random() * 0.4;
-      const scoreB = weightB + Math.random() * 0.4;
+    // 3. The Algorithm (Ranking Engine)
+    const now = new Date();
+    const rankedEvents = rawEvents
+      .filter(e => !swipedIds.has(e.id)) // Remove events already swiped
+      .map(event => {
+        // --- SCORE 1: Category Interest (Base) ---
+        const categoryWeight = interests[`cat_${event.category_id}`] || 0;
+        
+        // --- SCORE 2: Freshness Boost ---
+        const createdDate = new Date(event.created_at || now);
+        const ageInHours = (now - createdDate) / (1000 * 60 * 60);
+        const freshnessBoost = Math.max(0, 1.0 - (ageInHours / 48)); // Boost events created in last 48h
 
-      return scoreB - scoreA; // Descending (highest score first)
-    });
+        // --- SCORE 3: Discovery Randomness ---
+        // (Ensures the list feels "alive" and not robotically identical)
+        const discoveryFactor = Math.random() * 0.5;
 
-    // 4. Return the top 10 recommended events
-    res.status(200).json(rankedEvents.slice(0, 10));
+        // FINAL CALCULATION
+        const finalScore = (categoryWeight * 1.5) + (freshnessBoost * 0.8) + discoveryFactor;
+
+        return { ...event, _score: finalScore };
+      })
+      .sort((a, b) => b._score - a._score); // Highest score first
+
+    // 4. Return the top refined batch
+    res.status(200).json(rankedEvents.slice(0, 15));
 
   } catch (error) {
-    console.error("Recommendation Error:", error.message);
-    res.status(500).json({ error: error.message });
+    console.error("Critical Recommendation Error:", error.message);
+    res.status(500).json({ error: "Internal Algorithm Error" });
   }
 };

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View, Text, Image, TouchableOpacity, StyleSheet,
   StatusBar, Animated, PanResponder, Dimensions, ActivityIndicator,
@@ -39,6 +39,14 @@ const SwipeScreen = ({ navigation }) => {
     }
   }, [user?.id]); // Dependency on user.id
 
+  // 1. FORCED RESET SAFETY: Whenever the front card changes, 
+  // ensure the animation value is back to (0,0).
+  useEffect(() => {
+    if (events.length > 0) {
+      position.setValue({ x: 0, y: 0 });
+    }
+  }, [events[0]?.id]); // Triggers when the top card ID changes
+
   const fetchRecommendations = async () => {
     try {
       setIsLoading(true);
@@ -71,12 +79,13 @@ const SwipeScreen = ({ navigation }) => {
     extrapolate: 'clamp',
   });
 
-  const panResponder = useRef(
-    PanResponder.create({
+  const panResponder = useMemo(
+    () => PanResponder.create({
       onStartShouldSetPanResponder: () => true,
-      onPanResponderMove: (_, gesture) => {
-        position.setValue({ x: gesture.dx, y: gesture.dy });
-      },
+      onPanResponderMove: Animated.event(
+        [null, { dx: position.x, dy: position.y }],
+        { useNativeDriver: false }
+      ),
       onPanResponderRelease: (_, gesture) => {
         if (gesture.dx > SWIPE_THRESHOLD) {
           forceSwipe('right');
@@ -86,25 +95,35 @@ const SwipeScreen = ({ navigation }) => {
           resetPosition();
         }
       },
-    })
-  ).current;
+    }),
+    [events[0]?.id, position] // Refresh when top event ID changes
+  );
 
   const forceSwipe = (direction) => {
     const x = direction === 'right' ? SCREEN_WIDTH + 100 : -SCREEN_WIDTH - 100;
+    
+    // STOP any existing animation to prevent callback drop!
+    position.stopAnimation();
+
     Animated.timing(position, {
       toValue: { x, y: 0 },
-      duration: 250, // Faster duration for better feel
-      useNativeDriver: false,
-    }).start(() => onSwipeComplete(direction));
+      duration: 250, 
+      useNativeDriver: true,
+    }).start(() => {
+      // FORCE COMPLETION: Never check for "finished". 
+      // If forceSwipe is called, we move to the next event regardless.
+      onSwipeComplete(direction);
+    });
   };
 
   const onSwipeComplete = async (direction) => {
     const currentItem = events[0];
     if (!currentItem) return;
 
-    // Fix: Clear position BEFORE updating state to prevent "stuck" card bug
-    position.setValue({ x: 0, y: 0 });
-    setEvents((prev) => prev.slice(1));
+    // A tiny gap to let the animation 'lock' off screen before state change
+    setTimeout(() => {
+      setEvents((prev) => prev.slice(1));
+    }, 50);
 
     try {
       await fetch(`${API_URL}/swipe/interact`, {
@@ -122,36 +141,16 @@ const SwipeScreen = ({ navigation }) => {
   };
 
   const resetPosition = () => {
+    position.stopAnimation();
     Animated.spring(position, {
       toValue: { x: 0, y: 0 },
-      useNativeDriver: false,
+      useNativeDriver: true,
+      bounciness: 0, // Solid reset without bounce for state changes
     }).start();
   };
 
   const handleLike = () => forceSwipe('right');
   const handlePass = () => forceSwipe('left');
-
-  if (isLoading) {
-    return (
-      <View style={[s.container, { justifyContent: 'center' }]}>
-        <ActivityIndicator size="large" color={C.blue.light} />
-      </View>
-    );
-  }
-
-  if (events.length === 0) {
-    return (
-      <SafeAreaView style={s.container}>
-        <View style={s.emptyState}>
-          <Heart size={80} color={C.blue.light} weight="thin" />
-          <Text style={s.emptyTitle}>All Caught Up!</Text>
-          <TouchableOpacity style={s.emptyButton} onPress={fetchRecommendations}>
-            <Text style={s.emptyButtonText}>Check for More</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   const currentEvent = events[0];
 
@@ -159,69 +158,86 @@ const SwipeScreen = ({ navigation }) => {
     <SafeAreaView style={s.container}>
       <StatusBar barStyle="light-content" />
 
-      <View style={s.header}>
-        <TouchableOpacity style={s.backButton} onPress={() => navigation.goBack()}>
-          <ArrowLeft size={20} color={C.text.primary} weight="bold" />
-        </TouchableOpacity>
-        <Text style={s.headerTitle}>Discover Events</Text>
-        <TouchableOpacity style={s.favButton} onPress={() => navigation.navigate('Favorites')}>
-          <Heart size={20} color={C.blue.light} weight="fill" />
-        </TouchableOpacity>
-      </View>
-
-      <View style={s.cardContainer}>
-        {/* Next Card */}
-        {events[1] && (
-          <View key={`next-${events[1].id}`} style={[s.card, s.nextCard]}>
-            <Image source={{ uri: events[1].image }} style={s.cardImage} />
+      {isLoading ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={C.blue.light} />
+        </View>
+      ) : events.length === 0 ? (
+        <View style={s.emptyState}>
+          <Heart size={80} color={C.blue.light} weight="thin" />
+          <Text style={s.emptyTitle}>All Caught Up!</Text>
+          <TouchableOpacity style={s.emptyButton} onPress={fetchRecommendations}>
+            <Text style={s.emptyButtonText}>Check for More</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <>
+          <View style={s.header}>
+            <TouchableOpacity style={s.backButton} onPress={() => navigation.goBack()}>
+              <ArrowLeft size={20} color={C.text.primary} weight="bold" />
+            </TouchableOpacity>
+            <Text style={s.headerTitle}>Discover Events</Text>
+            <TouchableOpacity style={s.favButton} onPress={() => navigation.navigate('Favorites')}>
+              <Heart size={20} color={C.blue.light} weight="fill" />
+            </TouchableOpacity>
           </View>
-        )}
 
-        {/* Current Card - CRITICAL: Added key to force reset */}
-        <Animated.View
-          key={currentEvent?.id} 
-          {...panResponder.panHandlers}
-          style={[
-            s.card,
-            {
-              transform: [
-                { translateX: position.x },
-                { translateY: position.y },
-                { rotate: rotate },
-              ],
-            },
-          ]}
-        >
-          <Image source={{ uri: currentEvent?.image }} style={s.cardImage} />
+          <View style={s.cardContainer}>
+            {/* Next Card */}
+            {events[1] && (
+              <View key={`next-${events[1].id}`} style={[s.card, s.nextCard]}>
+                <Image source={{ uri: events[1].image }} style={s.cardImage} />
+              </View>
+            )}
 
-          <Animated.View style={[s.overlay, s.likeOverlay, { opacity: likeOpacity }]}>
-            <Text style={s.overlayText}>LIKE</Text>
-          </Animated.View>
-          <Animated.View style={[s.overlay, s.nopeOverlay, { opacity: nopeOpacity }]}>
-            <Text style={s.overlayText}>PASS</Text>
-          </Animated.View>
+            {/* Current Card - CRITICAL: Added key to force reset */}
+            <Animated.View
+              key={currentEvent?.id} 
+              {...panResponder.panHandlers}
+              style={[
+                s.card,
+                {
+                  transform: [
+                    { translateX: position.x },
+                    { translateY: position.y },
+                    { rotate: rotate },
+                  ],
+                  zIndex: 100, // Z-INDEX LOCK: Always ensure the active card is capture touches
+                },
+              ]}
+            >
+              <Image source={{ uri: currentEvent?.image }} style={s.cardImage} />
 
-          <View style={s.cardInfo}>
-            <View style={s.categoryBadge}>
-              <Text style={s.categoryText}>{getCategoryName(currentEvent?.category_id)}</Text>
-            </View>
-            <Text style={s.cardTitle}>{currentEvent?.title}</Text>
-            <View style={s.cardMeta}>
-              <MapPin size={16} color={C.blue.light} weight="fill" />
-              <Text style={s.cardMetaText}>{currentEvent?.location}</Text>
-            </View>
+              <Animated.View style={[s.overlay, s.likeOverlay, { opacity: likeOpacity }]}>
+                <Text style={s.overlayText}>LIKE</Text>
+              </Animated.View>
+              <Animated.View style={[s.overlay, s.nopeOverlay, { opacity: nopeOpacity }]}>
+                <Text style={s.overlayText}>PASS</Text>
+              </Animated.View>
+
+              <View style={s.cardInfo}>
+                <View style={s.categoryBadge}>
+                  <Text style={s.categoryText}>{getCategoryName(currentEvent?.category_id)}</Text>
+                </View>
+                <Text style={s.cardTitle}>{currentEvent?.title}</Text>
+                <View style={s.cardMeta}>
+                  <MapPin size={16} color={C.blue.light} weight="fill" />
+                  <Text style={s.cardMetaText}>{currentEvent?.location}</Text>
+                </View>
+              </View>
+            </Animated.View>
           </View>
-        </Animated.View>
-      </View>
 
-      <View style={s.actions}>
-        <TouchableOpacity style={[s.actionButton, s.passButton]} onPress={handlePass}>
-          <X size={32} color="#fff" weight="bold" />
-        </TouchableOpacity>
-        <TouchableOpacity style={[s.actionButton, s.likeButton]} onPress={handleLike}>
-          <Heart size={32} color="#fff" weight="fill" />
-        </TouchableOpacity>
-      </View>
+          <View style={s.actions}>
+            <TouchableOpacity style={[s.actionButton, s.passButton]} onPress={handlePass}>
+              <X size={32} color="#fff" weight="bold" />
+            </TouchableOpacity>
+            <TouchableOpacity style={[s.actionButton, s.likeButton]} onPress={handleLike}>
+              <Heart size={32} color="#fff" weight="fill" />
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
     </SafeAreaView>
   );
 };
