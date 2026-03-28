@@ -19,7 +19,6 @@ export const signup = async (req, res) => {
             return res.status(400).json({ error: authError.message });
         }
 
-        // --- NEW: Create Profile Record ---
         // This ensures every new account has an entry in the 'profiles' table immediately.
         const { error: profileError } = await supabase
             .from('profiles')
