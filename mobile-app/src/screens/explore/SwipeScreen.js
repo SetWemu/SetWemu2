@@ -37,10 +37,9 @@ const SwipeScreen = ({ navigation }) => {
     if (user?.id) {
       fetchRecommendations();
     }
-  }, [user?.id]); // Dependency on user.id
+  }, [user?.id]); 
 
   // 1. FORCED RESET SAFETY: Whenever the front card changes, 
-  // ensure the animation value is back to (0,0).
   useEffect(() => {
     if (events.length > 0) {
       position.setValue({ x: 0, y: 0 });
@@ -111,7 +110,6 @@ const SwipeScreen = ({ navigation }) => {
       useNativeDriver: true,
     }).start(() => {
       // FORCE COMPLETION: Never check for "finished". 
-      // If forceSwipe is called, we move to the next event regardless.
       onSwipeComplete(direction);
     });
   };

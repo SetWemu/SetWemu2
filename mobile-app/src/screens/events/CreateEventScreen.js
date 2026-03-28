@@ -73,7 +73,6 @@ const Section = ({ title, children, isPremium }) => (
 const CreateEventScreen = ({ navigation }) => {
   const [userType, setUserType] = useState('personal'); // TODO: Get from auth context
 
-  // FORM STATE
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
@@ -92,14 +91,12 @@ const CreateEventScreen = ({ navigation }) => {
   const [isPublishing, setIsPublishing] = useState(false);
   const { user } = useAuth();
 
-  // PICKERS
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(new Date());
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
-  // FETCH CATEGORIES
   React.useEffect(() => {
     const fetchCats = async () => {
       try {
@@ -203,7 +200,7 @@ const CreateEventScreen = ({ navigation }) => {
   };
 
   const handlePublish = async () => {
-    // 1. Validation
+    // Validation
     if (!title.trim() || !date || !time || !location.trim() || !selectedCategoryId || !agreedToTerms) {
       Alert.alert('Missing Info', 'Please fill in all required fields and agree to terms.');
       return;
@@ -246,7 +243,6 @@ const CreateEventScreen = ({ navigation }) => {
         });
       }
 
-      // 4. Prepare Event Data
       const eventData = {
         title: title.trim(),
         description: description.trim(),
@@ -262,7 +258,6 @@ const CreateEventScreen = ({ navigation }) => {
           price: parseFloat(t.price) || 0,
           capacity: parseInt(t.quantity) || 0,
         })),
-        // Premium features
         brand_color: userType === 'business' ? customBrandColor : null,
         brand_logo: userType === 'business' ? finalLogoUrl : null,
         early_bird_price: userType === 'business' ? earlyBirdPrice : null,
@@ -325,7 +320,6 @@ const CreateEventScreen = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 140 }}
       >
-        {/* HERO IMAGE */}
         <Section title="Event Cover Image">
           <TouchableOpacity
             style={s.heroImageBtn}
@@ -343,7 +337,6 @@ const CreateEventScreen = ({ navigation }) => {
           </TouchableOpacity>
         </Section>
 
-        {/* BASIC DETAILS */}
         <Section title={
           <Text style={s.sectionTitle}>Basic Information <Text style={s.asterisk}>*</Text></Text>
         }>
@@ -369,7 +362,6 @@ const CreateEventScreen = ({ navigation }) => {
           </View>
         </Section>
 
-        {/* DATE & TIME */}
         <Section title={
           <Text style={s.sectionTitle}>Date & Time <Text style={s.asterisk}>*</Text></Text>
         }>
@@ -454,7 +446,6 @@ const CreateEventScreen = ({ navigation }) => {
           </Text>
         </Section>
 
-        {/* CATEGORY */}
         <Section title={
           <Text style={s.sectionTitle}>Event Category <Text style={s.asterisk}>*</Text></Text>
         }>
@@ -544,7 +535,6 @@ const CreateEventScreen = ({ navigation }) => {
           </TouchableOpacity>
         </Section>
 
-        {/* EVENT TAGS */}
         <Section title="Event Tags">
           <View style={s.inputWrap}>
             <Tag size={18} color={C.blue.light} weight="bold" />
@@ -559,7 +549,6 @@ const CreateEventScreen = ({ navigation }) => {
         </Section>
 
 
-        {/* PREMIUM: EARLY BIRD PRICING */}
         <Section title="Early Bird Pricing" isPremium>
           <TouchableOpacity
             style={s.premiumCard}
@@ -582,7 +571,6 @@ const CreateEventScreen = ({ navigation }) => {
           </TouchableOpacity>
         </Section>
 
-        {/* PREMIUM: PROMO CODES */}
         <Section title="Promo Codes" isPremium>
           <TouchableOpacity
             style={s.premiumCard}
@@ -605,7 +593,6 @@ const CreateEventScreen = ({ navigation }) => {
           </TouchableOpacity>
         </Section>
 
-        {/* PREMIUM: TICKET CUSTOMIZATION */}
         <Section title="Ticket Design" isPremium>
           <TouchableOpacity
             style={s.premiumCard}
@@ -648,7 +635,6 @@ const CreateEventScreen = ({ navigation }) => {
           </TouchableOpacity>
         </Section>
 
-        {/* PREMIUM: ANALYTICS */}
         <Section title="Advanced Analytics" isPremium>
           <TouchableOpacity
             style={s.premiumCard}
@@ -677,7 +663,6 @@ const CreateEventScreen = ({ navigation }) => {
           </TouchableOpacity>
         </Section>
 
-        {/* TERMS */}
         <Section title={
           <Text style={s.sectionTitle}>Legal <Text style={s.asterisk}>*</Text></Text>
         }>
@@ -697,7 +682,6 @@ const CreateEventScreen = ({ navigation }) => {
         </Section>
       </ScrollView>
 
-      {/* BOTTOM BAR */}
       <View style={s.bottomBar}>
         <TouchableOpacity
           style={[

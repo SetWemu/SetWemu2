@@ -107,7 +107,6 @@ const ChatConversationScreen = ({ navigation, route }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{ flex: 1 }}
       >
-        {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <TouchableOpacity

@@ -125,7 +125,7 @@ const CreateStoryScreen = ({ navigation }) => {
         navigation.goBack();
     };
 
-    // ========== DRAW TOOL ==========
+    //  DRAW TOOL 
     const handleDrawOpen = () => {
         setShowDrawTool(true);
         setCurrentPath([]);
@@ -154,7 +154,7 @@ const CreateStoryScreen = ({ navigation }) => {
         setCurrentPath([...currentPath, { x: locationX, y: locationY }]);
     };
 
-    // ========== TEXT TOOL ==========
+    //  TEXT TOOL 
     const handleTextOpen = () => {
         setTextInput("");
         setShowTextTool(true);
@@ -176,7 +176,7 @@ const CreateStoryScreen = ({ navigation }) => {
         setTextInput("");
     };
 
-    // ========== STICKER/EMOJI TOOL ==========
+    //  STICKER/EMOJI TOOL 
     const handleStickerOpen = () => {
         setShowStickerTool(true);
     };
@@ -197,7 +197,7 @@ const CreateStoryScreen = ({ navigation }) => {
         setShowStickerTool(false);
     };
 
-    // ========== SHARE ==========
+    //  SHARE 
     const handleShareButton = () => {
         setShowShareOptions(true);
     };
@@ -228,12 +228,10 @@ const CreateStoryScreen = ({ navigation }) => {
                     </View>
                 )}
 
-                {/* RENDER DRAWINGS */}
                 {drawingPaths.map((drawing) => (
                     <DrawingPath key={drawing.id} drawing={drawing} />
                 ))}
 
-                {/* RENDER TEXT ELEMENTS */}
                 {textElements.map((textEl) => (
                     <DraggableText
                         key={textEl.id}
@@ -252,7 +250,6 @@ const CreateStoryScreen = ({ navigation }) => {
                     />
                 ))}
 
-                {/* RENDER EMOJIS */}
                 {emojis.map((emojiObj) => (
                     <DraggableEmoji
                         key={emojiObj.id}
@@ -279,7 +276,7 @@ const CreateStoryScreen = ({ navigation }) => {
                     </View>
                 )}
 
-                {/* TRASH BIN (shows when dragging) */}
+                {/* TRASH BIN */}
                 {showTrash && (
                     <View style={styles.trashBin}>
                         <Ionicons name="trash-outline" size={32} color="#fff" />
@@ -356,7 +353,7 @@ const CreateStoryScreen = ({ navigation }) => {
                 </View>
             )}
 
-            {/* ==================== DRAW TOOL MODAL ==================== */}
+            {/*  DRAW TOOL MODAL  */}
             <Modal
                 visible={showDrawTool}
                 animationType="slide"
@@ -383,7 +380,7 @@ const CreateStoryScreen = ({ navigation }) => {
                             <Image source={{ uri: mediaUri }} style={styles.canvasImage} />
                         )}
 
-                        {/* Render current drawing */}
+                        {/*current drawing */}
                         {currentPath.map((point, index) => (
                             index > 0 && (
                                 <View
@@ -451,7 +448,7 @@ const CreateStoryScreen = ({ navigation }) => {
                 </View>
             </Modal>
 
-            {/* ==================== TEXT TOOL MODAL ==================== */}
+            {/*  TEXT TOOL MODAL  */}
             <Modal
                 visible={showTextTool}
                 animationType="slide"
@@ -552,7 +549,7 @@ const CreateStoryScreen = ({ navigation }) => {
                 </View>
             </Modal>
 
-            {/* ==================== STICKER MODAL ==================== */}
+            {/*  STICKER MODAL  */}
             <Modal
                 visible={showStickerTool}
                 animationType="slide"
@@ -651,7 +648,7 @@ const CreateStoryScreen = ({ navigation }) => {
                 </View>
             </Modal>
 
-            {/* ==================== SHARE MODAL ==================== */}
+            {/*  SHARE MODAL  */}
             <Modal
                 visible={showShareOptions}
                 animationType="slide"
@@ -706,7 +703,7 @@ const CreateStoryScreen = ({ navigation }) => {
     );
 };
 
-// ========== DRAGGABLE TEXT COMPONENT ==========
+//  DRAGGABLE TEXT COMPONENT 
 const DraggableText = ({ textElement, onDragStart, onDragEnd, onDelete, onUpdate }) => {
     const pan = new Animated.ValueXY({ x: textElement.x, y: textElement.y });
 
@@ -755,7 +752,7 @@ const DraggableText = ({ textElement, onDragStart, onDragEnd, onDelete, onUpdate
     );
 };
 
-// ========== DRAGGABLE EMOJI COMPONENT ==========
+//  DRAGGABLE EMOJI COMPONENT 
 const DraggableEmoji = ({ emojiObj, onDragStart, onDragEnd, onDelete, onUpdate }) => {
     const pan = new Animated.ValueXY({ x: emojiObj.x, y: emojiObj.y });
 
@@ -796,7 +793,7 @@ const DraggableEmoji = ({ emojiObj, onDragStart, onDragEnd, onDelete, onUpdate }
     );
 };
 
-// ========== DRAWING PATH COMPONENT ==========
+//  DRAWING PATH COMPONENT 
 const DrawingPath = ({ drawing }) => {
     return (
         <>

@@ -29,12 +29,10 @@ const StoriesScreen = ({ navigation, route }) => {
 
   const handleNextStory = () => {
     console.log('Next story tapped');
-    // TODO: Load next story
   };
 
   const handlePrevStory = () => {
     console.log('Previous story tapped');
-    // TODO: Load previous story
   };
 
   return (

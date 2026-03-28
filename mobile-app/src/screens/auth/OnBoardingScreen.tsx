@@ -25,11 +25,9 @@ const OnboardingScreen = ({ navigation }: any) => {
             <Text style={styles.title}>{slide.title}</Text>
             <Text style={styles.desc}>{slide.desc}</Text>
             
-            {/* Show 'Get Started' button ONLY on the last slide */}
             {index === slides.length - 1 && (
               <TouchableOpacity 
                 style={styles.button}
-                // Temporary navigation: goes to the screen we built earlier today!
                 onPress={() => navigation.replace('CreateAccount')} 
               >
                 <Text style={styles.buttonText}>Get Started</Text>
@@ -39,7 +37,6 @@ const OnboardingScreen = ({ navigation }: any) => {
         ))}
       </ScrollView>
 
-      {/* Little hint at the bottom */}
       <Text style={styles.swipeText}>Swipe left to continue {'>>'}</Text>
     </View>
   );

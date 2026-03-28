@@ -46,7 +46,6 @@ const ExploreScreen = ({ navigation }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const { user } = useAuth();
   
-  // FIX: Added missing state definitions
   const [realEvents, setRealEvents] = useState({ today: [], weekend: [], trending: [] });
   const [loading, setLoading] = useState(true);
 
@@ -95,7 +94,7 @@ const ExploreScreen = ({ navigation }) => {
         setRealEvents({
           today: todayEvents,
           weekend: weekendEvents,
-          trending: upcomingEvents, // All upcoming events for trending
+          trending: upcomingEvents, 
         });
       } catch (error) {
         console.error("Error fetching events:", error.response?.data || error.message);

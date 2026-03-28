@@ -5,13 +5,13 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator, //loading indicator
+  ActivityIndicator, 
   Image,
 } from 'react-native';
 
 
 const SignupScreen = ({ navigation }) => {
-  const [name, setName] = useState('');  //useState to store data
+  const [name, setName] = useState('');  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -156,7 +156,6 @@ const SignupScreen = ({ navigation }) => {
           <Text style={styles.signupText}>Sign Up</Text>
         )}
       </TouchableOpacity>
-      {/* divider between signup and social buttons */}
       <View style={styles.divider} />
 
       {/* Social signup buttons */}

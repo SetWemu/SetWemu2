@@ -40,7 +40,7 @@ const EventAnalyticsScreen = ({ navigation, route }) => {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Mock user account type - replace with real data
-  const accountType = 'personal'; // or 'business'
+  const accountType = 'personal'; 
 
   const basicStats = [
     {
@@ -77,7 +77,6 @@ const EventAnalyticsScreen = ({ navigation, route }) => {
     if (accountType === 'personal') {
       setShowUpgradeModal(true);
     } else {
-      // Redirect to advanced analytics web page
       Linking.openURL('https://analytics.setwemu.com');
     }
   };

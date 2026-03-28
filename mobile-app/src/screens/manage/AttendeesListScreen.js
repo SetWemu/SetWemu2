@@ -29,7 +29,7 @@ const COLORS = {
 const AttendeesListScreen = ({ navigation, route }) => {
   const { event } = route.params || {};
   const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState('all'); // all, checked-in, not-checked-in
+  const [filter, setFilter] = useState('all'); 
 
   const attendees = [
     {
