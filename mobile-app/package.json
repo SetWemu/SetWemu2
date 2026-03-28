@@ -66,7 +66,7 @@
   "jest": {
     "preset": "react-native",
     "transformIgnorePatterns": [
-      "node_modules/(?!(react-native|@react-native|@react-navigation|react-native-vector-icons|phosphor-react-native|react-native-gesture-handler|react-native-screens|react-native-safe-area-context|react-native-country-codes-picker|react-native-image-picker|react-native-maps|react-native-reanimated|react-native-snap-carousel|@gorhom|react-native-qrcode-svg)/)"
+      "node_modules/(?!(react-native|@react-native|@react-navigation|react-native-vector-icons|phosphor-react-native|react-native-gesture-handler|react-native-screens|react-native-safe-area-context|react-native-country-codes-picker|react-native-image-picker|react-native-maps|react-native-reanimated|react-native-snap-carousel|@gorhom|react-native-qrcode-svg|@react-native-community|react-native-linear-gradient|react-native-svg|react-native-paper|react-native-element-dropdown|react-native-toast-message|react-native-modal|react-native-pager-view|react-native-tab-view|react-native-camera|react-native-permissions|react-native-image-crop-picker|react-native-video|react-native-sound|react-native-share|react-native-fs|react-native-device-info|react-native-splash-screen|react-native-push-notification|@notifee|react-native-ratings|react-native-animatable|react-native-maps|react-native-gifted-chat|react-native-keyboard-aware-scroll-view|react-native-loading-spinner-overlay|react-native-fast-image|react-native-barcode-builder|react-native-qrcode-scanner|expo|@expo)/)"
     ],
     "setupFiles": [],
     "moduleNameMapper": {
