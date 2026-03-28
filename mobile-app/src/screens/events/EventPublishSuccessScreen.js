@@ -20,17 +20,14 @@ const EventPublishSuccessScreen = ({ route, navigation }) => {
   const { eventId, eventTitle } = route.params || {};
 
   const handleViewEvent = () => {
-    // Navigate to event detail
     navigation.navigate('EventDetail', { eventId });
   };
 
   const handleShareEvent = () => {
-    // TODO: Implement share functionality
     console.log('Share event');
   };
 
   const handleBackHome = () => {
-    // Go back to home/discover
     navigation.navigate('Main', { screen: 'HomeTab' });
   };
 
@@ -39,7 +36,6 @@ const EventPublishSuccessScreen = ({ route, navigation }) => {
       <StatusBar barStyle="light-content" />
 
       <View style={s.content}>
-        {/* Success Icon */}
         <View style={s.iconContainer}>
           <CheckCircle size={80} color={C.success} weight="fill" />
         </View>
@@ -59,7 +55,6 @@ const EventPublishSuccessScreen = ({ route, navigation }) => {
 
         {/* Action Buttons */}
         <View style={s.actions}>
-          {/* View Event */}
           <TouchableOpacity style={s.primaryButton} onPress={handleViewEvent}>
             <Eye size={20} color="#141416" weight="bold" />
             <Text style={s.primaryButtonText}>View My Event</Text>
@@ -81,7 +76,6 @@ const EventPublishSuccessScreen = ({ route, navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Tips */}
         <View style={s.tipsCard}>
           <Text style={s.tipsTitle}>💡 Next Steps</Text>
           <Text style={s.tipText}>• Share your event on social media</Text>

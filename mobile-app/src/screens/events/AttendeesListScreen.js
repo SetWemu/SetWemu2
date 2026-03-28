@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, TextInput, StatusBar } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-// SetWemu Design System Constants
 const COLORS = {
   bg: { primary: '#141416', card: '#1C1C1E', elevated: '#242428' },
   blue: { light: '#ADF3FF', brand: '#4CC1D4', glow: 'rgba(173,243,255,0.10)', border: 'rgba(173,243,255,0.22)' },
@@ -66,7 +65,6 @@ const AttendeesListScreen = ({ navigation }) => {
         <View style={{ width: 24 }} /> 
       </View>
 
-      {/* Search Bar - Updated to Design System */}
       <View style={styles.searchContainer}>
         <Icon name="search-outline" size={20} color={COLORS.text.tertiary} style={styles.searchIcon} />
         <TextInput

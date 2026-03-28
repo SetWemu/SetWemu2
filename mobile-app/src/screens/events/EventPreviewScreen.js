@@ -52,7 +52,6 @@ const EventPreviewScreen = ({ route, navigation }) => {
         )}
         <View style={s.heroOverlay} />
 
-        {/* Header */}
         <View style={s.header}>
           <TouchableOpacity style={s.headerBtn} onPress={() => navigation.goBack()}>
             <ArrowLeft size={20} color="#fff" weight="bold" />
@@ -67,17 +66,14 @@ const EventPreviewScreen = ({ route, navigation }) => {
           </View>
         </View>
 
-        {/* Preview Badge */}
         <View style={s.previewBadge}>
           <Text style={s.previewBadgeText}>PREVIEW MODE</Text>
         </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Event Info */}
         <View style={s.content}>
           
-          {/* Tags */}
           {tagArray.length > 0 && (
             <View style={s.tagsRow}>
               {tagArray.map((tag, index) => (
@@ -89,10 +85,8 @@ const EventPreviewScreen = ({ route, navigation }) => {
             </View>
           )}
 
-          {/* Title */}
           <Text style={s.title}>{title}</Text>
 
-          {/* Meta Info */}
           <View style={s.metaSection}>
             <View style={s.metaRow}>
               <CalendarBlank size={18} color={C.blue.light} weight="fill" />
@@ -108,13 +102,11 @@ const EventPreviewScreen = ({ route, navigation }) => {
             </View>
           </View>
 
-          {/* Description */}
           <View style={s.section}>
             <Text style={s.sectionTitle}>About This Event</Text>
             <Text style={s.description}>{description}</Text>
           </View>
 
-          {/* Tickets */}
           {tickets.length > 0 && (
             <View style={s.section}>
               <Text style={s.sectionTitle}>Tickets</Text>
@@ -137,7 +129,6 @@ const EventPreviewScreen = ({ route, navigation }) => {
             </View>
           )}
 
-          {/* Gallery */}
           {galleryImages.length > 0 && (
             <View style={s.section}>
               <Text style={s.sectionTitle}>Event Gallery</Text>
@@ -149,7 +140,6 @@ const EventPreviewScreen = ({ route, navigation }) => {
             </View>
           )}
 
-          {/* FAQs */}
           {faqs.length > 0 && (
             <View style={s.section}>
               <Text style={s.sectionTitle}>Frequently Asked Questions</Text>
@@ -168,7 +158,6 @@ const EventPreviewScreen = ({ route, navigation }) => {
         </View>
       </ScrollView>
 
-      {/* Bottom Bar */}
       <View style={s.bottomBar}>
         <TouchableOpacity style={s.backButton} onPress={() => navigation.goBack()}>
           <Text style={s.backButtonText}>Back to Editing</Text>

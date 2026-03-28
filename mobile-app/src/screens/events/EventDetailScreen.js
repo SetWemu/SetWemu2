@@ -32,7 +32,6 @@ const C = {
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Date TBD';
 const fmtTime = (t) => {
   if (!t) return 'Time TBD';
-  // If format is HH:mm:ss, convert to more readable HH:mm AM/PM
   try {
     const [h, m] = t.split(':');
     const date = new Date();
@@ -178,7 +177,6 @@ const EventDetailScreen = ({ route, navigation }) => {
       return;
     }
 
-    // Optimistic UI update
     const previousFavState = isFav;
     setIsFav(!isFav);
 
