@@ -16,7 +16,7 @@ import bookingRoutes from './routes/bookingRoutes.js';
 import favoriteRoutes from './routes/favoriteRoutes.js';
 import followRoutes from './routes/followRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
-import swipeRoutes from './routes/swipeRoutes.js'; // Ensure this matches your file/folder name
+import swipeRoutes from './routes/swipeRoutes.js'; 
 
 const app = express();
 const port = process.env.PORT || 3000;
