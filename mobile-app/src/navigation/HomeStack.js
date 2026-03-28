@@ -1,7 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// Screens
 import HomeScreen from '../screens/home/HomeScreen';
 import CreateStoryScreen from '../screens/home/CreateStoryScreen';
 import StoriesScreen from '../screens/home/StoriesScreen';
@@ -19,8 +18,6 @@ const HomeStack = () => {
       <Stack.Screen name="Stories" component={StoriesScreen} />
       <Stack.Screen name="EventDetail" component={EventDetailScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
-      
-      {/* Chat screens accessible from Home */}
       <Stack.Screen name="ChatList" component={ChatStack} />
     </Stack.Navigator>
   );
