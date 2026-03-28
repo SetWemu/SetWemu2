@@ -16,9 +16,9 @@ const C = {
   bg:    { primary: '#141416', card: '#1C1C1E', elevated: '#242428' },
   blue:  { light: '#ADF3FF', soft: '#B8EEFF', mid: '#8DDFF5', deep: '#5DD5E8' },
   stub:  {
-    bg:        '#B8EEFF',             // THE ONE COLOR — entire stub top + bottom
-    text:      '#0A2A35',             // dark navy on light blue
-    textMuted: 'rgba(10,42,53,0.50)', // THE ONE COLOR — entire stub top + bottom
+    bg:        '#B8EEFF',             
+    text:      '#0A2A35',             
+    textMuted: 'rgba(10,42,53,0.50)', 
     divider:   'rgba(10,42,53,0.12)',
   },
   text:   { primary: '#F2F2F7', secondary: '#ABABAB', tertiary: '#6B6B6B' },
