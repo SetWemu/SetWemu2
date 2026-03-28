@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, StatusBar } from 'react-native';
-// 1. We must import Rect and Path with capital letters!
 import Svg, { Path, Rect } from 'react-native-svg'; 
 
 const SplashScreen = ({ navigation }: any) => {
@@ -16,12 +15,9 @@ const SplashScreen = ({ navigation }: any) => {
     <View style={styles.container}>
       <StatusBar hidden />
       
-      {/* 2. Adjusted width, height, and viewBox so your logo actually fits on the screen */}
       <Svg width="250" height="150" viewBox="100 170 320 160">
-        {/* Changed <rect> to <Rect> */}
         <Rect x="129.039" y="191.018" width="53.8592" height="13.9538" transform="rotate(36.3257 129.039 191.018)" fill="#4CC1D4"/>
         
-        {/* Changed all <path> to <Path> */}
         <Path d="M183.205 185.077C180.154 185.077 177.68 187.551 177.68 190.603C177.68 193.654 180.154 196.127 183.205 196.127V202.205H120.773C120.773 189.389 131.163 179 143.978 179H183.205V185.077Z" fill="#ADF3FF"/>
         <Path d="M110 240.051C113.051 240.051 115.524 237.577 115.524 234.526C115.524 231.474 113.051 229.001 110 229.001L110 222.923L172.432 222.923C172.432 235.739 162.042 246.128 149.226 246.128L110 246.128L110 240.051Z" fill="#ADF3FF"/>
         <Path d="M208.94 193.94V204.865H230.315V219.02H208.94V231.085H233.165V246H190.32V179.025H233.165V193.94H208.94Z" fill="#ADF3FF"/>
